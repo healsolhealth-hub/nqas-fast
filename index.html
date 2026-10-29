@@ -14,13 +14,60 @@
 // an upload without the assets folder). The page then opens app-inline.html — the same app as one file — instead.
 function nfAssetFail(el){ try{ console.warn('[NQAS] asset missing:',el&&(el.src||el.href)); location.replace('app-inline.html'+location.search+location.hash); }catch(e){} }
 </script>
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<!-- Razorpay checkout: loaded when someone pays (shared/payments.js) -->
 <title>NQAS | FAST · HealSol Academy</title>
-<script id="nf-level" src="assets/types-settings.e2330cb4bf.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-level" src="assets/types-settings.c9093f9dc9.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-assets">var NF_ASSETS={"uphc-checklist":"assets/data-uphc-checklist.09cb37887b.json","phc-checklist":"assets/data-phc-checklist.0f179b7980.json","chc-checklist":"assets/data-chc-checklist.1d22f2ed41.json","uphc-hindi":"assets/data-uphc-hindi.29e9e07d2c.json","phc-hindi":"assets/data-phc-hindi.32c71d43c3.json","chc-hindi":"assets/data-chc-hindi.fa7c99a1ef.json","uphc-fix":"assets/data-uphc-fix.a1e44c80ea.json","phc-fix":"assets/data-phc-fix.4875d574ef.json","chc-fix":"assets/data-chc-fix.ad0f694a2c.json","sc-checkpoints":"assets/data-sc-checkpoints.faf119347a.js","sign-font":"assets/vendor-sign-font.245deebf21.js","pdf-fonts":"assets/vendor-pdf-fonts.d24cedb333.js","sc-fix":"assets/data-sc-how-to-fix.370427c0e7.js"};</script>
+<script id="nf-data-loader">// Data files loaded on demand (phase 3): a facility type's checklist is fetched only when a facility of that type opens.
+// NF_ASSETS (written by app/build.js): name → 'assets/data-<name>.<hash>.json' (published page) or '#nf-data-<name>'
+// (single file: inline <script type="application/json">). nfLoadData(name) → Promise of the parsed data, fetched once
+// per page; a failure is not remembered, so the next call tries again. The service worker keeps the file after first use.
+var _nfData={};
+function nfLoadData(name){
+  if(_nfData[name]) return _nfData[name];
+  var ref=(typeof NF_ASSETS!=='undefined'&&NF_ASSETS)?NF_ASSETS[name]:null;
+  if(!ref) return Promise.reject(new Error('No data file called '+name));
+  var p=(ref.charAt(0)==='#')
+    ? new Promise(function(ok,no){ var go=function(){ var el=document.getElementById(ref.slice(1)); if(!el) return no(new Error('Data block missing: '+ref)); try{ ok(JSON.parse(el.textContent)); }catch(e){ no(e); } };
+        if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',go); else go(); })
+    : fetch(ref).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status+' for '+ref); return r.json(); });
+  _nfData[name]=p.catch(function(e){ delete _nfData[name]; throw e; });
+  return _nfData[name];
+}
+
+// Scripts loaded on demand (page.json {lazy: name}): nfLoadScript(name) → Promise, resolved once the script has run.
+// In the single file they are already inline ('#inline'); in site/ the file is added the first time it is needed.
+var _nfScr={};
+function nfLoadScript(name){
+  if(_nfScr[name]) return _nfScr[name];
+  var ref=(typeof NF_ASSETS!=='undefined'&&NF_ASSETS)?NF_ASSETS[name]:null;
+  // an older nightly-summary inliner turns script assets into <script type="application/json" id="nf-data-NAME"> blocks: run them here
+  if(ref&&ref.indexOf('#nf-data-')===0){ var el=document.getElementById(ref.slice(1));
+    if(el&&el.type==='application/json'&&!el._nfRan){ el._nfRan=1; try{ (0,eval)(el.textContent.replace(/\\u003c/g,'<')); }catch(e){ console.warn('[lazy script]',name,e); } } }
+  if(!ref||ref.charAt(0)==='#') return (_nfScr[name]=Promise.resolve());
+  var p=new Promise(function(ok,no){ var s=document.createElement('script'); s.src=ref; s.async=true; s.onload=function(){ ok(); }; s.onerror=function(){ no(new Error('Could not load '+ref)); }; document.head.appendChild(s); });
+  _nfScr[name]=p.catch(function(e){ delete _nfScr[name]; throw e; });
+  return _nfScr[name];
+}
+
+// SC data (checkpoints, How to fix, linked checks: ~470 KB) — in site/ it loads in the background while the login screen
+// shows; every login waits for it in nfGo (nfScDataReady), so nothing after login runs without it. (speed, 26 Oct 2026)
+var _nfScHooks=[], _nfScReady=null, _nfScDone=false;
+function nfScDataThen(fn){ if(_nfScDone){ try{ fn(); }catch(e){ console.warn('[SC data]',e); } } else _nfScHooks.push(fn); }
+function nfScDataReady(){
+  if(_nfScReady) return _nfScReady;
+  _nfScReady=Promise.all([nfLoadScript('sc-checkpoints'),nfLoadScript('sc-fix')]).then(function(){
+    _nfScDone=true; var h=_nfScHooks; _nfScHooks=[]; h.forEach(function(fn){ try{ fn(); }catch(e){ console.warn('[SC data]',e); } });
+  }).catch(function(e){ _nfScReady=null; throw e; });
+  return _nfScReady;
+}
+(function(){ var go=function(){ nfScDataReady().catch(function(){}); };
+  if(document.readyState==='complete') setTimeout(go,0); else window.addEventListener('load',go); })();
+</script>
 
 
-<link rel="stylesheet" href="assets/shared-base.e513cad502.css" onerror="nfAssetFail(this)">
-<link rel="stylesheet" href="assets/sc-v2.6b52c20961.css" onerror="nfAssetFail(this)">
+<link rel="stylesheet" href="assets/shared-base.296e41553e.css" onerror="nfAssetFail(this)">
+<link rel="stylesheet" href="assets/sc-v2.bfc3486435.css" onerror="nfAssetFail(this)">
 
 <style id="nf-boot-css">
 /* Hide the old staff-login panel from the very first paint; the new NQAS | FAST login replaces it (nf-on). Safety net: show it after 6 s if the new login never mounts. */
@@ -47,7 +94,7 @@ function nfAssetFail(el){ try{ console.warn('[NQAS] asset missing:',el&&(el.src|
         <button type="button" data-lang="en" class="on" onclick="setLang('en')">EN</button>
         <button type="button" data-lang="hi" onclick="setLang('hi')">हिं</button>
       </div>
-      <button onclick="scShowChoLogin()" title="Facility Admin Login"
+      <button onclick="scShowChoLogin()" title="Facility dashboard login"
         style="width:38px;height:38px;border-radius:10px;border:1.5px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;"
         onmouseover="this.style.background='rgba(255,255,255,0.25)'"
         onmouseout="this.style.background='rgba(255,255,255,0.1)'">
@@ -111,13 +158,13 @@ function nfAssetFail(el){ try{ console.warn('[NQAS] asset missing:',el&&(el.src|
         <i class="ti ti-arrow-left"></i>
       </button>
       <div>
-        <div class="lc-title" style="margin-bottom:0;">Facility Admin Login</div>
+        <div class="lc-title" style="margin-bottom:0;">Facility dashboard login</div>
         <div style="font-size:10px;color:var(--t3);font-weight:600;">CHO / Facility In-charge</div>
       </div>
     </div>
     <div style="background:var(--teal-lt);border:1px solid rgba(30,107,94,0.2);border-radius:9px;padding:9px 11px;margin-bottom:12px;font-size:11px;color:var(--teal-dk);font-weight:600;line-height:1.5;">
       <i class="ti ti-info-circle" style="font-size:12px;vertical-align:-2px;"></i>
-      CHOs can now sign in once through <strong>Staff Login</strong> with their mobile number and get both <strong>My Cards</strong> and the <strong>Facility Dashboard</strong>. This older login still works.
+      CHOs can now sign in once through <strong>Staff Login</strong> with their mobile number and get both <strong>My Cards</strong> and the <strong>Facility dashboard</strong>. This older login still works.
     </div>
     <div class="lc-field">
       <label class="lc-label">Facility ID</label>
@@ -139,7 +186,7 @@ function nfAssetFail(el){ try{ console.warn('[NQAS] asset missing:',el&&(el.src|
     </div>
     <div class="lc-err" id="sc-cho-err"></div>
     <button class="lc-btn staff" style="background:var(--teal);" onclick="scChoLogin()">
-      <i class="ti ti-building" style="font-size:14px;"></i> Enter Facility Admin Panel
+      <i class="ti ti-building" style="font-size:14px;"></i> Open the Facility dashboard
     </button>
   </div>
 
@@ -356,7 +403,7 @@ function nfAssetFail(el){ try{ console.warn('[NQAS] asset missing:',el&&(el.src|
       <!-- Header -->
       <div style="background:var(--teal,#1E6B5E);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
         <div style="display:flex;align-items:center;gap:10px;">
-          <span style="font-size:15px;font-weight:800;color:#fff;font-family:'Poppins',sans-serif;">✏️ Card Editor</span>
+          <span style="font-size:15px;font-weight:800;color:#fff;font-family:'Poppins',sans-serif;">✏️ Sub-Centre editor</span>
           <span id="ae-edit-count" style="font-size:11px;color:rgba(255,255,255,0.7);font-weight:600;">0 cards edited</span>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -457,21 +504,21 @@ function nfAssetFail(el){ try{ console.warn('[NQAS] asset missing:',el&&(el.src|
     <div class="hs-only" style="background:var(--bgc);border-radius:14px;border:1px solid var(--br);padding:16px;margin-bottom:14px;">
       <div style="font-size:13px;font-weight:800;color:var(--t1);margin-bottom:12px;font-family:'Poppins',sans-serif;display:flex;align-items:center;gap:6px;"><i class="ti ti-building-plus" style="color:var(--teal);font-size:15px;"></i> Enroll New Facility</div>
       <div class="sc-enroll-grid">
-        <div><label class="lc-label">Facility type</label><select class="fc-add-input" id="sc-enroll-type" style="width:100%;" onchange="var p=document.getElementById('sc-enroll-prog');if(p)p.parentNode.style.display=this.value==='sc'?'':'none';"></select></div>
-        <div><label class="lc-label">Facility Name *</label><input class="fc-add-input" id="sc-enroll-name" data-nf-lvl-ph placeholder="Rampur Sub-Centre" style="width:100%;"/></div>
+        <div><label class="lc-label">Facility type</label><select class="fc-add-input" id="sc-enroll-type" style="width:100%;" onchange="nfEnrollTypeChanged(this)"></select></div>
+        <div><label class="lc-label">Facility Name *</label><input class="fc-add-input" id="sc-enroll-name" placeholder="e.g. Rampur Sub-Centre" style="width:100%;"/></div>
         <div><label class="lc-label">State *</label><select class="fc-add-input" id="sc-enroll-state" style="width:100%;"></select></div>
-        <div><label class="lc-label">District *</label><input class="fc-add-input" id="sc-enroll-district" list="nf-enroll-districts" placeholder="Start typing…" autocomplete="off" style="width:100%;"/></div>
+        <div><label class="lc-label">District *</label><select class="fc-add-input" id="sc-enroll-district" style="width:100%;"><option value="">Choose a district…</option></select></div>
         <div><label class="lc-label">Programme</label>
           <select class="fc-add-input" id="sc-enroll-prog" style="width:100%;">
             <option value="nqas_12A">12A — 12 Services (60 days)</option>
             <option value="nqas_12B">12B — 12 Services + Delivery (60 days)</option>
           </select>
         </div>
-        <div><label class="lc-label">CHO Name</label><input class="fc-add-input" id="sc-enroll-choname" placeholder="CHO Name" style="width:100%;"/></div>
-        <div><label class="lc-label">CHO Mobile *</label><input class="fc-add-input" id="sc-enroll-chomob" type="tel" maxlength="10" inputmode="numeric" placeholder="10-digit mobile (CHO login)" style="width:100%;"/></div>
+        <div><label class="lc-label" id="sc-enroll-choname-lbl">CHO Name</label><input class="fc-add-input" id="sc-enroll-choname" placeholder="CHO name" style="width:100%;"/></div>
+        <div><label class="lc-label" id="sc-enroll-chomob-lbl">CHO Mobile *</label><input class="fc-add-input" id="sc-enroll-chomob" type="tel" maxlength="10" inputmode="numeric" placeholder="10-digit mobile (CHO login)" style="width:100%;"/></div>
         <div><label class="lc-label">Govt. facility ID (NIN / HFR)</label><input class="fc-add-input" id="sc-enroll-nin" placeholder="Optional" maxlength="40" style="width:100%;"/></div>
       </div>
-      <div id="sc-enroll-idnote" style="font-size:11.5px;color:var(--t3);background:var(--bgs);border:1px dashed var(--br);border-radius:10px;padding:8px 11px;margin:-2px 0 12px;"><i class="ti ti-id" style="color:var(--teal);"></i> The Facility ID is created on save from the state and district — for example <b>UP-JHS-SC-0001</b> (running number per district, shared with self-registration). The CHO's login and a temporary password are shown once after enrolling.</div>
+      <div id="sc-enroll-idnote" style="font-size:11.5px;color:var(--t3);background:var(--bgs);border:1px dashed var(--br);border-radius:10px;padding:8px 11px;margin:-2px 0 12px;"><i class="ti ti-id" style="color:var(--teal);"></i> The Facility ID is created on save from the state and district — for example <b id="sc-enroll-idex">UP-JHS-SC-0001</b> (running number per district, shared with self-registration). The <span id="sc-enroll-incharge">CHO</span>'s login and a temporary password are shown once after enrolling.</div>
       <div style="margin-bottom:14px;">
         <label style="font-size:10px;font-weight:800;color:var(--t3);display:block;margin-bottom:5px;text-transform:uppercase;">Access Level</label>
         <div style="display:flex;gap:8px;">
@@ -497,7 +544,7 @@ function nfAssetFail(el){ try{ console.warn('[NQAS] asset missing:',el&&(el.src|
         <div style="font-size:13px;font-weight:800;color:var(--t1);font-family:'Poppins',sans-serif;display:flex;align-items:center;gap:6px;"><i class="ti ti-binoculars" style="color:var(--teal);font-size:15px;"></i> Supervisors</div>
         <button class="scx-btn sm" onclick="scEditSupervisor(null)"><i class="ti ti-user-plus"></i> Add supervisor</button>
       </div>
-      <div style="font-size:11px;color:var(--t3);margin-bottom:10px;">Supervisors can drill into their assigned facilities, see readiness and the gap register, assign corrective actions and join live sessions. They cannot set dates, edit, suspend or cancel facilities, use the Card Editor, or schedule sessions.</div>
+      <div style="font-size:11px;color:var(--t3);margin-bottom:10px;">Supervisors can drill into their assigned facilities, see readiness and the gap register, assign corrective actions and join live sessions. They cannot set dates, edit, suspend or cancel facilities, or change Content (cards and checkpoints).</div>
       <div id="sc-sup-list"></div>
     </div>
     <div class="hs-only" style="background:var(--bgc);border-radius:14px;border:1px solid var(--br);padding:16px;margin-bottom:14px;">
@@ -648,7 +695,7 @@ function nfAssetFail(el){ try{ console.warn('[NQAS] asset missing:',el&&(el.src|
     <div style="display:flex;align-items:center;gap:9px;">
       <div class="sc-cho-nav-icon">H</div>
       <div>
-        <div style="font-size:13px;font-weight:800;color:#fff;font-family:'Poppins',sans-serif;">Facility Admin — <span id="sc-cho-fac-name"></span></div>
+        <div style="font-size:13px;font-weight:800;color:#fff;font-family:'Poppins',sans-serif;">Facility dashboard — <span id="sc-cho-fac-name"></span></div>
         <div style="font-size:9px;color:rgba(255,255,255,0.7);font-weight:600;">Code: <span id="sc-cho-fac-code"></span> · NQAS | FAST</div>
       </div>
     </div>
@@ -761,8 +808,8 @@ function nfAssetFail(el){ try{ console.warn('[NQAS] asset missing:',el&&(el.src|
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js"></script>
-<script src="assets/sc-login-3tier.d4e8ecf957.js" onerror="nfAssetFail(this)"></script>
-<script src="assets/data-sc-days.84b54839e3.js" onerror="nfAssetFail(this)"></script>
+<script src="assets/sc-login-3tier.6baeea5ce4.js" onerror="nfAssetFail(this)"></script>
+<script src="assets/data-sc-days.0eb3c1d272.js" onerror="nfAssetFail(this)"></script>
 
 <div class="report-modal-overlay" id="rpt-filter-modal">
   <div class="report-modal" style="max-width:560px;padding:0;overflow:hidden;">
@@ -911,7 +958,7 @@ function nfAssetFail(el){ try{ console.warn('[NQAS] asset missing:',el&&(el.src|
     <div style="padding:20px;overflow-y:auto;" id="demo-convert-body"></div>
   </div>
 </div>
-<script src="assets/sc-v2-core.1f19854840.js" onerror="nfAssetFail(this)"></script>
+<script src="assets/sc-v2-core.329f5d3321.js" onerror="nfAssetFail(this)"></script>
 <!-- ══════════════════════════════════════════════════════════════
      BUILD 1 — SC simplification
      · Single CHO login: My Cards + Facility Dashboard tabs
@@ -944,7 +991,7 @@ body.scb1-tabs-on .toast{bottom:84px;}
 body.scb1-light #bnav-board{display:none;}
 body.scb1-light #ws-guide-toggle-btn{display:none !important;}
 </style>
-<script src="assets/sc-build1.7a975d02d8.js" onerror="nfAssetFail(this)"></script>
+<script src="assets/sc-build1.176238c84a.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══════════════════════════════════════════════════════════════
      BUILD 2 — Full 60-day timeline with prep preview
@@ -955,11 +1002,11 @@ body.scb1-light #ws-guide-toggle-btn{display:none !important;}
      · Session markers (Live Sessions now; Build 3 review sessions plug in)
      ══════════════════════════════════════════════════════════════ -->
 <link rel="stylesheet" href="assets/sc-build2.9b9d0fc3cf.css" onerror="nfAssetFail(this)">
-<script src="assets/sc-build2.65b20c180e.js" onerror="nfAssetFail(this)"></script>
+<script src="assets/sc-build2.7bf047c30a.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ BUILD 3 — Quality Champions & peer review sessions ══ -->
 <link rel="stylesheet" href="assets/sc-champions.e1ab6daa4b.css" onerror="nfAssetFail(this)">
-<script src="assets/sc-champions.ef6d2f719b.js" onerror="nfAssetFail(this)"></script>
+<script src="assets/sc-champions.caf844a402.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ STEP A — Checkpoint Master ══ -->
 <style>
@@ -1000,8 +1047,8 @@ body.scb1-light #ws-guide-toggle-btn{display:none !important;}
 .scm-meta span.m{background:#FEF3C7;color:#92400E;}
 .scm-meta span.pk{background:#fff;border:1px solid #E2E8F0;}
 </style>
-<script src="assets/data-sc-checkpoints.faf119347a.js" onerror="nfAssetFail(this)"></script>
-<script src="assets/sc-cp-master.01f36caf69.js" onerror="nfAssetFail(this)"></script>
+
+<script src="assets/sc-cp-master.c533185d48.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ STEP A.2 — NQAS hierarchy (AoC → Standard → ME) ══ -->
 <style>
@@ -1064,7 +1111,7 @@ body.scb1-light #ws-guide-toggle-btn{display:none !important;}
 .scm-min{font-style:normal;font-size:10px;font-weight:800;color:#64748B;background:#F1F5F9;border-radius:7px;padding:1px 6px;}
 .scm-min.hi{color:#9A3412;background:#FFEDD5;}
 </style>
-<script src="assets/sc-checklist.63f7006cf3.js" onerror="nfAssetFail(this)"></script>
+<script src="assets/sc-checklist.f5e8f6206b.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ STEP B — Per-checkpoint progress, MoV ticks, scoring rule, reset ══ -->
 <style>
@@ -1122,7 +1169,7 @@ body.scb1-light #ws-guide-toggle-btn{display:none !important;}
 .scc-who em{color:var(--t3);font-style:normal;}
 .scc-card-line{font-size:10px;color:var(--t2);font-weight:700;margin:-2px 0 6px;}
 </style>
-<script src="assets/sc-prep-lists.2f422a93fa.js" onerror="nfAssetFail(this)"></script>
+<script src="assets/sc-prep-lists.f656ff32b2.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ STEP D — 7-day rapid-audit baseline, baseline report & action plan ══ -->
 <style>
@@ -1159,7 +1206,7 @@ body.scb1-light #ws-guide-toggle-btn{display:none !important;}
 <style>
 .scx-dist #scx-adm-vq-btn,.scx-dist #scq-nav-btn,.scx-dist #scb-reset-panel{display:none !important;}
 </style>
-<script src="assets/sc-district.7979842a5a.js" onerror="nfAssetFail(this)"></script>
+<script src="assets/sc-district.94320f56ac.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ Review & Action Plan — MoV-level actions, Supervisor-only assignment ══ -->
 <style>
@@ -1209,7 +1256,7 @@ body.scb1-light #ws-guide-toggle-btn{display:none !important;}
 .sce-opt{margin-top:14px;border:1.5px dashed var(--br);border-radius:12px;padding:0 10px;}
 .sce-opt>summary{cursor:pointer;font-size:12px;font-weight:900;color:var(--green-dk);padding:10px 0;}
 </style>
-<script src="assets/sc-implementation.27485be94c.js" onerror="nfAssetFail(this)"></script>
+<script src="assets/sc-implementation.8bce442784.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ Day placement — see and (rarely) move checkpoint days ══ -->
 <style>
@@ -1227,7 +1274,7 @@ body.scb1-light #ws-guide-toggle-btn{display:none !important;}
 .scdp-list td{padding:6px 8px;border-top:1px solid var(--br);vertical-align:top;color:var(--t1);}
 .scdp-list tr.ret td{opacity:0.5;}
 </style>
-<script src="assets/sc-day-placement.9020e8e4d1.js" onerror="nfAssetFail(this)"></script>
+<script src="assets/sc-day-placement.9f84827e93.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ Mark Done guidance — which checkpoints still need an answer ══ -->
 <style>
@@ -1317,20 +1364,20 @@ function scMdNext(di){
 <script src="assets/sc-champion-verify.6be0e5d069.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ BUILD 4.1 — Foundation (brand, bundled fonts & icons) ══ -->
-<link rel="stylesheet" href="assets/vendor-poppins-font.7a4a5ae076.css" onerror="nfAssetFail(this)">
+<link rel="stylesheet" href="assets/vendor-poppins-font.0ea9314335.css" onerror="nfAssetFail(this)">
 <script src="assets/shared-brand.1b47ef65ba.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ BUILD 4.2 — single login ══ -->
 <link rel="stylesheet" href="assets/shared-one-login.6f478da916.css" onerror="nfAssetFail(this)">
-<script src="assets/shared-one-login.c204d6395c.js" onerror="nfAssetFail(this)"></script>
+<script src="assets/shared-one-login.39388a85bf.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ BUILD 4.3 — staff app (Today · Cards · Progress · Me) ══ -->
 <link rel="stylesheet" href="assets/sc-staff-app.e0189e484b.css" onerror="nfAssetFail(this)">
-<script src="assets/sc-staff-app.1f975b2968.js" onerror="nfAssetFail(this)"></script>
+<script src="assets/sc-staff-app.14042a7974.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ BUILD 4.4 — laptop dashboards ══ -->
 <link rel="stylesheet" href="assets/sc-laptop.3b958233dd.css" onerror="nfAssetFail(this)">
-<script src="assets/sc-laptop.c55d6f8774.js" onerror="nfAssetFail(this)"></script>
+<script src="assets/sc-laptop.a3d55c3bdb.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ Readiness redesign + separate service dropdowns ══ -->
 <style>
@@ -1366,14 +1413,14 @@ function scMdNext(di){
 
 <!-- ══ HealSol business indicators ══ -->
 <link rel="stylesheet" href="assets/shared-business-ind.d97663522b.css" onerror="nfAssetFail(this)">
-<script src="assets/shared-business-ind.75044a63cd.js" onerror="nfAssetFail(this)"></script>
+<script src="assets/shared-business-ind.a9e4d359b8.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ Branded PDF reports ══ -->
-<script src="assets/shared-pdf-reports.77cff64a9b.js" onerror="nfAssetFail(this)"></script>
+<script src="assets/shared-pdf-reports.1da837fa8c.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ Phases: Baseline · Implementation · Endline ══ -->
 <link rel="stylesheet" href="assets/sc-phases.07a2a34a96.css" onerror="nfAssetFail(this)">
-<script src="assets/sc-phases.e63ef7115d.js" onerror="nfAssetFail(this)"></script>
+<script src="assets/sc-phases.23968f3a3c.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ Heat-map tabs, By Standard toggle, baseline incomplete ══ -->
 <style>
@@ -1391,7 +1438,7 @@ function scMdNext(di){
 <script>
 // ══ Heat-map tabs (Baseline · Implementation · Endline) + "By Standard" toggle + baseline-incomplete attention ══
 var _nfHeatTab={}, _nfStdOpen={};
-function nfHeatPhases(P){ return [{k:'B',label:'Baseline',agg:P.B&&P.B.assessed?P.B:null,note:'from Day 1'},{k:'I',label:'Implementation',agg:P.I,note:'from Day 8'},{k:'E',label:'Endline',agg:P.E,note:'from Day 50'}]; }
+function nfHeatPhases(P){ return [{k:'B',label:'Baseline',agg:P.B&&P.B.assessed?P.B:null,note:'from Day 1'},{k:'I',label:'Implementation',agg:P.I,note:'from Day 8'},{k:'E',label:'End-line',agg:P.E,note:'from Day 50'}]; }
 function nfHeatLatest(P){ var L=nfHeatPhases(P).filter(function(x){ return x.agg; }); return L.length?L[L.length-1]:{k:'B',label:'Baseline',agg:P.A}; }
 function nfHeatBlockHTML(hostId,P){
   var ph=nfHeatPhases(P), cur=_nfHeatTab[hostId], pick=ph.find(function(x){ return x.k===cur&&x.agg; })||nfHeatLatest(P), H=JSON.stringify(hostId).replace(/"/g,'&quot;');
@@ -1467,7 +1514,7 @@ body.nf-admin:not(.nfv-inbox) .admin-main > [data-nfv="inbox"]{display:none!impo
 @media(max-width:1100px){ .nfib-sum{grid-template-columns:repeat(4,minmax(0,1fr));} }
 @media(max-width:700px){ .nfib-sum{grid-template-columns:repeat(2,minmax(0,1fr));} .nfib-fac{position:static;display:inline-block;margin-bottom:4px;} }
 .ti-inbox{--ti:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 stroke-width=%222%22 stroke=%22black%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath stroke=%22none%22 d=%22M0 0h24v24H0z%22 fill=%22none%22/%3E%3Cpath d=%22M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z%22 /%3E%3Cpath d=%22M4 13h3l3 3h4l3 -3h3%22 /%3E%3C/svg%3E")}</style>
-<script src="assets/sc-review-inbox.d5525ac076.js" onerror="nfAssetFail(this)"></script>
+<script src="assets/sc-review-inbox.1806590a5c.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ Release staff layers when a dashboard opens ══ -->
 <script>
@@ -1504,10 +1551,12 @@ function nfReleaseLayers(){
 .nfs-card .scx-btn{align-self:flex-start;} td.pw{font-family:monospace;font-weight:700;color:var(--teal-dk);}
 html.nf-secure #sc-add-pwd{display:none!important;}
 .ti-database-export{--ti:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 stroke-width=%222%22 stroke=%22black%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath stroke=%22none%22 d=%22M0 0h24v24H0z%22 fill=%22none%22/%3E%3Cpath d=%22M4 6c0 1.657 3.582 3 8 3s8 -1.343 8 -3s-3.582 -3 -8 -3s-8 1.343 -8 3%22 /%3E%3Cpath d=%22M4 6v6c0 1.657 3.582 3 8 3c1.118 0 2.183 -.086 3.15 -.241%22 /%3E%3Cpath d=%22M20 12v-6%22 /%3E%3Cpath d=%22M4 12v6c0 1.657 3.582 3 8 3c.157 0 .312 -.002 .466 -.005%22 /%3E%3Cpath d=%22M16 19h6%22 /%3E%3Cpath d=%22M19 16l3 3l-3 3%22 /%3E%3C/svg%3E")}.ti-id{--ti:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 stroke-width=%222%22 stroke=%22black%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath stroke=%22none%22 d=%22M0 0h24v24H0z%22 fill=%22none%22/%3E%3Cpath d=%22M3 4m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v10a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z%22 /%3E%3Cpath d=%22M9 10m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0%22 /%3E%3Cpath d=%22M15 8l2 0%22 /%3E%3Cpath d=%22M15 12l2 0%22 /%3E%3Cpath d=%22M7 16l10 0%22 /%3E%3C/svg%3E")}</style>
-<script src="assets/shared-secure.556d978207.js" onerror="nfAssetFail(this)"></script>
+<script src="assets/shared-secure.96c5e9e074.js" onerror="nfAssetFail(this)"></script>
 
 <script id="nf-registration" src="assets/shared-registration.6833f0a40c.js" onerror="nfAssetFail(this)"></script>
-<script id="nf-payments" src="assets/shared-payments.2b35528884.js" onerror="nfAssetFail(this)"></script>
+<link id="nf-join-css" rel="stylesheet" href="assets/shared-join.096521446f.css" onerror="nfAssetFail(this)">
+<script id="nf-join" src="assets/shared-join.6ad5ff74c1.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-payments" src="assets/shared-payments.12fb4e5a71.js" onerror="nfAssetFail(this)"></script>
 <style id="nf-rcpt-css">
 .nf-rcpt{font-size:13px;color:#0F172A;max-width:520px;margin:0 auto;}
 .nf-rcpt-top{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #0F5C52;padding-bottom:10px;margin-bottom:10px;gap:10px;}
@@ -1526,11 +1575,11 @@ html.nf-secure #sc-add-pwd{display:none!important;}
 .nf-mp-err{display:none;color:#B91C1C;font-size:12px;font-weight:700;margin:10px 0;}
 @media print{ body.nf-printing-rcpt > *:not(#nf-rcpt-ov){display:none!important;} body.nf-printing-rcpt #nf-rcpt-ov{position:static;background:none;padding:0;} body.nf-printing-rcpt .nf-rcpt-box{box-shadow:none;max-height:none;} body.nf-printing-rcpt .nf-tmp-acts{display:none!important;} }
 </style>
-<script id="nf-biz-report" src="assets/shared-biz-report.277765cffc.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-biz-report" src="assets/shared-biz-report.7d0c383ae8.js" onerror="nfAssetFail(this)"></script>
 <script id="nf-qr" src="assets/vendor-qrcode.fabb956c75.js" onerror="nfAssetFail(this)"></script>
-<script id="nf-sign-font-data" src="assets/vendor-sign-font.245deebf21.js" onerror="nfAssetFail(this)"></script>
-<link id="nf-cert-css" rel="stylesheet" href="assets/shared-cert.bd7de7b6f9.css" onerror="nfAssetFail(this)">
-<script id="nf-cert" src="assets/shared-cert.1c3d0ffa3c.js" onerror="nfAssetFail(this)"></script>
+
+<link id="nf-cert-css" rel="stylesheet" href="assets/shared-cert.50af794399.css" onerror="nfAssetFail(this)">
+<script id="nf-cert" src="assets/shared-cert.210bb0517e.js" onerror="nfAssetFail(this)"></script>
 <style id="nf-wa-css">
 /* WhatsApp: help card, help links, one-tap message buttons */
 .nf-help{display:flex;gap:12px;align-items:center;margin-top:12px;border-radius:20px;padding:14px 16px;background:#fff;border:1px solid var(--br,#E2E8F0);}
@@ -1547,10 +1596,10 @@ html.nf-secure #sc-add-pwd{display:none!important;}
 .nf-supset input{border:1.5px solid var(--br,#E2E8F0);border-radius:10px;padding:9px 10px;font:inherit;font-size:13px;}
 .nf-supset button{border:0;border-radius:10px;background:var(--teal,#0F5C52);color:#fff;font:inherit;font-size:13px;font-weight:700;padding:10px 16px;cursor:pointer;}
 </style>
-<script id="nf-wa" src="assets/shared-whatsapp.a3bc984eb3.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-wa" src="assets/shared-whatsapp.0f06cebdec.js" onerror="nfAssetFail(this)"></script>
 
 
-<script id="nf-pdf-fonts" src="assets/vendor-pdf-fonts.d24cedb333.js" onerror="nfAssetFail(this)"></script>
+
 <style id="nf-pro-css">
 /* PRO badge — paid and contract facilities, shows the package (12A / 12B) */
 .nf-pro{display:inline-flex;align-items:stretch;vertical-align:middle;border-radius:6px;overflow:hidden;border:1px solid #135A55;font:700 9.5px/1 'NF Poppins',system-ui,sans-serif;letter-spacing:.05em;white-space:nowrap;margin-left:4px;box-shadow:0 1px 2px rgba(19,90,85,.18);}
@@ -1571,9 +1620,9 @@ function nfProTier(f){ if(!f) return ''; var st=f.subscriptionStatus||'contract'
 function nfProBadge(f,cls){ var t=nfProTier(f); if(!t) return '';
   return '<span class="nf-pro'+(cls?' '+cls:'')+'" title="'+(f.subscriptionStatus==='paid'?'Paid subscription':'Full programme (contract)')+' · package '+t+'"><i class="p">PRO</i><i class="t">'+t+'</i></span>'; }
 </script>
-<link id="nf-biz-dash-css" rel="stylesheet" href="assets/shared-biz-dash.333261e206.css" onerror="nfAssetFail(this)">
-<script id="nf-pdf" src="assets/shared-pdf.33e49f6393.js" onerror="nfAssetFail(this)"></script>
-<script id="nf-biz-dash" src="assets/shared-biz-dash.7bfe787182.js" onerror="nfAssetFail(this)"></script>
+<link id="nf-biz-dash-css" rel="stylesheet" href="assets/shared-biz-dash.c8831fea1d.css" onerror="nfAssetFail(this)">
+<script id="nf-pdf" src="assets/shared-pdf.da58c8e364.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-biz-dash" src="assets/shared-biz-dash.1058fd58bd.js" onerror="nfAssetFail(this)"></script>
 
 <style>
 .nf-bizrep{background:var(--card,#fff);border:1px solid var(--br,#E2E8F0);border-radius:16px;padding:16px 18px;margin:0 0 14px;}
@@ -1709,7 +1758,7 @@ function nfCoverDone(){
 </style>
 <!-- ══ Facility Admin dashboard — new look (Home · Staff · Readiness · More) ══ -->
 <link id="nf-fadm-css" rel="stylesheet" href="assets/sc-fadm.1fb01e6ce7.css" onerror="nfAssetFail(this)">
-<script id="nf-fadm" src="assets/sc-fadm.90548a4c15.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-fadm" src="assets/sc-fadm.3f3b4d2d74.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ Action Plan → tell each staff member on WhatsApp ══ -->
 <style id="nf-plan-wa-css">
@@ -1753,7 +1802,7 @@ function nfCoverDone(){
 .nf-ho .box b{font-size:13px;} .nf-ho .scx-btn{margin-top:10px;width:100%;}
 .nf-ho .hist{font-size:11.5px;color:var(--t3);margin-top:10px;line-height:1.6;}
 </style>
-<script id="nf-ho" src="assets/sc-healsol-view.3fbb05a162.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-ho" src="assets/sc-healsol-view.fdd1503355.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ Step 2a: "My gaps" for staff; actions and WhatsApp in Hindi ══ -->
 <style id="nf-gaps-css">
@@ -1793,38 +1842,11 @@ function nfCoverDone(){
 <script id="nf-wp" src="assets/sc-week-plan.126d067680.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ Step 3: PHC / CHC links · MO PHC overview · MOIC block view ══ -->
-<style id="nf-links-css">
-.nfl-card{border:1px solid var(--br);border-radius:14px;padding:12px 14px;background:#fff;margin-bottom:10px;}
-.nfl-card h4{margin:0 0 6px;font-size:14px;display:flex;align-items:center;gap:6px;}
-.nfl-kv{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:12.5px;color:var(--t2);} .nfl-kv b{color:var(--t1);font-weight:600;}
-.nfl-st{display:inline-block;font-size:11px;font-weight:700;border-radius:10px;padding:2px 9px;margin-left:6px;}
-.nfl-st.ok{background:#DCFCE7;color:#15803D;} .nfl-st.wait{background:#FEF3C7;color:#92400E;} .nfl-st.none{background:#F1F5F9;color:#64748B;}
-.nfl-row{display:flex;gap:10px;align-items:flex-start;border-top:1px solid var(--br);padding:9px 0;font-size:12.5px;}
-.nfl-row:first-child{border-top:0;} .nfl-row > div{flex:1 1 220px;min-width:0;} #nfl-body .nfl-row{flex-wrap:wrap;} #nfl-body .nfl-row > .scx-btn{width:100%;} .nfl-row small{display:block;color:var(--t3);font-size:11.5px;line-height:1.4;}
-.nfl-row .scx-btn{flex:0 0 auto;}
-.nfl-tree{font-size:12.5px;line-height:1.55;} .nfl-tree .c{font-weight:700;margin-top:6px;} .nfl-tree .p{margin-left:14px;} .nfl-tree .s{margin-left:28px;color:var(--t2);}
-#nf-mo{position:fixed;inset:0;z-index:9000;background:var(--bg);overflow:auto;-webkit-overflow-scrolling:touch;}
-.nfmo-hd{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--br);padding:12px 16px;display:flex;align-items:center;gap:10px;z-index:2;}
-.nfmo-hd b{font-size:16px;display:block;} .nfmo-hd small{font-size:12px;color:var(--t3);}
-.nfmo-hd button{margin-left:auto;border:0;background:var(--bg);width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;flex:0 0 auto;}
-.nfmo-body{padding:14px 16px 40px;max-width:720px;margin:0 auto;}
-.nfmo-sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
-.nfmo-sum div{background:#fff;border:1px solid var(--br);border-radius:14px;padding:10px;text-align:center;} .nfmo-sum b{display:block;font-size:20px;color:var(--teal);} .nfmo-sum span{font-size:11px;color:var(--t3);}
-.nfmo-sc{background:#fff;border:1px solid var(--br);border-radius:16px;padding:12px 14px;margin-bottom:10px;}
-.nfmo-sc.cur{border-color:var(--teal);}
-.nfmo-top{display:flex;align-items:center;gap:8px;} .nfmo-top b{font-size:14.5px;} .nfmo-top .pct{margin-left:auto;font-size:18px;font-weight:800;}
-.nfmo-meta{font-size:11.5px;color:var(--t3);margin:2px 0 8px;}
-.nfmo-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;} .nfmo-chips span{font-size:11.5px;border-radius:10px;padding:3px 9px;background:var(--bg);color:var(--t2);font-weight:600;}
-.nfmo-chips .v{background:#EDE9FE;color:#5B21B6;} .nfmo-chips .od{background:#FEE2E2;color:#B91C1C;} .nfmo-chips .bl{background:#FEF3C7;color:#92400E;}
-.nfmo-btns{display:flex;gap:8px;flex-wrap:wrap;}
-.nfmo-chip{display:flex;align-items:center;gap:8px;width:100%;border:1px solid #BFE3DD;background:#F2FBF9;color:var(--teal);font:inherit;font-size:13px;font-weight:700;border-radius:14px;padding:10px 12px;margin:12px 0 0;cursor:pointer;}
-.nfmo-chip small{margin-left:auto;font-weight:600;color:var(--t3);}
-.nfl-drill{margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--t2);}
-</style>
-<script id="nf-links" src="assets/sc-links.39cf2b42da.js" onerror="nfAssetFail(this)"></script>
+<link id="nf-links-css" rel="stylesheet" href="assets/sc-links.e145d9c6bb.css" onerror="nfAssetFail(this)">
+<script id="nf-links" src="assets/sc-links.776611d768.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ How to fix (per MoV item) + linked checks (contradiction notes) ══ -->
-<script id="nf-fix-data" src="assets/data-sc-how-to-fix.370427c0e7.js" onerror="nfAssetFail(this)"></script>
+
 <style id="nf-fix-css">
 .nffx{margin-top:6px;} .nffx summary{cursor:pointer;font-size:12px;font-weight:700;color:var(--teal);list-style:none;} .nffx summary:before{content:'🔧 ';}
 .nffx-b{font-size:12px;color:var(--t2);line-height:1.5;background:#F8FAFC;border-radius:10px;padding:7px 10px;margin-top:4px;white-space:pre-line;}
@@ -1866,7 +1888,7 @@ function nfCoverDone(){
 .scm-row .nflx-cnt{flex:0 0 auto;font-size:11.5px;}
 .scm-lkf{display:inline-flex;align-items:center;gap:5px;font-size:12px;white-space:nowrap;}
 </style>
-<script id="nf-lx" src="assets/sc-linked-checks.047edf7bec.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-lx" src="assets/sc-linked-checks.0eddd56dc9.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ Step 1 of CQI: Readiness week · graduation · close date · catch-up · NHSRC record · population · timeline compliance ══ -->
 <style id="nf-grad-css">
@@ -1889,17 +1911,199 @@ function nfCoverDone(){
 .nfg-banner button{margin-top:6px;}
 .master-fac-card .nfg-row{margin:6px 0 0;}
 </style>
-<script id="nf-grad" src="assets/sc-graduation.3110780067.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-grad" src="assets/sc-graduation.5fcd31094e.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ Step 2 of CQI: nightly facility summaries (server runs this app's own scoring) · light dashboards at scale · block · refresh ══ -->
 <script id="nf-sum" src="assets/sc-summary.0ba9eaf152.js" onerror="nfAssetFail(this)"></script>
 
 <!-- ══ Step 3 of CQI: Social impact — levels, stars, shareable card with QR, Verify page, partner strip ══ -->
-<link id="nf-imp-css" rel="stylesheet" href="assets/shared-impact.109d76a0dd.css" onerror="nfAssetFail(this)">
-<script id="nf-imp" src="assets/shared-impact.9f12aaeff6.js" onerror="nfAssetFail(this)"></script>
+<link id="nf-imp-css" rel="stylesheet" href="assets/shared-impact.b1cba457b4.css" onerror="nfAssetFail(this)">
+<script id="nf-imp" src="assets/shared-impact.9f7d5ac345.js" onerror="nfAssetFail(this)"></script>
 
-<link id="nf-dash-css" rel="stylesheet" href="assets/shared-dashboards.c05c6b7e04.css" onerror="nfAssetFail(this)">
-<script id="nf-dash" src="assets/shared-dashboards.524d7561de.js" onerror="nfAssetFail(this)"></script>
+<link id="nf-dash-css" rel="stylesheet" href="assets/shared-dashboards.9030b996af.css" onerror="nfAssetFail(this)">
+<script id="nf-dash" src="assets/shared-dashboards.6389b2bdbd.js" onerror="nfAssetFail(this)"></script>
+<link id="nf-dept-css" rel="stylesheet" href="assets/dept-core.4ed6e40053.css" onerror="nfAssetFail(this)">
+<link id="nf-dept-screens-css" rel="stylesheet" href="assets/dept-screens.f9291d80a9.css" onerror="nfAssetFail(this)">
+<script id="nf-dept-plan" src="assets/dept-plan.e35a7f99c9.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-dept" src="assets/dept-core.fa10621186.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-dept-review" src="assets/dept-review.28e080f175.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-dept-content" src="assets/dept-content.bbcfa094c1.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-dept-screens" src="assets/dept-screens.1ab0b095db.js" onerror="nfAssetFail(this)"></script>
+<link id="nf-dept-master-css" rel="stylesheet" href="assets/dept-master.1ceca8c5a8.css" onerror="nfAssetFail(this)">
+<script id="nf-dept-master" src="assets/dept-master.8cc7ea5f67.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-dept-master-ui" src="assets/dept-master-ui.e493849b6c.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-dept-summary" src="assets/dept-summary.5fb8e55baf.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-dept-admin" src="assets/dept-admin.ee8d5ffab0.js" onerror="nfAssetFail(this)"></script>
+<link id="nf-dept-grad-css" rel="stylesheet" href="assets/dept-grad.c07401b26c.css" onerror="nfAssetFail(this)">
+<script id="nf-dept-grad" src="assets/dept-grad.1ac7433c09.js" onerror="nfAssetFail(this)"></script>
+<link id="nf-hs-home-css" rel="stylesheet" href="assets/shared-hs-home.f2fa190596.css" onerror="nfAssetFail(this)">
+<script id="nf-hs-home" src="assets/shared-hs-home.e238ffd188.js" onerror="nfAssetFail(this)"></script>
+<style id="nf-hs-settings-css">/* HealSol Settings refinements (21 Oct 2026) */
+.hsx-pick{display:block!important;max-height:280px;overflow-y:auto;border:1px solid var(--br);border-radius:10px;padding:6px 8px;}
+.hsx-grp+.hsx-grp{margin-top:8px;padding-top:8px;border-top:1px dashed var(--br);}
+.hsx-grp-hd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px;font-size:11px;color:var(--t2);}
+.hsx-mini{border:1px solid var(--br);background:#fff;border-radius:7px;padding:2px 8px;font-size:10.5px;font-weight:700;color:var(--teal-dk);cursor:pointer;font-family:inherit;}
+.hsx-fbar{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:6px;margin-bottom:6px;}
+@media(max-width:560px){.hsx-fbar{grid-template-columns:1fr 1fr;}.hsx-fbar [data-hsx="search"]{grid-column:1/-1;}}
+.pr-grp{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--t3);margin:12px 0 2px;}
+.pr-tabs{margin-bottom:4px;}
+.nfg-ttabs{margin:0 0 10px;gap:16px;}
+/* Supervisor · District Admin · Champion: the shared Facilities table and Reports page (hs-roles.js) */
+body.hs-roles.nfv-facilities .admin-main > #sc-master-grid{display:none!important;}
+body.hs-roles .admin-main > .sc-report-bar, body.hs-roles #nf-dsrep{display:none!important;}
+.hs-rt td small{display:block;}
+@media (max-width:700px){
+  .nfo-tw .hs-rt, .hs-tw .hs-rt{min-width:0;}
+  .hs-rt thead{display:none;}
+  .hs-rt tr.nfo-row{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;padding:12px 4px;border-bottom:1px solid var(--br,#DCE4E1);}
+  .hs-rt tr.nfo-row td{border:0!important;padding:0!important;text-align:left!important;font-size:12.5px;}
+  .hs-rt tr.nfo-row td:first-child{grid-column:1 / -1;font-size:14px;}
+  .hs-rt tr.nfo-row td[data-l]:not([data-l=""]):before{content:attr(data-l);display:block;font-size:10.5px;color:var(--t3,#6B7A75);font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
+  .hs-rt tr.nfo-row td.nfo-acts{grid-column:1 / -1;display:flex;gap:8px;}
+}
+.hs-rt.cmp td:first-child small + small{color:var(--t2,#4F5E59);}
+/* sortable headers in the shared role table */
+.hs-rt th .hs-sort { border: 0; background: none; padding: 0; font: inherit; color: inherit; cursor: pointer; text-align: inherit; min-height: 32px; }
+.hs-rt th .hs-sort:hover { color: #134A41; text-decoration: underline; }
+/* MOIC block view: groups by PHC */
+.hs-rt tr.hs-grp td{background:#EAF2F0;padding:10px 12px;font-size:13px;border-top:1px solid #DCE4E1;}
+.hs-rt tr.hs-grp td b{font-size:14px;} .hs-rt tr.hs-grp td small{display:block;font-size:12px;color:#4F5E59;margin-top:2px;}
+.hs-rt tr.hs-grp{cursor:default;}
+.hs-grpbar{display:flex;justify-content:space-between;align-items:baseline;margin:6px 2px 8px;} .hs-grpbar b{font-size:15px;}
+@media (max-width:700px){ .hs-rt tr.hs-grp{display:block;border:0;background:none;padding:0;margin:14px 0 4px;} .hs-rt tr.hs-grp td{display:block;border-radius:12px;} .hs-rt tr.hs-grp td::before{content:none!important;} }
+</style>
+<script id="nf-hs-settings" src="assets/shared-hs-settings.f1365f98fb.js" onerror="nfAssetFail(this)"></script>
+<link id="nf-fac-page-css" rel="stylesheet" href="assets/shared-fac-page.7d7df7d9b9.css" onerror="nfAssetFail(this)">
+<link id="nf-one-ui-css" rel="stylesheet" href="assets/shared-one-ui.1b4350b497.css" onerror="nfAssetFail(this)">
+<script id="nf-one-ui" src="assets/shared-one-ui.c255a0db58.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-vocab" src="assets/shared-vocab.22993a26fc.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-fac-page" src="assets/shared-fac-page.f6d63b3ce5.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-fac-ready" src="assets/shared-fac-ready.3755ce3545.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-fac-sc" src="assets/shared-fac-sc.5e2a4ee502.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-hs-roles" src="assets/shared-hs-roles.d381b3e930.js" onerror="nfAssetFail(this)"></script>
+<style id="nf-reports-css">/* Reports — one dialog for every report (23 Oct 2026) */
+.rp-box{max-width:720px;width:100%;max-height:92vh;display:flex;flex-direction:column;padding:0;font-family:'Poppins',sans-serif;color:#1F2D29;overflow:hidden;}
+.rp-hd{display:flex;gap:12px;align-items:flex-start;padding:16px 18px 12px;border-bottom:1px solid #EEF2F1;}
+.rp-hd > div{flex:1;min-width:0;} .rp-hd b{font-size:17px;display:block;} .rp-hd small{display:block;font-size:12px;color:#4F5E59;margin-top:3px;line-height:1.45;}
+.rp-x{border:0;background:#EEF2F1;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:18px;flex:0 0 40px;}
+.rp-b{padding:6px 18px 12px;overflow:auto;flex:1;}
+.rp-sec{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#4F5E59;margin:14px 0 6px;}
+.rp-types{display:flex;gap:4px;flex-wrap:wrap;background:#EEF2F1;border-radius:12px;padding:4px;margin-bottom:8px;}
+.rp-types button{border:0;border-radius:9px;background:transparent;font:inherit;font-size:13px;color:#33433E;padding:7px 12px;cursor:pointer;min-height:36px;}
+.rp-types button em{font-style:normal;color:#6B7A75;font-size:12px;} .rp-types button.on{background:#134A41;color:#fff;font-weight:600;} .rp-types button.on em{color:#CFE5DF;}
+.rp-filt{display:flex;gap:8px;flex-wrap:wrap;} .rp-filt select{border:1px solid #DCE4E1;border-radius:10px;padding:8px 10px;font:inherit;font-size:13px;background:#fff;min-height:40px;}
+.rp-search{flex:1;min-width:200px;display:flex;align-items:center;gap:6px;border:1px solid #DCE4E1;border-radius:10px;padding:0 10px;background:#fff;min-height:40px;} .rp-search input{border:0;font:inherit;font-size:13px;flex:1;outline:none;min-width:0;}
+.rp-allrow{display:flex;gap:12px;align-items:center;font-size:12px;color:#4F5E59;margin:8px 2px;} .rp-allrow span{flex:1;}
+.rp-list{border:1px solid #DCE4E1;border-radius:12px;max-height:240px;overflow:auto;}
+.rp-item{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border-top:1px solid #EEF2F1;cursor:pointer;font-size:13px;} .rp-item:first-child{border-top:0;}
+.rp-item.on{background:#F2F8F6;} .rp-item input{margin-top:3px;width:16px;height:16px;accent-color:#134A41;} .rp-item small{display:block;font-size:11.5px;color:#4F5E59;}
+.rp-ty{font-style:normal;background:#E3ECE9;color:#134A41;border-radius:999px;padding:1px 7px;font-size:10.5px;font-weight:600;}
+.rp-fmt{display:flex;gap:8px;flex-wrap:wrap;} .rp-fmt label{display:flex;gap:6px;align-items:center;border:1px solid #DCE4E1;border-radius:10px;padding:9px 12px;font-size:13px;cursor:pointer;min-height:40px;} .rp-fmt label.on{border-color:#134A41;background:#F2F8F6;}
+.rp-fmt input{accent-color:#134A41;}
+.rp-pv{border:1px solid #EEF2F1;border-radius:12px;padding:8px 10px;background:#FAFCFB;}
+.rp-dim{font-size:12px;color:#4F5E59;margin:4px 0;}
+.rp-tw{overflow-x:auto;} .rp-tw table{width:100%;border-collapse:collapse;font-size:12px;} .rp-tw th{text-align:left;font-size:10.5px;color:#4F5E59;text-transform:uppercase;letter-spacing:.03em;padding:6px;border-bottom:1px solid #DCE4E1;white-space:nowrap;} .rp-tw td{padding:6px;border-bottom:1px solid #EEF2F1;}
+.rp-f{display:flex;gap:8px;align-items:center;padding:12px 18px;border-top:1px solid #EEF2F1;flex-wrap:wrap;} .rp-f small{flex:1;font-size:11.5px;color:#4F5E59;min-width:160px;}
+.rp-f button{border-radius:10px;font:inherit;font-size:14px;font-weight:600;padding:10px 16px;cursor:pointer;min-height:44px;} .rp-f .s{border:1px solid #DCE4E1;background:#fff;color:#1F2D29;} .rp-f .p{border:0;background:#134A41;color:#fff;} .rp-f .p:disabled{opacity:.5;cursor:default;}
+@media (max-width:700px){ .rp-box{max-height:100vh;height:100%;border-radius:0;} .rp-f .p{flex:1;} }
+</style>
+<script id="nf-reports" src="assets/shared-reports.69da7fca0e.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-sc-draft" src="assets/shared-sc-draft.672ef4231a.js" onerror="nfAssetFail(this)"></script>
+<link id="nf-content-shell-css" rel="stylesheet" href="assets/shared-content-shell.afbafa0c3e.css" onerror="nfAssetFail(this)">
+<script id="nf-content-shell" src="assets/shared-content-shell.ba4570feab.js" onerror="nfAssetFail(this)"></script>
+<link id="nf-sc-content-css" rel="stylesheet" href="assets/shared-sc-content.4dd2befa79.css" onerror="nfAssetFail(this)">
+<script id="nf-sc-content" src="assets/shared-sc-content.057fe71840.js" onerror="nfAssetFail(this)"></script>
+<link id="nf-registry-css" rel="stylesheet" href="assets/shared-registry.0152bb4061.css" onerror="nfAssetFail(this)">
+<script id="nf-registry" src="assets/shared-registry.a19478cbcf.js" onerror="nfAssetFail(this)"></script>
+<style id="nf-enq-css">/* ══ Business → Enquiries & sign-ups (28 Oct 2026) ══ */
+.eq{margin-bottom:16px;}
+.eq-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start;margin-bottom:10px;}
+.eq-head b{font-size:16px;font-weight:800;display:block;} .eq-head small{font-size:12.5px;color:var(--t2);}
+.eq-hr{display:flex;gap:8px;align-items:center;} .eq-hr select{min-height:38px;border-radius:20px;border:1.5px solid var(--br);background:#fff;font:inherit;font-size:13px;padding:0 12px;}
+.eq-kinds,.eq-types{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px;}
+.eq-kinds button{min-height:38px;border-radius:20px;border:1.5px solid var(--br);background:#fff;color:var(--t1);font:inherit;font-size:13px;font-weight:700;padding:0 14px;cursor:pointer;}
+.eq-kinds button.on{background:var(--teal);border-color:var(--teal);color:#fff;} .eq-kinds em,.eq-types em{font-style:normal;opacity:.85;}
+.eq-types > span:first-child{font-size:12px;font-weight:800;color:var(--t2);margin-right:4px;}
+.eq-types button{min-height:34px;border-radius:10px;border:1.5px solid var(--br);background:#fff;color:var(--t1);font:inherit;font-size:12.5px;font-weight:700;padding:0 12px;cursor:pointer;}
+.eq-types button.on{background:var(--teal-dk);border-color:var(--teal-dk);color:#fff;}
+.eq-tn{font-size:12px;color:var(--t2);margin-left:6px;}
+.eq-list{border:1px solid var(--br);border-radius:14px;overflow:hidden;}
+.eq-r{display:grid;grid-template-columns:140px minmax(0,1fr) 170px minmax(0,300px);gap:12px;padding:12px 14px;border-top:1px solid var(--br);align-items:center;background:#fff;}
+.eq-r:first-child{border-top:0;}
+@media(max-width:900px){ .eq-r{grid-template-columns:1fr;gap:6px;} }
+.eq-c1,.eq-c2{display:flex;flex-direction:column;gap:3px;min-width:0;} .eq-c1 small,.eq-c2 small{font-size:12px;color:var(--t2);}
+.eq-c2 b{font-size:14px;} .eq-c2 b i{font-style:normal;font-weight:600;color:var(--t2);}
+.eq-c2 .eq-g{color:#15803D;font-weight:700;} .eq-c2 .eq-a{color:#B45309;font-weight:700;} .eq-c2 .eq-b{color:var(--t1);font-weight:700;} .eq-c2 .eq-m{font-style:italic;}
+.eq-kind{font-size:11.5px;font-weight:800;border-radius:8px;padding:3px 8px;align-self:flex-start;}
+.eq-kind.t{background:var(--teal-lt);color:var(--teal-dk);} .eq-kind.q{background:var(--qi-lt,#EEEBFB);color:#3B2F9A;} .eq-kind.o{background:var(--org-lt);color:#92400E;}
+.eq-st{font-size:12.5px;font-weight:800;} .eq-st.a{color:#B45309;} .eq-st.b{color:#1D4ED8;} .eq-st.g{color:#15803D;} .eq-st.n{color:var(--t2);}
+.eq-c4{display:flex;flex-wrap:wrap;gap:6px;}
+.eq-btn{min-height:36px;border-radius:10px;border:1.5px solid var(--br);background:#fff;color:var(--t1);font:inherit;font-size:12.5px;font-weight:700;padding:0 10px;cursor:pointer;}
+.eq-btn.p{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:800;} .eq-btn.wa{border-color:#16A34A;color:#15803D;} .eq-btn.x{border:0;background:transparent;color:#B91C1C;}
+.eq-btn:disabled{opacity:.6;}
+.eq-empty{padding:18px;text-align:center;color:var(--t2);font-size:13px;}
+.eq-foot{font-size:12px;color:var(--t2);margin-top:8px;} .eq-foot .hs-link{font-size:12px;padding:0;}
+</style>
+<script id="nf-enq" src="assets/shared-enquiries.b52b45dc3b.js" onerror="nfAssetFail(this)"></script>
+<link id="nf-hsp-css" rel="stylesheet" href="assets/shared-hs-people.3edc650740.css" onerror="nfAssetFail(this)">
+<script id="nf-hsp" src="assets/shared-hs-people.5cfb83bc29.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-day-score">// ══════════════════════════════════════════════════════════════
+// Today's score on the staff cards (HealSol 21 Oct, every facility type): "Today's score 70% · 14 of 20 checked".
+// The score of what has been answered on that card — Met 2, Partial 1, Not met 0 — not the facility's readiness.
+// ══════════════════════════════════════════════════════════════
+function nfScoreLine(sum, n, of, label) {
+  if (!of) return '';
+  var pct = n ? Math.round(100 * sum / (2 * n)) : null;
+  return '<div class="nf-dscore"><b>' + scEsc(label) + (pct == null ? '' : ' ' + pct + '%') + '</b><span>' + n + ' of ' + of + ' checked' + (pct == null ? ' — answer a checkpoint to see the score' : '') + '</span></div>';
+}
+// ── Sub-Centre staff app ──
+function nfScDayScore(di) {
+  var own = []; try { own = scMyCpIdx(di); } catch (e) { return null; }
+  var c = getCHOCard(di) || {}, sum = 0, n = 0;
+  own.forEach(function (ci) { var s = scNormScore((c.cpScores || [])[ci]); if (s !== null) { n++; sum += s; } });
+  return { sum: sum, n: n, of: own.length };
+}
+(function () {
+  if (typeof nfRenderToday === 'function') {
+    var oT = nfRenderToday;
+    nfRenderToday = function () { var r = oT.apply(this, arguments);
+      try { var host = document.getElementById('nf-today'), cta = host && host.querySelector('.nf-cta'); if (cta && !host.querySelector('.nf-dscore')) {
+        var x = nfScDayScore(scb1TodayIdx()); if (x && x.of) cta.insertAdjacentHTML('afterend', nfScoreLine(x.sum, x.n, x.of, _appLang === 'hi' ? 'आज का स्कोर' : 'Today\'s score')); } } catch (e) {}
+      return r; };
+  }
+  if (typeof renderCard === 'function') {
+    var oC = renderCard;
+    renderCard = function (di) { var r = oC.apply(this, arguments);
+      try { if (typeof nfIsStaff === 'function' && nfIsStaff()) { var cont = document.getElementById('card-container'), body = cont && cont.querySelector('.cbody');
+        if (body && !body.querySelector('.nf-dscore')) { var x = nfScDayScore(di); if (x && x.of) body.insertAdjacentHTML('afterbegin', nfScoreLine(x.sum, x.n, x.of, (_appLang === 'hi' ? 'दिन ' : 'Day ') + (di + 1) + (_appLang === 'hi' ? ' स्कोर' : ' score'))); } } } catch (e) {}
+      return r; };
+  }
+})();
+// ── UPHC · PHC · CHC staff app ──
+function nfDeptCardScore(dept, day, mob) {
+  var ids = ndMyIds(dept, day, mob); if (!ids.length) return null;
+  var s = (ndPc(dept, day)[mob] || {}).s || {}, sum = 0, n = 0;
+  ids.forEach(function (i) { if (s[i] !== undefined && s[i] !== null) { n++; sum += +s[i]; } });
+  return { sum: sum, n: n, of: ids.length };
+}
+(function () {
+  if (typeof ndRender === 'function') {
+    var oR = ndRender;
+    ndRender = function () { var r = oR.apply(this, arguments);
+      try { if (_nd && !_nd.view && (_nd.tab === 'today' || !_nd.tab) && !_nd.card && !_nd.screen) { var app = document.getElementById('nf-dept-app'), cta = app && app.querySelector('.nx-hero .nx-cta');
+        if (cta && !app.querySelector('.nf-dscore')) { var me = ndMob(), day = ndDay(), sum = 0, n = 0, of = 0;
+          ndCardDepts(day > 100 ? day : Math.min(day, _nd.cfg.days)).forEach(function (d) { if (!ndFills(d.id, me)) return; var x = nfDeptCardScore(d.id, day, me); if (x) { sum += x.sum; n += x.n; of += x.of; } });
+          if (of) cta.insertAdjacentHTML('afterend', nfScoreLine(sum, n, of, 'Today\'s score')); } } } catch (e) {}
+      return r; };
+  }
+  if (typeof ndDayCardHTML === 'function') {
+    var oD = ndDayCardHTML;
+    ndDayCardHTML = function (dept, day) { var h = oD.apply(this, arguments);
+      try { var me = ndMob(); if (!_nd.view && ndFills(dept, me)) { var x = nfDeptCardScore(dept, day, me); if (x) h = h.replace('<div class="nx-aoc">', nfScoreLine(x.sum, x.n, x.of, 'Day ' + day + ' score') + '<div class="nx-aoc">'); } } catch (e) {}
+      return h; };
+  }
+})();
+</script>
 <script id="nf-pwa">// PWA (Step 5): register the service worker (site/sw.js) in a real browser on https (or localhost). Not in tests (no
 // serviceWorker there), not on a page without the manifest. ?nosw skips it once; ?nosw=reset removes it and its caches.
 (function(){
@@ -1919,5 +2123,15 @@ function nfCoverDone(){
   }catch(e){}
 })();
 </script>
+<script id="nf-hindi-ui" src="assets/shared-hindi-ui.4dcfc4c93a.js" onerror="nfAssetFail(this)"></script>
+<script id="nf-hindi-dom" src="assets/shared-hindi-dom.82e2be6c6a.js" onerror="nfAssetFail(this)"></script>
+<style>/* Content → Import / export → App wording in Hindi */
+.hiw-row{margin-top:14px;} .hiw-card .hiw-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.hiw-prev{margin-top:12px;border:1px solid #DCE4E1;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px;font-size:13px;}
+.hiw-prev>div{display:flex;justify-content:space-between;gap:10px;} .hiw-prev>div.r span{color:#8E2F1E;} .hiw-prev ul{margin:6px 0 0;padding-left:18px;max-height:260px;overflow:auto;} .hiw-prev li{margin:3px 0;}
+.hiw-prev li span{color:#4F5E59;} .hiw-prev li em{color:#8A5A12;font-style:normal;font-size:12px;} .hiw-none{color:#5D6D68;font-size:13px;align-self:center;}
+</style>
+<script id="nf-hindi-admin" src="assets/shared-hindi-admin.a43e18db13.js" onerror="nfAssetFail(this)"></script>
+
 </body>
 </html>
