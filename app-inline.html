@@ -13815,6 +13815,11 @@ var SC_BRAND={name:'NQAS | FAST',nameHTML:'NQAS<i>|</i>FAST',by:'HealSol Academy
 .nf-l-rt{flex:1;min-width:0;display:flex;flex-direction:column;} .nf-l-rt b{font-size:14.5px;font-weight:600;} .nf-l-rt small{font-size:12px;color:var(--t3);}
 .nf-l-role > .ti{font-size:20px;color:var(--t3);}
 body.lang-hi .nf-l-sub,body.lang-hi .nf-l-tag{line-height:1.6;}
+
+/* Terms / Privacy links and NHSRC credit under the login footer (2 Nov 2026) */
+.nf-l-legal{padding:0 22px 16px;text-align:center;font-size:10.5px;line-height:1.6;color:var(--t3);}
+.nf-l-legal a{color:var(--t3);text-decoration:underline;}
+.nf-l-foot{padding-bottom:8px;}
 </style>
 <script>
 // ══════════════════════════════════════════════════════════════
@@ -13826,7 +13831,7 @@ body.lang-hi .nf-l-sub,body.lang-hi .nf-l-tag{line-height:1.6;}
 //  sc_staff_index/{mobile}/{facilityCode} = true speeds up staff lookup; it repairs itself.
 // ══════════════════════════════════════════════════════════════
 Object.assign(HINDI_UI,{'Namaste':'नमस्ते','Log in with your mobile number or ID — we\'ll open the right space for you.':'अपने मोबाइल नंबर या ID से लॉग इन करें — हम आपके लिए सही जगह खोल देंगे।',
-  'Mobile number or ID':'मोबाइल नंबर या ID','Password':'पासवर्ड','Show':'दिखाएँ','Hide':'छिपाएँ','Remember me on this phone':'इस फ़ोन पर याद रखें','Forgot?':'भूल गए?','Log in':'लॉग इन',
+  'Mobile number or ID':'मोबाइल नंबर या ID','Password':'पासवर्ड','Show':'दिखाएँ','Hide':'छिपाएँ','Remember me on this phone':'इस फ़ोन पर याद रखें','Forgot?':'भूल गए?','NQAS checklists: NHSRC, MoHFW, Govt. of India':'NQAS चेकलिस्ट: NHSRC, स्वास्थ्य एवं परिवार कल्याण मंत्रालय, भारत सरकार','Terms':'शर्तें','Privacy':'गोपनीयता','Refunds':'रिफ़ंड','Log in':'लॉग इन',
   'Get your Sub-Centre NQAS-ready in 60 days':'60 दिनों में अपने उप-केंद्र को NQAS के लिए तैयार करें','New facility? Register — first 7 days (Baseline) free':'नया स्वास्थ्य केंद्र? पंजीकरण करें — पहले 7 दिन (बेसलाइन) मुफ़्त',
   'District / bulk enrolment? Contact us':'ज़िला / बल्क नामांकन? संपर्क करें','You have two roles. Where do you want to go?':'आपकी दो भूमिकाएँ हैं। आप कहाँ जाना चाहते हैं?',
   'Remember my choice on this phone':'इस फ़ोन पर मेरी पसंद याद रखें','Back':'वापस','Checking…':'जाँच हो रही है…','change':'बदलें',
@@ -13934,7 +13939,8 @@ function nfLoginHTML(){
       +'<button type="button" class="nf-l-plain" onclick="phcOpenLeadModal()"><i class="ti ti-building"></i> <span data-nf="District / bulk enrolment? Contact us"></span></button>'
     +'</div>'
     +'<div class="nf-l-body" id="nf-l-roles" style="display:none;"></div>'
-    +'<div class="nf-l-foot">by <img src="'+SC_BRAND.logoHealsol+'" alt="HealSol Academy"></div>';
+    +'<div class="nf-l-foot">by <img src="'+SC_BRAND.logoHealsol+'" alt="HealSol Academy"></div>'
+    +'<div class="nf-l-legal"><span data-nf="NQAS checklists: NHSRC, MoHFW, Govt. of India"></span><br><a href="legal.html#terms" target="_blank" rel="noopener" data-nf="Terms"></a> · <a href="legal.html#privacy" target="_blank" rel="noopener" data-nf="Privacy"></a> · <a href="legal.html#refund" target="_blank" rel="noopener" data-nf="Refunds"></a></div>';
 }
 function nfPaint(){
   var root=document.getElementById('nf-login'); if(!root) return;
@@ -16533,6 +16539,9 @@ select.jn-in{padding:0 8px;}
 .jn-or{display:flex;align-items:center;gap:10px;margin:18px 0 0;color:var(--t2);font-size:12px;} .jn-or span{flex:1;height:1px;background:var(--br);} .jn-or b{font-weight:600;}
 .jn-join{font-weight:800;font-size:14px;border-style:solid;}
 .nf-l-tag .jn-types{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;} .nf-l-tag .jn-types i{font-style:normal;font-size:11.5px;font-weight:700;background:rgba(255,255,255,.16);border-radius:20px;padding:4px 10px;}
+
+.jn-consent{margin-top:8px;text-align:center;font-size:11.5px;color:var(--t3);line-height:1.5;}
+.jn-consent a{color:var(--teal,#1E6B5E);}
 </style>
 <script id="nf-join">// ══ Join NQAS FAST (28 Oct 2026; approved mock-up "NQAS FAST · Join (sign-up)") ═══════════════════════════════════
 // One "Join NQAS FAST" button on the login screen replaces the old two pop-ups (Register your Sub-Centre / District bulk).
@@ -16675,7 +16684,7 @@ function jnYou(){
     +'<div class="jn-sum"><div class="jn-kick">'+jE(jt('CHECK BEFORE SENDING'))+'</div>'+row('Facility',s.name+' · '+(jnLv(_jn.type).short||_jn.type.toUpperCase()))+row('NIN',s.nin)
       +row('Where',[s.block?s.block+' '+jt('Block').toLowerCase():'',_jn.district,_jn.state].filter(Boolean).join(' · '))+row('Under',s.under)+row('Package',jnPkgLabel())+'</div>'
     +'<label class="nf-l-chk jn-agree"><input type="checkbox" id="jn-ag"'+(_jn.agree?' checked':'')+' onchange="_jn.agree=this.checked"> <span>'+jE(jt('I am the in-charge of this facility, and HealSol Academy may call or WhatsApp me about it.'))+'</span></label>'
-    +jnErr()+'<button type="button" class="nf-l-btn" id="jn-send" onclick="jnSend()"'+(_jn.busy?' disabled':'')+'>'+jE(jt(open?'Register — free baseline':'Send for approval'))+'</button>'
+    +jnErr()+'<button type="button" class="nf-l-btn" id="jn-send" onclick="jnSend()"'+(_jn.busy?' disabled':'')+'>'+jE(jt(open?'Register — free baseline':'Send for approval'))+'</button>'+jnConsent()
     +'<div class="jn-hint" style="text-align:center">'+jE(jt('HealSol Academy checks every new facility, then sends your login.'))+'</div>';
 }
 async function jnSend(){
@@ -16743,7 +16752,7 @@ function jnBulk(){
     +'<div class="jn-2"><div><label class="nf-l-lbl" for="jn-bn">'+jE(jt('Your name *'))+'</label><input class="jn-in" id="jn-bn" value="'+jE(B.name)+'" oninput="_jn.bulk.name=this.value"></div><div><label class="nf-l-lbl" for="jn-bd">'+jE(jt('Designation *'))+'</label><input class="jn-in" id="jn-bd" placeholder="DPM / CMO" value="'+jE(B.desig)+'" oninput="_jn.bulk.desig=this.value"></div></div>'
     +'<div class="jn-2"><div><label class="nf-l-lbl" for="jn-bm">'+jE(jt('Mobile *'))+'</label><input class="jn-in" id="jn-bm" type="tel" inputmode="numeric" value="'+jE(B.mob)+'" oninput="_jn.bulk.mob=this.value"></div><div><label class="nf-l-lbl" for="jn-be">'+jE(jt('Email'))+'</label><input class="jn-in" id="jn-be" type="email" value="'+jE(B.email)+'" oninput="_jn.bulk.email=this.value"></div></div>'
     +'<label class="nf-l-lbl" for="jn-bmsg">'+jE(jt('Anything else? (optional)'))+'</label><textarea class="jn-in jn-ta" id="jn-bmsg" rows="3" placeholder="Timeline, funding, which blocks first…" oninput="_jn.bulk.msg=this.value">'+jE(B.msg)+'</textarea>'
-    +jnErr()+'<button type="button" class="nf-l-btn" id="jn-bsend" onclick="jnBulkSend()">'+jE(jt('Send enquiry'))+'</button>';
+    +jnErr()+'<button type="button" class="nf-l-btn" id="jn-bsend" onclick="jnBulkSend()">'+jE(jt('Send enquiry'))+'</button>'+jnConsent();
 }
 async function jnBulkSend(){
   var B=_jn.bulk, mob=String(B.mob||'').replace(/\D/g,'').replace(/^(91|0)(?=\d{10}$)/,'');
@@ -16779,6 +16788,11 @@ function jnPaintLogin(){
 }
 (function(){ try{ var o=nfPaint; nfPaint=function(){ var r=o.apply(this,arguments); try{ jnPaintLogin(); }catch(e){} return r; }; }catch(e){} })();
 try{ if(document.readyState!=='loading') jnPaintLogin(); else document.addEventListener('DOMContentLoaded',function(){ try{ jnPaintLogin(); }catch(e){} }); }catch(e){}
+
+// consent line under the send buttons (2 Nov 2026; DPDP Act 2023)
+function jnConsent(){ var T='<a href="legal.html#terms" target="_blank" rel="noopener">', P='<a href="legal.html#privacy" target="_blank" rel="noopener">';
+  if(typeof _appLang!=='undefined'&&_appLang==='hi') return '<div class="jn-consent">भेजकर आप '+T+'शर्तों</a> और '+P+'गोपनीयता नीति</a> से सहमत हैं।</div>';
+  return '<div class="jn-consent">By sending, you agree to the '+T+'Terms</a> and '+P+'Privacy Policy</a>.</div>'; }
 </script>
 <script id="nf-payments">
 // ══════════════════════════════════════════════════════════════

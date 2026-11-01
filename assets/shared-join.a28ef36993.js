@@ -139,7 +139,7 @@ function jnYou(){
     +'<div class="jn-sum"><div class="jn-kick">'+jE(jt('CHECK BEFORE SENDING'))+'</div>'+row('Facility',s.name+' · '+(jnLv(_jn.type).short||_jn.type.toUpperCase()))+row('NIN',s.nin)
       +row('Where',[s.block?s.block+' '+jt('Block').toLowerCase():'',_jn.district,_jn.state].filter(Boolean).join(' · '))+row('Under',s.under)+row('Package',jnPkgLabel())+'</div>'
     +'<label class="nf-l-chk jn-agree"><input type="checkbox" id="jn-ag"'+(_jn.agree?' checked':'')+' onchange="_jn.agree=this.checked"> <span>'+jE(jt('I am the in-charge of this facility, and HealSol Academy may call or WhatsApp me about it.'))+'</span></label>'
-    +jnErr()+'<button type="button" class="nf-l-btn" id="jn-send" onclick="jnSend()"'+(_jn.busy?' disabled':'')+'>'+jE(jt(open?'Register — free baseline':'Send for approval'))+'</button>'
+    +jnErr()+'<button type="button" class="nf-l-btn" id="jn-send" onclick="jnSend()"'+(_jn.busy?' disabled':'')+'>'+jE(jt(open?'Register — free baseline':'Send for approval'))+'</button>'+jnConsent()
     +'<div class="jn-hint" style="text-align:center">'+jE(jt('HealSol Academy checks every new facility, then sends your login.'))+'</div>';
 }
 async function jnSend(){
@@ -207,7 +207,7 @@ function jnBulk(){
     +'<div class="jn-2"><div><label class="nf-l-lbl" for="jn-bn">'+jE(jt('Your name *'))+'</label><input class="jn-in" id="jn-bn" value="'+jE(B.name)+'" oninput="_jn.bulk.name=this.value"></div><div><label class="nf-l-lbl" for="jn-bd">'+jE(jt('Designation *'))+'</label><input class="jn-in" id="jn-bd" placeholder="DPM / CMO" value="'+jE(B.desig)+'" oninput="_jn.bulk.desig=this.value"></div></div>'
     +'<div class="jn-2"><div><label class="nf-l-lbl" for="jn-bm">'+jE(jt('Mobile *'))+'</label><input class="jn-in" id="jn-bm" type="tel" inputmode="numeric" value="'+jE(B.mob)+'" oninput="_jn.bulk.mob=this.value"></div><div><label class="nf-l-lbl" for="jn-be">'+jE(jt('Email'))+'</label><input class="jn-in" id="jn-be" type="email" value="'+jE(B.email)+'" oninput="_jn.bulk.email=this.value"></div></div>'
     +'<label class="nf-l-lbl" for="jn-bmsg">'+jE(jt('Anything else? (optional)'))+'</label><textarea class="jn-in jn-ta" id="jn-bmsg" rows="3" placeholder="Timeline, funding, which blocks first…" oninput="_jn.bulk.msg=this.value">'+jE(B.msg)+'</textarea>'
-    +jnErr()+'<button type="button" class="nf-l-btn" id="jn-bsend" onclick="jnBulkSend()">'+jE(jt('Send enquiry'))+'</button>';
+    +jnErr()+'<button type="button" class="nf-l-btn" id="jn-bsend" onclick="jnBulkSend()">'+jE(jt('Send enquiry'))+'</button>'+jnConsent();
 }
 async function jnBulkSend(){
   var B=_jn.bulk, mob=String(B.mob||'').replace(/\D/g,'').replace(/^(91|0)(?=\d{10}$)/,'');
@@ -243,3 +243,8 @@ function jnPaintLogin(){
 }
 (function(){ try{ var o=nfPaint; nfPaint=function(){ var r=o.apply(this,arguments); try{ jnPaintLogin(); }catch(e){} return r; }; }catch(e){} })();
 try{ if(document.readyState!=='loading') jnPaintLogin(); else document.addEventListener('DOMContentLoaded',function(){ try{ jnPaintLogin(); }catch(e){} }); }catch(e){}
+
+// consent line under the send buttons (2 Nov 2026; DPDP Act 2023)
+function jnConsent(){ var T='<a href="legal.html#terms" target="_blank" rel="noopener">', P='<a href="legal.html#privacy" target="_blank" rel="noopener">';
+  if(typeof _appLang!=='undefined'&&_appLang==='hi') return '<div class="jn-consent">भेजकर आप '+T+'शर्तों</a> और '+P+'गोपनीयता नीति</a> से सहमत हैं।</div>';
+  return '<div class="jn-consent">By sending, you agree to the '+T+'Terms</a> and '+P+'Privacy Policy</a>.</div>'; }
