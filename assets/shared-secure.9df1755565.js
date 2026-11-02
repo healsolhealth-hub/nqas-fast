@@ -53,7 +53,7 @@ async function nfSecureSubmit(){
     var remember=(document.getElementById('nf-remember')||{}).checked!==false;
     try{ await firebase.auth().setPersistence(remember?firebase.auth.Auth.Persistence.LOCAL:firebase.auth.Auth.Persistence.SESSION); }catch(e){}
     try{ await nfWithin(firebase.auth().signInWithEmailAndPassword(key+'@'+NF_EMAIL_DOMAIN,pwd),25000); }
-    catch(e){ nfError(e&&e.nfTimeout?t('Could not reach the server. Check your internet and try again.'):nfAuthErr(e)); return; }
+    catch(e){ nfError(e&&e.nfTimeout?t('Could not reach the server. Check your internet and try again.'):nfAuthErr(e)); if(!(e&&e.nfTimeout)&&typeof nfPendingHint==='function') nfPendingHint(id); return; }
     nfCoverOn();
     try{ await nfAfterSignIn(); } finally { nfCoverDone(); }
   } finally { _nfLogin.busy=false; if(btn){ btn.disabled=false; btn.textContent=t('Log in'); } }
@@ -165,9 +165,9 @@ function nfCopyText(text,selectEl){
   try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done,fallback); return; } }catch(e){}
   fallback();
 }
-function nfShowTempPassword(name,identifier,pw,title){
+function nfShowTempPassword(name,identifier,pw,title,waText){
   if(!pw){ showToast((name||identifier)+' already has an account — they keep their own password.','ok'); return; }
-  var mob=nfMobile(identifier), msg='NQAS | FAST login for '+(name||identifier)+'\nMobile/ID: '+identifier+'\nTemporary password: '+pw+'\nYou will choose your own password at first login.';
+  var mob=nfMobile(identifier), msg='NQAS | FAST login for '+(name||identifier)+'\nMobile/ID: '+identifier+'\nTemporary password: '+pw+'\nYou will choose your own password at first login.'; if(waText) msg=waText;
   var ov=document.createElement('div'); ov.className='scx-ov open'; ov.id='nf-tmp-ov';
   ov.innerHTML='<div class="scx-box"><div class="nfcf-head"><span style="font-size:22px;">🔑</span><div style="flex:1;"><b>'+scEsc(title||'Temporary password')+'</b><div style="font-size:11.5px;color:var(--t3);">Shown only once — share it now by phone or WhatsApp</div></div></div>'
     +'<div class="nf-tmp"><div><small>Name</small><b>'+scEsc(name||'')+'</b></div><div><small>Mobile / ID</small><b>'+scEsc(identifier)+'</b></div><div><small>Temporary password</small><b class="pw">'+scEsc(pw)+'</b></div></div>'

@@ -61,3 +61,10 @@ select.jn-in{padding:0 8px;}
 
 .jn-consent{margin-top:8px;text-align:center;font-size:11.5px;color:var(--t3);line-height:1.5;}
 .jn-consent a{color:var(--teal,#1E6B5E);}
+
+/* Check my request (2 Nov 2026) */
+.jn-chk{display:block;margin:8px auto 0;font-size:12.5px;}
+.jn-chkb{margin-top:8px;}
+.jn-res{margin:16px 0 12px;padding:14px 16px;border-radius:14px;background:var(--org-lt,#FEF3C7);border:1px solid #FCD9A8;line-height:1.5;}
+.jn-res.ok{background:var(--teal-lt,#E6F2EF);border-color:#B9DBD3;} .jn-res.no{background:#F4F6F6;border-color:var(--br);}
+.jn-res b{display:block;font-size:16px;margin:4px 0 2px;color:var(--t1);} .jn-res small{display:block;color:var(--t2);font-weight:700;} .jn-res p{margin:6px 0 0;font-size:13px;color:var(--t2);}

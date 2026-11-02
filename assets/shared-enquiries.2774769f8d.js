@@ -21,7 +21,7 @@ function nfEqStatusHTML(x) {
   var s = x.status || 'new';
   if (s === 'approved' && nfEqKind(x) === 'champion') return '<span class="eq-st g">Selected</span>';
   if (s === 'approved') return '<span class="eq-st g">Approved' + (x.code ? ' · ' + nfEqE(x.code) : '') + '</span>';
-  if (s === 'declined') return '<span class="eq-st n">Declined</span>';
+  if (s === 'declined') return '<span class="eq-st n">Declined' + (x.declineReason ? ' · ' + nfEqE(x.declineReason === 'other' ? (x.declineNote || 'other') : (NF_EQ_REASONS.filter(function (r) { return r[0] === x.declineReason; })[0] || ['', ''])[1]) : '') + '</span>';
   if (s === 'closed') return '<span class="eq-st n">Closed</span>';
   if (s === 'contacted') return '<span class="eq-st b">Contacted' + (x.contactedAt ? ' · ' + nfEqE(nfEqWhen(x.contactedAt).split(',')[0]) : '') + '</span>';
   return '<span class="eq-st a">New' + (nfEqKind(x) === 'signup' ? ' · waiting for you' : '') + '</span>';
@@ -36,6 +36,7 @@ function nfEqRowHTML(x) {
     line2 = '<small class="eq-g">' + nfEqE([x.ftype ? (NF_LEVELS[x.ftype] || {}).short || x.ftype.toUpperCase() : '', x.nin ? 'NIN ' + x.nin : '', q.years ? q.years + ' yrs in role' : '', NQ[q.nqas] || '', q.reach ? 'can support ' + q.reach + ' facilities' : '', q.langs ? 'guides in ' + q.langs : ''].filter(Boolean).join(' · ')) + '</small>'; }
   else if (cnt.length) line2 = '<small class="eq-b">' + nfEqE(cnt.join(' · ')) + ' = ' + nfEqE(x.facilityCount || '') + ' facilities</small>';
   else if (x.facilityCount) line2 = '<small class="eq-b">~' + nfEqE(x.facilityCount) + ' facilities</small>';
+  if (x.checks) line2 += '<small class="eq-m">Applicant checked their request ' + nfEqE(x.checks) + '×' + (x.checkedAt ? ' · last ' + nfEqE(nfEqWhen(x.checkedAt)) : '') + '</small>';
   var btn = function (cls, label, js) { return '<button type="button" class="eq-btn ' + cls + '" onclick="' + js + '"' + (_nfEq.busy === x._k ? ' disabled' : '') + '>' + label + '</button>'; };
   var acts = '';
   if (open && k === 'signup') acts += btn('p', 'Approve &amp; enrol', "nfEqApprove('" + id + "')") + (x.rid ? btn('', 'Open in Registry', "nfEqRegistry('" + id + "')") : '');
@@ -76,10 +77,15 @@ async function nfEqRefresh() { try { await nfBizLoad(true); } catch (e) {} nfEqP
 function nfEqOpenList(kind) { _nfEq.kind = kind || ''; _nfEq.st = 'open'; nfAdminView('business'); setTimeout(function () { var el = document.getElementById('nf-eq'); try { el && el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }, 500); }
 async function nfEqSet(id, status) {
   var L = (_nfBiz.leads || {}), x = L[id]; if (!x) return;
-  if (status === 'declined') { var ok = await scDialog({ title: 'Decline this sign-up?', icon: '✋', okLabel: 'Decline', message: (x.orgName || '') + ' · ' + (x.contactName || '') + '\n\nNo facility or login is made. You can reopen it later.' }); if (!ok) return; }
-  var up = { status: status }; if (status === 'contacted') up.contactedAt = new Date().toISOString(); if (status === 'closed' || status === 'declined') up.closedAt = new Date().toISOString();
-  var nx = Object.assign({}, x, up); if (status === 'new') { delete nx.closedAt; }
+  var up = { status: status };
+  if (status === 'declined') {
+    var v = await scDialog({ title: 'Decline this sign-up?', icon: '✋', okLabel: 'Decline', message: (x.orgName || '') + ' · ' + (x.contactName || '') + '\n\nNo facility or login is made. The applicant sees the reason when they check their request. You can reopen it later.',
+      fields: [{ key: 'reason', label: 'Reason (shown to the applicant)', type: 'select', value: 'verify', options: NF_EQ_REASONS.map(function (r) { return { value: r[0], label: r[1] }; }) }, { key: 'note', label: 'If Other: the reason in a few words', value: '', placeholder: 'e.g. the facility is a private clinic' }] });
+    if (!v) return; up.declineReason = v.reason || 'other'; up.declineNote = String(v.note || '').trim().slice(0, 200) || null;
+    if (up.declineReason === 'other' && !up.declineNote) { showToast('Write the reason in a few words.', 'err'); return; } } if (status === 'contacted') up.contactedAt = new Date().toISOString(); if (status === 'closed' || status === 'declined') up.closedAt = new Date().toISOString();
+  var nx = Object.assign({}, x, up); if (status === 'new') { delete nx.closedAt; delete nx.declineReason; delete nx.declineNote; }
   var okw = await fbSet('shared/sc_leads/' + id, nx);
+  if (okw !== false && status === 'declined' && x.mobile) setTimeout(function () { nfEqWaPrompt('Let ' + (x.contactName || 'them') + ' know', x.mobile, nfEqDeclinedText(nx)); }, 300);
   if (okw !== false && status === 'approved' && nfEqKind(x) === 'champion') setTimeout(function () { try { scAlert('Selected. Now add ' + (x.contactName || 'them') + ' (' + (x.mobile || '') + ') in Settings → Recognition → Quality Champions, with their Supervisor and the facilities they will guide. That gives them their Champion login.', 'Quality Champion', '🏅'); } catch (e) {} }, 300);
   if (okw === false) { showToast('Could not save — check the connection.', 'err'); return; }
   L[id] = nx; nfEqPaint(); showToast({ contacted: 'Marked contacted.', closed: 'Closed.', declined: 'Declined.', new: 'Reopened.' }[status] || 'Saved.', 'ok');
@@ -93,7 +99,7 @@ async function nfEqApprove(id) {
     var r = await nfCall('approveSignup', { id: id });
     _nfEq.busy = ''; try { await nfBizLoad(true); } catch (e) {} try { if (typeof scRefreshDashboard === 'function') scRefreshDashboard(); } catch (e) {}
     nfEqPaint();
-    if (r && r.tempPassword && typeof nfShowTempPassword === 'function') await nfShowTempPassword(x.contactName || '', r.identifier, r.tempPassword, (x.orgName || 'Facility') + ' · ' + r.code);
+    if (r && r.tempPassword && typeof nfShowTempPassword === 'function') await nfShowTempPassword(x.contactName || '', r.identifier, r.tempPassword, (x.orgName || 'Facility') + ' · ' + r.code, nfEqApprovedText(x, r));
     else showToast((x.orgName || 'Facility') + ' enrolled · ' + (r && r.code || '') + (r && !r.tempPassword ? ' (their existing login now opens it)' : ''), 'ok');
     try { if (typeof rgAfterTree === 'function' && r && ((r.accounts || []).length || (r.conflicts || []).length)) await rgAfterTree(r); } catch (e) {}
   } catch (e) { _nfEq.busy = ''; nfEqPaint(); showToast(typeof nfErrText === 'function' ? nfErrText(e) : 'Could not approve.', 'err'); }
@@ -148,3 +154,22 @@ async function nfEqRegistry(id) {
 })();
 // the old Leads panel (retired Facilities screen) is replaced by this list
 try { renderLeadsPanel = function () { var b = document.getElementById('leads-box'); if (b) b.remove(); }; } catch (e) {}
+
+// ── approve / decline messages (2 Nov 2026) ───────────────────
+var NF_EQ_REASONS = [['verify', 'Could not verify the facility details'], ['exists', 'Facility already registered by its in-charge'], ['scope', 'Not a public health facility covered by NQAS FAST'], ['duplicate', 'Duplicate request'], ['other', 'Other (write it below)']];
+var NF_EQ_REASON_TXT = { verify: 'we could not verify the facility details', exists: 'this facility is already registered in NQAS FAST by its in-charge', scope: 'this facility is not a public health facility covered by NQAS FAST', duplicate: 'this is a duplicate of another request' };
+function nfEqFirst(x) { return String(x.contactName || '').replace(/^(dr\.?|mr\.?|ms\.?|mrs\.?)\s+/i, '').split(' ')[0]; }
+function nfEqApprovedText(x, r) {
+  var f = nfEqFirst(x);
+  return 'Namaste' + (f ? ' ' + f : '') + ' ji, 🎉\n' + (x.orgName || 'Your facility') + ' is now enrolled in NQAS | FAST' + (x.ref ? ' (' + x.ref + ')' : '') + '.\n\nLog in at app.thehealsol.com\nMobile: ' + (r.identifier || x.mobile || '') + '\nOne-time password: ' + (r.tempPassword || '') + '\n\nYou will set your own password at first login. Your free 7-day baseline starts today.\n— HealSol Academy';
+}
+function nfEqDeclinedText(x) {
+  var f = nfEqFirst(x), why = x.declineReason === 'other' ? (x.declineNote || '') : (NF_EQ_REASON_TXT[x.declineReason] || '');
+  return 'Namaste' + (f ? ' ' + f : '') + ' ji,\nThank you for your interest in NQAS | FAST' + (x.ref ? ' (' + x.ref + ')' : '') + '. We are sorry, we could not approve the request for ' + (x.orgName || 'your facility') + (why ? ' because ' + why : '') + '.\n\nIf you think this is a mistake, please reply here and we will help.\n— HealSol Academy';
+}
+function nfEqWaPrompt(title, mobile, text) {
+  var mob = String(mobile || '').replace(/\D/g, '').slice(-10), ov = document.createElement('div'); ov.className = 'scx-ov open'; ov.id = 'nf-eq-wa';
+  ov.innerHTML = '<div class="scx-box"><div class="nfcf-head"><span style="font-size:22px;">💬</span><div style="flex:1;"><b>' + nfEqE(title) + '</b><div style="font-size:11.5px;color:var(--t3);">The message opens in WhatsApp — check it and press send</div></div></div>'
+    + '<pre class="eq-wa-pre">' + nfEqE(text) + '</pre><div class="nf-tmp-acts"><button class="scx-btn ghost" id="nf-eq-wa-x">Not now</button><a class="scx-btn" target="_blank" rel="noopener" href="https://wa.me/' + (mob ? '91' + mob : '') + '?text=' + encodeURIComponent(text) + '" onclick="setTimeout(function(){var o=document.getElementById(\'nf-eq-wa\');o&&o.remove();},300)">Send on WhatsApp</a></div></div>';
+  document.body.appendChild(ov); ov.querySelector('#nf-eq-wa-x').onclick = function () { ov.remove(); };
+}

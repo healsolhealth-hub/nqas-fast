@@ -5,7 +5,7 @@
 //   approves (Business → Enquiries & sign-ups), or — when Settings switches that type open — enrolled at once with its free baseline.
 //   → I work in a facility: "your in-charge adds you", Check my number (checkMobile), WhatsApp to the in-charge.
 //   → District, State or Organisation: bulk enquiry with counts per facility type (submitEnquiry).
-var JN_HI={'Become a Quality Champion':'क्वालिटी चैंपियन बनें','Help nearby facilities get NQAS-ready · any facility staff':'आस-पास के स्वास्थ्य केंद्रों को NQAS-रेडी बनाने में मदद करें · कोई भी स्टाफ','QUALITY CHAMPION':'क्वालिटी चैंपियन','Champions guide nearby facilities on their NQAS journey and are recognised by HealSol Academy. Tell us about yourself — we will call the people we select.':'चैंपियन आस-पास के स्वास्थ्य केंद्रों को NQAS की राह पर मार्गदर्शन देते हैं और HealSol Academy उन्हें सम्मानित करती है। अपने बारे में बताएँ — चुने गए लोगों को हम कॉल करेंगे।','Your name *':'आपका नाम *','Mobile *':'मोबाइल *','Email':'ईमेल','Your role *':'आपकी भूमिका *','Your role (type it)':'आपकी भूमिका (लिखें)','Your facility type *':'आपके स्वास्थ्य केंद्र का प्रकार *','Facility name *':'स्वास्थ्य केंद्र का नाम *','NIN of the facility (if you know it)':'स्वास्थ्य केंद्र का NIN (यदि पता हो)','Choose':'चुनें','Years in this role':'इस भूमिका में वर्ष','Less than 1':'1 से कम','Has your facility been NQAS-certified?':'क्या आपका स्वास्थ्य केंद्र NQAS-प्रमाणित है?','Yes, certified':'हाँ, प्रमाणित','In process':'प्रक्रिया में','Not yet':'अभी नहीं','Languages you can guide in':'जिन भाषाओं में आप मार्गदर्शन कर सकते हैं','How many nearby facilities could you support?':'आप कितने आस-पास के केंद्रों की मदद कर सकते हैं?','7 or more':'7 या अधिक','Why do you want to be a Quality Champion? (optional)':'आप क्वालिटी चैंपियन क्यों बनना चाहते हैं? (वैकल्पिक)','Send my application':'मेरा आवेदन भेजें','Sending…':'भेजा जा रहा है…','Application received':'आवेदन मिल गया','Thank you for offering to be a Quality Champion. HealSol Academy will review your application and call you on':'क्वालिटी चैंपियन बनने की पेशकश के लिए धन्यवाद। HealSol Academy आपका आवेदन देखकर आपको इस नंबर पर कॉल करेगी:','Reference':'संदर्भ','Enter your name.':'अपना नाम लिखें।','Enter a 10-digit mobile number.':'10 अंकों का मोबाइल नंबर लिखें।','Choose your role.':'अपनी भूमिका चुनें।','Enter your facility name.':'अपने स्वास्थ्य केंद्र का नाम लिखें।','Choose your district.':'अपना ज़िला चुनें।','Join NQAS FAST':'NQAS FAST से जुड़ें','New to NQAS FAST?':'NQAS FAST में नए हैं?','Facilities, staff, districts and partners':'स्वास्थ्य केंद्र, स्टाफ, ज़िले और साझेदार',
+var JN_HI={'Already applied? Check my request':'पहले आवेदन किया है? अपना अनुरोध देखें','Check my request':'अपना अनुरोध देखें','CHECK MY REQUEST':'अनुरोध की स्थिति','Where is my request?':'मेरा अनुरोध कहाँ है?','Enter the reference you received (REQ-, ENQ- or QC-) and the mobile number you applied with.':'आपको मिला संदर्भ नंबर (REQ-, ENQ- या QC-) और आवेदन वाला मोबाइल नंबर लिखें।','Reference *':'संदर्भ नंबर *','Check status':'स्थिति देखें','Checking…':'देख रहे हैं…','Enter the reference exactly as you received it, e.g. REQ-2611-1234.':'संदर्भ नंबर ठीक वैसे ही लिखें जैसा मिला था, जैसे REQ-2611-1234।','Facility sign-up':'स्वास्थ्य केंद्र पंजीकरण','Quality Champion application':'क्वालिटी चैंपियन आवेदन','Request to join':'जुड़ने का अनुरोध','District / bulk enquiry':'ज़िला / बल्क पूछताछ','You have been selected':'आपका चयन हो गया है','HealSol Academy will set up your Quality Champion login and call you.':'HealSol Academy आपका क्वालिटी चैंपियन लॉगिन बनाकर आपको कॉल करेगी।','Approved':'स्वीकृत','is enrolled in NQAS FAST. Log in with your mobile number and the one-time password HealSol Academy sent you. Forgot it? Tap "Forgot?" on the log-in screen or WhatsApp us.':'NQAS FAST में जुड़ गया है। अपने मोबाइल नंबर और HealSol Academy द्वारा भेजे गए एक-बार के पासवर्ड से लॉग इन करें। भूल गए? लॉग इन स्क्रीन पर "भूल गए?" दबाएँ या हमें WhatsApp करें।','Not approved':'स्वीकृत नहीं','Reason':'कारण','Questions? WhatsApp HealSol Academy.':'कोई सवाल? HealSol Academy को WhatsApp करें।','Closed':'बंद','Thank you for your interest in NQAS FAST.':'NQAS FAST में रुचि के लिए धन्यवाद।','In review':'जाँच में','HealSol Academy has contacted you and is checking the details.':'HealSol Academy ने आपसे संपर्क किया है और विवरण जाँच रही है।','Received':'प्राप्त','Your request is with HealSol Academy. We will contact you within 1–2 working days.':'आपका अनुरोध HealSol Academy के पास है। हम 1–2 कार्य-दिवस में संपर्क करेंगे।','Your request':'आपका अनुरोध','is still waiting for approval by HealSol Academy. You will get your password once it is approved.':'अभी HealSol Academy की स्वीकृति की प्रतीक्षा में है। स्वीकृति के बाद आपको पासवर्ड मिलेगा।','save it (take a screenshot). Use it with your mobile number to check your request any time.':'इसे सहेज लें (स्क्रीनशॉट लें)। अपने मोबाइल नंबर के साथ इससे कभी भी अनुरोध की स्थिति देखें।','Become a Quality Champion':'क्वालिटी चैंपियन बनें','Help nearby facilities get NQAS-ready · any facility staff':'आस-पास के स्वास्थ्य केंद्रों को NQAS-रेडी बनाने में मदद करें · कोई भी स्टाफ','QUALITY CHAMPION':'क्वालिटी चैंपियन','Champions guide nearby facilities on their NQAS journey and are recognised by HealSol Academy. Tell us about yourself — we will call the people we select.':'चैंपियन आस-पास के स्वास्थ्य केंद्रों को NQAS की राह पर मार्गदर्शन देते हैं और HealSol Academy उन्हें सम्मानित करती है। अपने बारे में बताएँ — चुने गए लोगों को हम कॉल करेंगे।','Your name *':'आपका नाम *','Mobile *':'मोबाइल *','Email':'ईमेल','Your role *':'आपकी भूमिका *','Your role (type it)':'आपकी भूमिका (लिखें)','Your facility type *':'आपके स्वास्थ्य केंद्र का प्रकार *','Facility name *':'स्वास्थ्य केंद्र का नाम *','NIN of the facility (if you know it)':'स्वास्थ्य केंद्र का NIN (यदि पता हो)','Choose':'चुनें','Years in this role':'इस भूमिका में वर्ष','Less than 1':'1 से कम','Has your facility been NQAS-certified?':'क्या आपका स्वास्थ्य केंद्र NQAS-प्रमाणित है?','Yes, certified':'हाँ, प्रमाणित','In process':'प्रक्रिया में','Not yet':'अभी नहीं','Languages you can guide in':'जिन भाषाओं में आप मार्गदर्शन कर सकते हैं','How many nearby facilities could you support?':'आप कितने आस-पास के केंद्रों की मदद कर सकते हैं?','7 or more':'7 या अधिक','Why do you want to be a Quality Champion? (optional)':'आप क्वालिटी चैंपियन क्यों बनना चाहते हैं? (वैकल्पिक)','Send my application':'मेरा आवेदन भेजें','Sending…':'भेजा जा रहा है…','Application received':'आवेदन मिल गया','Thank you for offering to be a Quality Champion. HealSol Academy will review your application and call you on':'क्वालिटी चैंपियन बनने की पेशकश के लिए धन्यवाद। HealSol Academy आपका आवेदन देखकर आपको इस नंबर पर कॉल करेगी:','Reference':'संदर्भ','Enter your name.':'अपना नाम लिखें।','Enter a 10-digit mobile number.':'10 अंकों का मोबाइल नंबर लिखें।','Choose your role.':'अपनी भूमिका चुनें।','Enter your facility name.':'अपने स्वास्थ्य केंद्र का नाम लिखें।','Choose your district.':'अपना ज़िला चुनें।','Join NQAS FAST':'NQAS FAST से जुड़ें','New to NQAS FAST?':'NQAS FAST में नए हैं?','Facilities, staff, districts and partners':'स्वास्थ्य केंद्र, स्टाफ, ज़िले और साझेदार',
   'Make your facility NQAS-ready':'अपने स्वास्थ्य केंद्र को NQAS के लिए तैयार करें','Back to log in':'लॉग इन पर वापस','Back':'वापस','Who are you?':'आप कौन हैं?',
   'Pick the one that fits. It takes about 2 minutes.':'जो आप पर लागू हो, उसे चुनें। लगभग 2 मिनट लगेंगे।','I run a facility':'मैं स्वास्थ्य केंद्र का प्रभारी हूँ',
   'CHO of a Sub-Centre · MO in-charge of a UPHC or PHC · MOIC of a CHC':'उप-केंद्र के CHO · UPHC या PHC के MO प्रभारी · CHC के MOIC','I work in a facility':'मैं स्वास्थ्य केंद्र में काम करता/करती हूँ',
@@ -58,7 +58,7 @@ function phcOpenDemoSignup(){ jnOpen('fac'); }
 function phcOpenLeadModal(){ jnOpen('bulk'); }
 function jnRender(){
   var box=document.getElementById('nf-l-join'); if(!box) return;
-  var f={who:jnWho,fac:jnFac,you:jnYou,sent:jnSent,staff:jnStaff,bulk:jnBulk,bulksent:jnBulkSent,champ:jnChamp,champsent:jnChampSent}[_jn.step]||jnWho;
+  var f={who:jnWho,fac:jnFac,you:jnYou,sent:jnSent,staff:jnStaff,bulk:jnBulk,bulksent:jnBulkSent,champ:jnChamp,champsent:jnChampSent,status:jnStatus}[_jn.step]||jnWho;
   box.innerHTML=f();
 }
 function jnTop(back,step){ return '<div class="jn-top"><button type="button" class="nf-l-back" onclick="'+back+'"><i class="ti ti-arrow-left"></i> '+jE(jt(back==='jnClose()'?'Back to log in':'Back'))+'</button>'+(step?'<span class="jn-stepn">'+jE(jt(step))+'</span>':'')+'</div>'
@@ -166,8 +166,8 @@ function jnSent(){
   return '<div class="jn-done"><span class="jn-ok"><i class="ti ti-check"></i></span><div class="nf-l-hi">'+jE(jt('Request sent'))+'</div>'
     +'<div class="nf-l-sub">'+jE(r.fname||'Your facility')+' is with HealSol Academy for approval. We\'ll contact you on '+jE(r.mob||'')+'.</div>'
     +'<div class="jn-kick">'+jE(jt('WHAT HAPPENS NEXT'))+'</div>'+st(1,'HealSol Academy checks the facility and calls or WhatsApps you.',1)+st(2,'Once approved, you get your login: this mobile and a one-time password.')+st(3,'Log in, add your staff, and start the baseline.')
-    +(r.ref?'<div class="jn-ref">'+jE(jt('Reference'))+' <b>'+jE(r.ref)+'</b> — quote it if you call HealSol Academy.</div>':'')
-    +'<button type="button" class="nf-l-btn" onclick="jnClose()">'+jE(jt('Back to log in'))+'</button></div>';
+    +(r.ref?'<div class="jn-ref">'+jE(jt('Reference'))+' <b>'+jE(r.ref)+'</b> — '+jE(jt('save it (take a screenshot). Use it with your mobile number to check your request any time.'))+'</div>':'')
+    +'<button type="button" class="nf-l-btn" onclick="jnClose()">'+jE(jt('Back to log in'))+'</button>'+jnChkBtn(r.ref,r.mob)+'</div>';
 }
 function jnLoginWith(id,pw){ jnClose(); var i=document.getElementById('nf-id'), p=document.getElementById('nf-pwd'); if(i) i.value=id; if(p) p.value=pw; }
 // ── Staff ──────────────────────────────────────────────────────
@@ -240,10 +240,10 @@ function jnPaintLogin(){
   var tag=root.querySelector('.nf-l-tag'); if(tag){ tag.removeAttribute('data-nf'); tag.innerHTML=jE(jt('Make your facility NQAS-ready'))+'<span class="jn-types"><i>Sub-Centre</i><i>UPHC</i><i>PHC</i><i>CHC</i></span>'; }
   var f=document.getElementById('nf-l-form'); if(!f) return;
   [].forEach.call(f.querySelectorAll('.nf-l-ghost,.nf-l-plain'),function(b){ if(!b.classList.contains('jn-join')&&b.id!=='nf-l-wa') b.remove(); });
-  if(!document.getElementById('jn-join')){ f.insertAdjacentHTML('beforeend','<div class="jn-or"><span></span><b id="jn-or-t"></b><span></span></div><button type="button" class="nf-l-ghost jn-join" id="jn-join" onclick="jnOpen()"><i class="ti ti-user-plus"></i> <span id="jn-join-t"></span></button><div class="jn-hint" id="jn-join-s" style="text-align:center"></div>'); }
+  if(!document.getElementById('jn-join')){ f.insertAdjacentHTML('beforeend','<div class="jn-or"><span></span><b id="jn-or-t"></b><span></span></div><button type="button" class="nf-l-ghost jn-join" id="jn-join" onclick="jnOpen()"><i class="ti ti-user-plus"></i> <span id="jn-join-t"></span></button><div class="jn-hint" id="jn-join-s" style="text-align:center"></div><button type="button" class="nf-l-link jn-chk" id="jn-chk" onclick="jnOpenStatus()"></button>'); }
   var s=function(id,k){ var el=document.getElementById(id); if(el) el.textContent=jt(k); };
   try{ if(typeof nfSupportApply==='function') nfSupportApply(); }catch(e){}
-  s('jn-or-t','New to NQAS FAST?'); s('jn-join-t','Join NQAS FAST'); s('jn-join-s','Facilities, staff, districts and partners');
+  s('jn-or-t','New to NQAS FAST?'); s('jn-join-t','Join NQAS FAST'); s('jn-join-s','Facilities, staff, districts and partners'); s('jn-chk','Already applied? Check my request');
 }
 (function(){ try{ var o=nfPaint; nfPaint=function(){ var r=o.apply(this,arguments); try{ jnPaintLogin(); }catch(e){} return r; }; }catch(e){} })();
 try{ if(document.readyState!=='loading') jnPaintLogin(); else document.addEventListener('DOMContentLoaded',function(){ try{ jnPaintLogin(); }catch(e){} }); }catch(e){}
@@ -290,5 +290,53 @@ function jnChampSent(){
   return '<div class="jn-done"><span class="jn-ok q"><i class="ti ti-check"></i></span><div class="nf-l-hi">'+jE(jt('Application received'))+'</div>'
     +'<div class="nf-l-sub">'+jE(jt('Thank you for offering to be a Quality Champion. HealSol Academy will review your application and call you on'))+' '+jE(R.mob||'')+'.</div>'
     +(R.ref?'<div class="jn-ref">'+jE(jt('Reference'))+' <b>'+jE(R.ref)+'</b></div>':'')
-    +'<button type="button" class="nf-l-btn" onclick="jnClose()">'+jE(jt('Back to log in'))+'</button></div>';
+    +'<button type="button" class="nf-l-btn" onclick="jnClose()">'+jE(jt('Back to log in'))+'</button>'+jnChkBtn(R.ref,R.mob)+'</div>';
+}
+
+// ── Check my request (2 Nov 2026): reference + mobile → status; a failed log in from a waiting mobile says so ──
+var _js={ref:'',mob:'',res:null,busy:false};
+function jnRemember(ref,mob){ try{ if(ref) localStorage.setItem('nf_req',JSON.stringify({ref:ref,mob:mob||''})); }catch(e){} }
+function jnChkBtn(ref,mob){ jnRemember(ref,mob); return ref?'<button type="button" class="nf-l-plain jn-chkb" onclick="jnOpenStatus(\''+jE(ref)+'\',\''+jE(mob||'')+'\')"><i class="ti ti-search"></i> '+jE(jt('Check my request'))+'</button>':''; }
+function jnOpenStatus(ref,mob){
+  var saved={}; try{ saved=JSON.parse(localStorage.getItem('nf_req')||'{}')||{}; }catch(e){}
+  _js.ref=ref||_js.ref||saved.ref||''; _js.mob=mob||_js.mob||saved.mob||((document.getElementById('nf-id')||{}).value||'').replace(/\D/g,'').slice(-10); _js.res=null;
+  jnOpen('status');
+}
+function jnStatus(){
+  var R=_js.res;
+  return jnTop('jnClose()')+'<div class="jn-kick">'+jE(jt('CHECK MY REQUEST'))+'</div><div class="nf-l-hi">'+jE(jt('Where is my request?'))+'</div>'
+    +'<div class="nf-l-sub">'+jE(jt('Enter the reference you received (REQ-, ENQ- or QC-) and the mobile number you applied with.'))+'</div>'
+    +'<label class="nf-l-lbl" for="js-ref">'+jE(jt('Reference *'))+'</label><input class="jn-in" id="js-ref" placeholder="REQ-2611-1234" autocapitalize="characters" value="'+jE(_js.ref)+'" oninput="_js.ref=this.value">'
+    +'<label class="nf-l-lbl" for="js-mob">'+jE(jt('Mobile *'))+'</label><input class="jn-in" id="js-mob" type="tel" inputmode="numeric" value="'+jE(_js.mob)+'" oninput="_js.mob=this.value">'
+    +jnErr()+'<button type="button" class="nf-l-btn" id="js-go" onclick="jnStatusGo()"'+(_js.busy?' disabled':'')+'>'+jE(jt(_js.busy?'Checking…':'Check status'))+'</button>'
+    +(R?jnStatusCard(R):'');
+}
+async function jnStatusGo(){
+  var mob=String(_js.mob||'').replace(/\D/g,'').replace(/^(91|0)(?=\d{10}$)/,''), ref=String(_js.ref||'').trim().toUpperCase().replace(/\s+/g,'');
+  var bad=!/^(REQ|ENQ|QC)-\d{4}-\d{4}$/.test(ref)?'Enter the reference exactly as you received it, e.g. REQ-2611-1234.':!/^[6-9]\d{9}$/.test(mob)?'Enter a 10-digit mobile number.':'';
+  if(bad){ _jn.err=jt(bad); _js.res=null; jnRender(); return; }
+  _js.busy=true; _jn.err=''; _js.res=null; jnRender();
+  try{ _js.res=await nfCall('requestStatus',{ref:ref,mobile:mob}); _js.ref=ref; _js.mob=mob; jnRemember(ref,mob); }
+  catch(e){ _jn.err=typeof nfErrText==='function'?nfErrText(e):(e.message||'Could not check.'); }
+  _js.busy=false; jnRender();
+}
+function jnStatusCard(R){
+  var k=R.kind, s=R.status, nm=R.name||'', head, body, cls='', act='';
+  var what=k==='signup'?jt('Facility sign-up'):k==='champion'?jt('Quality Champion application'):k==='join'?jt('Request to join'):jt('District / bulk enquiry');
+  if(s==='approved'&&k==='champion'){ head='🏅 '+jt('You have been selected'); body=jt('HealSol Academy will set up your Quality Champion login and call you.'); cls='ok'; }
+  else if(s==='approved'){ head='✅ '+jt('Approved'); body=nm+' '+jt('is enrolled in NQAS FAST. Log in with your mobile number and the one-time password HealSol Academy sent you. Forgot it? Tap "Forgot?" on the log-in screen or WhatsApp us.'); cls='ok';
+    act='<button type="button" class="nf-l-btn" onclick="jnLoginWith(\''+jE(_js.mob)+'\',\'\')">'+jE(jt('Log in'))+'</button>'; }
+  else if(s==='declined'){ head='✋ '+jt('Not approved'); body=(R.reason?jt('Reason')+': '+R.reason+' ':'')+jt('Questions? WhatsApp HealSol Academy.'); cls='no'; }
+  else if(s==='closed'){ head=jt('Closed'); body=(R.reason?R.reason+' ':'')+jt('Thank you for your interest in NQAS FAST.'); cls='no'; }
+  else if(s==='contacted'){ head='📞 '+jt('In review'); body=jt('HealSol Academy has contacted you and is checking the details.'); }
+  else { head='🕐 '+jt('Received'); body=jt('Your request is with HealSol Academy. We will contact you within 1–2 working days.'); }
+  return '<div class="jn-res '+cls+'"><div class="jn-kick">'+jE(what)+' · '+jE(R.ref||'')+'</div><b>'+jE(head)+'</b>'+(nm&&!(s==='approved'&&k!=='champion')?'<small>'+jE(nm)+'</small>':'')+'<p>'+jE(body)+'</p></div>'+act;
+}
+// a failed log in from a mobile whose sign-up is still waiting → say so instead of "wrong password"
+async function nfPendingHint(id){
+  var mob=String(id||'').replace(/\D/g,'').replace(/^(91|0)(?=\d{10}$)/,''); if(!/^[6-9]\d{9}$/.test(mob)) return;
+  try{ var r=await nfCall('requestStatus',{mode:'login',mobile:mob}); if(!r||!r.pending) return;
+    var e=document.getElementById('nf-err'); if(!e) return;
+    e.innerHTML=jE(jt('Your request'))+' <b>'+jE(r.ref||'')+'</b> '+jE(jt('is still waiting for approval by HealSol Academy. You will get your password once it is approved.'))+' <button type="button" class="nf-l-link" onclick="jnOpenStatus(\''+jE(r.ref||'')+'\',\''+mob+'\')">'+jE(jt('Check my request'))+'</button>';
+    e.style.display='block'; }catch(err){}
 }
