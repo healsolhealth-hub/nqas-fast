@@ -8,7 +8,7 @@
 //  sc_staff_index/{mobile}/{facilityCode} = true speeds up staff lookup; it repairs itself.
 // ══════════════════════════════════════════════════════════════
 Object.assign(HINDI_UI,{'Namaste':'नमस्ते','Log in with your mobile number or ID — we\'ll open the right space for you.':'अपने मोबाइल नंबर या ID से लॉग इन करें — हम आपके लिए सही जगह खोल देंगे।',
-  'Mobile number or ID':'मोबाइल नंबर या ID','Password':'पासवर्ड','Show':'दिखाएँ','Hide':'छिपाएँ','Remember me on this phone':'इस फ़ोन पर याद रखें','Forgot?':'भूल गए?','NQAS checklists: NHSRC, MoHFW, Govt. of India':'NQAS चेकलिस्ट: NHSRC, स्वास्थ्य एवं परिवार कल्याण मंत्रालय, भारत सरकार','Terms':'शर्तें','Privacy':'गोपनीयता','Refunds':'रिफ़ंड','Log in':'लॉग इन',
+  'Mobile number or ID':'मोबाइल नंबर या ID','Password':'पासवर्ड','Show':'दिखाएँ','Hide':'छिपाएँ','Remember me on this phone':'इस फ़ोन पर याद रखें','Forgot?':'भूल गए?','NQAS checklists: NHSRC, MoHFW, Govt. of India':'NQAS चेकलिस्ट: NHSRC, स्वास्थ्य एवं परिवार कल्याण मंत्रालय, भारत सरकार','Terms':'शर्तें','Privacy':'गोपनीयता','Refunds':'रिफ़ंड','Pricing':'मूल्य','Contact':'संपर्क','Log in':'लॉग इन',
   'Get your Sub-Centre NQAS-ready in 60 days':'60 दिनों में अपने उप-केंद्र को NQAS के लिए तैयार करें','New facility? Register — first 7 days (Baseline) free':'नया स्वास्थ्य केंद्र? पंजीकरण करें — पहले 7 दिन (बेसलाइन) मुफ़्त',
   'District / bulk enrolment? Contact us':'ज़िला / बल्क नामांकन? संपर्क करें','You have two roles. Where do you want to go?':'आपकी दो भूमिकाएँ हैं। आप कहाँ जाना चाहते हैं?',
   'Remember my choice on this phone':'इस फ़ोन पर मेरी पसंद याद रखें','Back':'वापस','Checking…':'जाँच हो रही है…','change':'बदलें',
@@ -117,7 +117,7 @@ function nfLoginHTML(){
     +'</div>'
     +'<div class="nf-l-body" id="nf-l-roles" style="display:none;"></div>'
     +'<div class="nf-l-foot">by <img src="'+SC_BRAND.logoHealsol+'" alt="HealSol Academy"></div>'
-    +'<div class="nf-l-legal"><span data-nf="NQAS checklists: NHSRC, MoHFW, Govt. of India"></span><br><a href="legal.html#terms" target="_blank" rel="noopener" data-nf="Terms"></a> · <a href="legal.html#privacy" target="_blank" rel="noopener" data-nf="Privacy"></a> · <a href="legal.html#refund" target="_blank" rel="noopener" data-nf="Refunds"></a></div>';
+    +'<div class="nf-l-legal"><span data-nf="NQAS checklists: NHSRC, MoHFW, Govt. of India"></span><br><a href="legal.html#about" target="_blank" rel="noopener" data-nf="Pricing"></a> · <a href="legal.html#terms" target="_blank" rel="noopener" data-nf="Terms"></a> · <a href="legal.html#privacy" target="_blank" rel="noopener" data-nf="Privacy"></a> · <a href="legal.html#refund" target="_blank" rel="noopener" data-nf="Refunds"></a> · <a href="legal.html#contact" target="_blank" rel="noopener" data-nf="Contact"></a></div>';
 }
 function nfPaint(){
   var root=document.getElementById('nf-login'); if(!root) return;
