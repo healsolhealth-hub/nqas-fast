@@ -5,7 +5,7 @@
 //   approves (Business → Enquiries & sign-ups), or — when Settings switches that type open — enrolled at once with its free baseline.
 //   → I work in a facility: "your in-charge adds you", Check my number (checkMobile), WhatsApp to the in-charge.
 //   → District, State or Organisation: bulk enquiry with counts per facility type (submitEnquiry).
-var JN_HI={'Join NQAS FAST':'NQAS FAST से जुड़ें','New to NQAS FAST?':'NQAS FAST में नए हैं?','Facilities, staff, districts and partners':'स्वास्थ्य केंद्र, स्टाफ, ज़िले और साझेदार',
+var JN_HI={'Become a Quality Champion':'क्वालिटी चैंपियन बनें','Help nearby facilities get NQAS-ready · any facility staff':'आस-पास के स्वास्थ्य केंद्रों को NQAS-रेडी बनाने में मदद करें · कोई भी स्टाफ','QUALITY CHAMPION':'क्वालिटी चैंपियन','Champions guide nearby facilities on their NQAS journey and are recognised by HealSol Academy. Tell us about yourself — we will call the people we select.':'चैंपियन आस-पास के स्वास्थ्य केंद्रों को NQAS की राह पर मार्गदर्शन देते हैं और HealSol Academy उन्हें सम्मानित करती है। अपने बारे में बताएँ — चुने गए लोगों को हम कॉल करेंगे।','Your name *':'आपका नाम *','Mobile *':'मोबाइल *','Email':'ईमेल','Your role *':'आपकी भूमिका *','Your role (type it)':'आपकी भूमिका (लिखें)','Your facility type *':'आपके स्वास्थ्य केंद्र का प्रकार *','Facility name *':'स्वास्थ्य केंद्र का नाम *','NIN of the facility (if you know it)':'स्वास्थ्य केंद्र का NIN (यदि पता हो)','Choose':'चुनें','Years in this role':'इस भूमिका में वर्ष','Less than 1':'1 से कम','Has your facility been NQAS-certified?':'क्या आपका स्वास्थ्य केंद्र NQAS-प्रमाणित है?','Yes, certified':'हाँ, प्रमाणित','In process':'प्रक्रिया में','Not yet':'अभी नहीं','Languages you can guide in':'जिन भाषाओं में आप मार्गदर्शन कर सकते हैं','How many nearby facilities could you support?':'आप कितने आस-पास के केंद्रों की मदद कर सकते हैं?','7 or more':'7 या अधिक','Why do you want to be a Quality Champion? (optional)':'आप क्वालिटी चैंपियन क्यों बनना चाहते हैं? (वैकल्पिक)','Send my application':'मेरा आवेदन भेजें','Sending…':'भेजा जा रहा है…','Application received':'आवेदन मिल गया','Thank you for offering to be a Quality Champion. HealSol Academy will review your application and call you on':'क्वालिटी चैंपियन बनने की पेशकश के लिए धन्यवाद। HealSol Academy आपका आवेदन देखकर आपको इस नंबर पर कॉल करेगी:','Reference':'संदर्भ','Enter your name.':'अपना नाम लिखें।','Enter a 10-digit mobile number.':'10 अंकों का मोबाइल नंबर लिखें।','Choose your role.':'अपनी भूमिका चुनें।','Enter your facility name.':'अपने स्वास्थ्य केंद्र का नाम लिखें।','Choose your district.':'अपना ज़िला चुनें।','Join NQAS FAST':'NQAS FAST से जुड़ें','New to NQAS FAST?':'NQAS FAST में नए हैं?','Facilities, staff, districts and partners':'स्वास्थ्य केंद्र, स्टाफ, ज़िले और साझेदार',
   'Make your facility NQAS-ready':'अपने स्वास्थ्य केंद्र को NQAS के लिए तैयार करें','Back to log in':'लॉग इन पर वापस','Back':'वापस','Who are you?':'आप कौन हैं?',
   'Pick the one that fits. It takes about 2 minutes.':'जो आप पर लागू हो, उसे चुनें। लगभग 2 मिनट लगेंगे।','I run a facility':'मैं स्वास्थ्य केंद्र का प्रभारी हूँ',
   'CHO of a Sub-Centre · MO in-charge of a UPHC or PHC · MOIC of a CHC':'उप-केंद्र के CHO · UPHC या PHC के MO प्रभारी · CHC के MOIC','I work in a facility':'मैं स्वास्थ्य केंद्र में काम करता/करती हूँ',
@@ -30,6 +30,9 @@ var JN_TYPES=[['sc','SC'],['uphc','UPHC'],['phc','PHC'],['chc','CHC']];
 var JN_PKG={sc:[{id:'nqas_12A',label:'12A — 12 Services (60 days)'},{id:'nqas_12B',label:'12B — 12 Services + Delivery (60 days)'}],
   chc:[{id:'fru',label:'CHC (FRU) — NQAS · LaQshya · MusQan (90 days)'},{id:'nonfru',label:'CHC (Non-FRU) — NQAS · LaQshya · MusQan (90 days)'}]};
 var JN_ORG=['District Health Society','State NHM','NGO / Partner','Donor / CSR','Other'];
+// 2 Nov 2026: "Become a Quality Champion" — any facility staff can apply; HealSol selects and adds them in Recognition
+var JN_QROLE=['CHO','MO / MOIC','Staff Nurse','ANM','Other'], JN_QYRS=['Less than 1','1–3','3–5','5+'];
+var _jq={name:'',mob:'',email:'',role:'',roleOther:'',type:'sc',fac:'',nin:'',state:'Uttar Pradesh',district:'',block:'',years:'',nqas:'',langs:'',reach:'',why:''};
 var _jn={step:'who',type:'sc',state:'Uttar Pradesh',district:'',block:'',q:'',pick:'',typed:false,tname:'',tnin:'',pkg:'',name:'',role:'',mob:'',email:'',agree:false,
   look:{}, err:'', busy:false, res:null, staffMob:'', staffRes:null,
   bulk:{org:'District Health Society',oname:'',state:'Uttar Pradesh',districts:[],whole:false,counts:{sc:0,uphc:0,phc:0,chc:0},name:'',desig:'',mob:'',email:'',msg:''}};
@@ -55,7 +58,7 @@ function phcOpenDemoSignup(){ jnOpen('fac'); }
 function phcOpenLeadModal(){ jnOpen('bulk'); }
 function jnRender(){
   var box=document.getElementById('nf-l-join'); if(!box) return;
-  var f={who:jnWho,fac:jnFac,you:jnYou,sent:jnSent,staff:jnStaff,bulk:jnBulk,bulksent:jnBulkSent}[_jn.step]||jnWho;
+  var f={who:jnWho,fac:jnFac,you:jnYou,sent:jnSent,staff:jnStaff,bulk:jnBulk,bulksent:jnBulkSent,champ:jnChamp,champsent:jnChampSent}[_jn.step]||jnWho;
   box.innerHTML=f();
 }
 function jnTop(back,step){ return '<div class="jn-top"><button type="button" class="nf-l-back" onclick="'+back+'"><i class="ti ti-arrow-left"></i> '+jE(jt(back==='jnClose()'?'Back to log in':'Back'))+'</button>'+(step?'<span class="jn-stepn">'+jE(jt(step))+'</span>':'')+'</div>'
@@ -68,6 +71,7 @@ function jnWho(){
     +card('fac','t','ti-building-hospital','I run a facility','CHO of a Sub-Centre · MO in-charge of a UPHC or PHC · MOIC of a CHC')
     +card('staff','o','ti-users','I work in a facility','ANM · Staff Nurse · MPW · ASHA · Pharmacist · Lab Technician and other staff')
     +card('bulk','q','ti-building-community','District, State or Organisation','DPM · CMO · NHM · NGO · Donor — many facilities together')
+    +card('champ','q','ti-award','Become a Quality Champion','Help nearby facilities get NQAS-ready · any facility staff')
     +'<div class="jn-note">'+jE(jt('Already have a login?'))+' <button type="button" class="nf-l-link" onclick="jnClose()">'+jE(jt('Log in'))+'</button> '+jE(jt('Supervisors, District Admins and MOIC block logins are made by HealSol Academy.'))+'</div>';
 }
 // ── Step 1: your facility ──────────────────────────────────────
@@ -248,3 +252,43 @@ try{ if(document.readyState!=='loading') jnPaintLogin(); else document.addEventL
 function jnConsent(){ var T='<a href="legal.html#terms" target="_blank" rel="noopener">', P='<a href="legal.html#privacy" target="_blank" rel="noopener">';
   if(typeof _appLang!=='undefined'&&_appLang==='hi') return '<div class="jn-consent">भेजकर आप '+T+'शर्तों</a> और '+P+'गोपनीयता नीति</a> से सहमत हैं।</div>';
   return '<div class="jn-consent">By sending, you agree to the '+T+'Terms</a> and '+P+'Privacy Policy</a>.</div>'; }
+
+// ── Become a Quality Champion (2 Nov 2026) ─────────────────────
+function jqSet(k,v,re){ _jq[k]=v; if(re) jnRender(); }
+function jqChips(k,list,labels){ return '<div class="jn-chips">'+list.map(function(o,i){ var l=labels?labels[i]:o; return '<button type="button" class="'+(_jq[k]===o?'on':'')+'" aria-pressed="'+(_jq[k]===o)+'" onclick="jqSet(\''+k+'\',\''+o+'\',1)">'+jE(jt(l))+'</button>'; }).join('')+'</div>'; }
+function jnChamp(){
+  var Q=_jq, inp=function(id,k,lab,extra){ return '<label class="nf-l-lbl" for="'+id+'">'+jE(jt(lab))+'</label><input class="jn-in" id="'+id+'" value="'+jE(Q[k])+'" oninput="_jq.'+k+'=this.value"'+(extra||'')+'>'; };
+  return jnTop("jnGo('who')")+'<div class="jn-kick">'+jE(jt('QUALITY CHAMPION'))+'</div><div class="nf-l-hi">'+jE(jt('Become a Quality Champion'))+'</div>'
+    +'<div class="nf-l-sub">'+jE(jt('Champions guide nearby facilities on their NQAS journey and are recognised by HealSol Academy. Tell us about yourself — we will call the people we select.'))+'</div>'
+    +'<div class="jn-2"><div>'+inp('jq-n','name','Your name *')+'</div><div>'+inp('jq-m','mob','Mobile *',' type="tel" inputmode="numeric"')+'</div></div>'
+    +inp('jq-e','email','Email',' type="email"')
+    +'<div class="nf-l-lbl">'+jE(jt('Your role *'))+'</div>'+jqChips('role',JN_QROLE)
+    +(Q.role==='Other'?inp('jq-ro','roleOther','Your role (type it)'):'')
+    +'<div class="nf-l-lbl">'+jE(jt('Your facility type *'))+'</div>'+jqChips('type',['sc','uphc','phc','chc'],['Sub-Centre','UPHC','PHC','CHC'])
+    +inp('jq-f','fac','Facility name *')+inp('jq-nin','nin','NIN of the facility (if you know it)',' inputmode="numeric"')
+    +'<label class="nf-l-lbl" for="jq-s">'+jE(jt('State *'))+'</label><select class="jn-in" id="jq-s" onchange="_jq.state=this.value;_jq.district=\'\';jnRender()">'+jnOpts(jnStates(),Q.state)+'</select>'
+    +'<div class="jn-2"><div><label class="nf-l-lbl" for="jq-d">'+jE(jt('District *'))+'</label><select class="jn-in" id="jq-d" onchange="_jq.district=this.value">'+jnOpts(jnDistricts(Q.state),Q.district,jt('Choose'))+'</select></div><div>'+inp('jq-b','block','Block')+'</div></div>'
+    +'<div class="nf-l-lbl">'+jE(jt('Years in this role'))+'</div>'+jqChips('years',JN_QYRS)
+    +'<div class="nf-l-lbl">'+jE(jt('Has your facility been NQAS-certified?'))+'</div>'+jqChips('nqas',['certified','process','no'],['Yes, certified','In process','Not yet'])
+    +inp('jq-l','langs','Languages you can guide in',' placeholder="e.g. Hindi, English"')
+    +'<div class="nf-l-lbl">'+jE(jt('How many nearby facilities could you support?'))+'</div>'+jqChips('reach',['1-3','4-6','7+'],['1–3','4–6','7 or more'])
+    +'<label class="nf-l-lbl" for="jq-w">'+jE(jt('Why do you want to be a Quality Champion? (optional)'))+'</label><textarea class="jn-in jn-ta" id="jq-w" rows="3" oninput="_jq.why=this.value">'+jE(Q.why)+'</textarea>'
+    +jnErr()+'<button type="button" class="nf-l-btn" id="jq-send" onclick="jnChampSend()">'+jE(jt('Send my application'))+'</button>'+jnConsent();
+}
+async function jnChampSend(){
+  var Q=_jq, mob=String(Q.mob||'').replace(/\D/g,'').replace(/^(91|0)(?=\d{10}$)/,''), role=Q.role==='Other'?String(Q.roleOther||'').trim():Q.role;
+  var bad=!String(Q.name||'').trim()?'Enter your name.':!/^[6-9]\d{9}$/.test(mob)?'Enter a 10-digit mobile number.':!role?'Choose your role.':!String(Q.fac||'').trim()?'Enter your facility name.':!Q.district?'Choose your district.':'';
+  if(bad){ _jn.err=jt(bad); var e=document.getElementById('jn-err'); if(e){ e.textContent=_jn.err; e.style.display='block'; e.scrollIntoView({block:'center'}); } return; }
+  var b=document.getElementById('jq-send'); if(b){ b.disabled=true; b.textContent=jt('Sending…'); }
+  try{ var r=await nfCall('submitEnquiry',{source:'champion',orgName:String(Q.fac).trim(),ftype:Q.type,nin:String(Q.nin||'').replace(/\D/g,''),state:Q.state,district:Q.district,block:String(Q.block||'').trim(),
+      contactName:String(Q.name).trim(),designation:role,mobile:mob,email:String(Q.email||'').trim(),years:Q.years,nqas:Q.nqas,langs:String(Q.langs||'').trim(),reach:Q.reach,message:String(Q.why||'').trim()});
+    _jn.qres={ref:(r&&r.ref)||'',mob:mob}; jnGo('champsent'); }
+  catch(err){ _jn.err=typeof nfErrText==='function'?nfErrText(err):(err.message||'Could not send.'); jnRender(); }
+}
+function jnChampSent(){
+  var R=_jn.qres||{};
+  return '<div class="jn-done"><span class="jn-ok q"><i class="ti ti-check"></i></span><div class="nf-l-hi">'+jE(jt('Application received'))+'</div>'
+    +'<div class="nf-l-sub">'+jE(jt('Thank you for offering to be a Quality Champion. HealSol Academy will review your application and call you on'))+' '+jE(R.mob||'')+'.</div>'
+    +(R.ref?'<div class="jn-ref">'+jE(jt('Reference'))+' <b>'+jE(R.ref)+'</b></div>':'')
+    +'<button type="button" class="nf-l-btn" onclick="jnClose()">'+jE(jt('Back to log in'))+'</button></div>';
+}

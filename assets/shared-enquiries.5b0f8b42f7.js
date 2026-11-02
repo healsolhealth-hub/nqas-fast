@@ -5,10 +5,10 @@
 // Approve & enrol → approveSignup (server). Mark contacted / Close / Decline write the status (HealSol may write sc_leads).
 // Replaces the old Leads panel of the retired Facilities screen. Today shows "N sign-ups to approve · N new enquiries".
 var _nfEq = { kind: '', type: '', st: 'open', busy: '' };
-var NF_EQ_KIND = { signup: ['Sign-up', 't'], bulk: ['District / bulk', 'q'], join: ['Request to join', 'o'] };
+var NF_EQ_KIND = { signup: ['Sign-up', 't'], bulk: ['District / bulk', 'q'], join: ['Request to join', 'o'], champion: ['Quality Champion', 'g'] };
 function nfEqE(s) { return typeof scEsc === 'function' ? scEsc(s) : String(s == null ? '' : s); }
 function nfEqJ(s) { return typeof scJs === 'function' ? scJs(s) : String(s || '').replace(/'/g, "\\'"); }
-function nfEqKind(x) { return x.source === 'signup' ? 'signup' : x.source === 'join' ? 'join' : 'bulk'; }
+function nfEqKind(x) { return x.source === 'signup' ? 'signup' : x.source === 'join' ? 'join' : x.source === 'champion' ? 'champion' : 'bulk'; }
 function nfEqOpen(x) { return ['approved', 'declined', 'closed'].indexOf(x.status || 'new') < 0; }
 function nfEqRows() { var L = (typeof _nfBiz !== 'undefined' && _nfBiz.leads) || {}; return Object.keys(L).map(function (k) { return Object.assign({ _k: k }, L[k] || {}); }).filter(function (x) { return x.orgName || x.contactName; }); }
 function nfEqTypes(x) { var o = {}; if (x.ftype) o[x.ftype] = 1; var c = x.counts || {}; Object.keys(c).forEach(function (t) { if (c[t]) o[t] = c[t]; }); return o; }
@@ -19,6 +19,7 @@ function nfEqWhen(iso) { try { var d = new Date(iso); return d.toLocaleDateStrin
 function nfEqPkg(x) { if (x.ftype === 'chc') return 'CHC (' + (x.chcKind === 'nonfru' ? 'Non-FRU' : 'FRU') + ')'; if (typeof JN_PKG !== 'undefined') { var j = (JN_PKG[x.ftype] || []).filter(function (y) { return y.id === x.progId; })[0]; if (j) return j.label; } try { var p = getProg(x.progId); if (p && p.label) return p.label; } catch (e) {} var L = (NF_LEVELS[x.ftype] || {}).programmes || []; var q = L.filter(function (y) { return y.id === x.progId; })[0]; return q ? q.label : (x.progId || ''); }
 function nfEqStatusHTML(x) {
   var s = x.status || 'new';
+  if (s === 'approved' && nfEqKind(x) === 'champion') return '<span class="eq-st g">Selected</span>';
   if (s === 'approved') return '<span class="eq-st g">Approved' + (x.code ? ' · ' + nfEqE(x.code) : '') + '</span>';
   if (s === 'declined') return '<span class="eq-st n">Declined</span>';
   if (s === 'closed') return '<span class="eq-st n">Closed</span>';
@@ -31,11 +32,14 @@ function nfEqRowHTML(x) {
   var c = x.counts || {}, cnt = [['sc', 'SC'], ['uphc', 'UPHC'], ['phc', 'PHC'], ['chc', 'CHC']].filter(function (y) { return c[y[0]]; }).map(function (y) { return c[y[0]] + ' ' + y[1]; });
   var line2 = '';
   if (k === 'signup') line2 = x.rid ? '<small class="eq-g">Found in the registry' + (x.nin ? ' · NIN ' + nfEqE(x.nin) : '') + '</small>' : '<small class="eq-a">Typed by the applicant' + (x.nin ? ' · NIN ' + nfEqE(x.nin) : '') + ' — Approve adds it to the registry too</small>';
+  else if (k === 'champion') { var q = x.champ || {}, NQ = { certified: 'NQAS-certified facility', process: 'NQAS in process', no: 'Not yet certified' };
+    line2 = '<small class="eq-g">' + nfEqE([x.ftype ? (NF_LEVELS[x.ftype] || {}).short || x.ftype.toUpperCase() : '', x.nin ? 'NIN ' + x.nin : '', q.years ? q.years + ' yrs in role' : '', NQ[q.nqas] || '', q.reach ? 'can support ' + q.reach + ' facilities' : '', q.langs ? 'guides in ' + q.langs : ''].filter(Boolean).join(' · ')) + '</small>'; }
   else if (cnt.length) line2 = '<small class="eq-b">' + nfEqE(cnt.join(' · ')) + ' = ' + nfEqE(x.facilityCount || '') + ' facilities</small>';
   else if (x.facilityCount) line2 = '<small class="eq-b">~' + nfEqE(x.facilityCount) + ' facilities</small>';
   var btn = function (cls, label, js) { return '<button type="button" class="eq-btn ' + cls + '" onclick="' + js + '"' + (_nfEq.busy === x._k ? ' disabled' : '') + '>' + label + '</button>'; };
   var acts = '';
   if (open && k === 'signup') acts += btn('p', 'Approve &amp; enrol', "nfEqApprove('" + id + "')") + (x.rid ? btn('', 'Open in Registry', "nfEqRegistry('" + id + "')") : '');
+  if (open && k === 'champion') acts += btn('p', 'Select', "nfEqSet('" + id + "','approved')");
   if (open && k === 'join') acts += btn('p', 'Enrol from Registry', "nfEqRegistry('" + id + "')");
   if (x.mobile) acts += btn('wa', 'WhatsApp', "nfBizMsg('lead','" + id + "')");
   if (open && (x.status || 'new') === 'new' && k !== 'signup') acts += btn('', 'Mark contacted', "nfEqSet('" + id + "','contacted')");
@@ -49,7 +53,7 @@ function nfEqRowHTML(x) {
     + '<div class="eq-c3">' + nfEqStatusHTML(x) + '</div><div class="eq-c4">' + acts + '</div></div>';
 }
 function nfEqHTML() {
-  var R = nfEqRows(), base = R.filter(nfEqStatusOk), kinds = { '': base.length, signup: 0, bulk: 0, join: 0 };
+  var R = nfEqRows(), base = R.filter(nfEqStatusOk), kinds = { '': base.length, signup: 0, bulk: 0, join: 0, champion: 0 };
   base.forEach(function (x) { kinds[nfEqKind(x)]++; });
   var inKind = base.filter(function (x) { return !_nfEq.kind || nfEqKind(x) === _nfEq.kind; });
   var T = { sc: [0, 0], uphc: [0, 0], phc: [0, 0], chc: [0, 0] };
@@ -61,7 +65,7 @@ function nfEqHTML() {
   return '<div class="nfo-card eq" id="nf-eq"><div class="eq-head"><div><b>Enquiries &amp; sign-ups</b><small>' + (toAp ? toAp + ' sign-up' + (toAp === 1 ? '' : 's') + ' to approve · ' : '') + newE + ' new enquir' + (newE === 1 ? 'y' : 'ies') + ' · open ones always show, whatever dates you pick</small></div>'
     + '<div class="eq-hr"><select aria-label="Status" onchange="nfEqSetF(\'st\',this.value)">' + [['open', 'Open (new + contacted)'], ['approved', 'Approved'], ['closed', 'Closed / declined'], ['all', 'All']].map(function (o) { return '<option value="' + o[0] + '"' + (_nfEq.st === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>'
     + '<button type="button" class="nfo-ic" title="Refresh" aria-label="Refresh enquiries" onclick="nfEqRefresh()"><i class="ti ti-refresh"></i></button></div></div>'
-    + '<div class="eq-kinds" role="tablist" aria-label="Kind">' + kb('', 'All') + kb('signup', 'Sign-ups to approve') + kb('bulk', 'District / bulk') + kb('join', 'Request to join') + '</div>'
+    + '<div class="eq-kinds" role="tablist" aria-label="Kind">' + kb('', 'All') + kb('signup', 'Sign-ups to approve') + kb('bulk', 'District / bulk') + kb('join', 'Request to join') + kb('champion', 'Quality Champions') + '</div>'
     + '<div class="eq-types"><span>Facility type</span>' + tb('', 'All') + tb('sc', 'SC') + tb('uphc', 'UPHC') + tb('phc', 'PHC') + tb('chc', 'CHC') + '<span class="eq-tn">rows · facilities asked about</span></div>'
     + '<div class="eq-list">' + (rows.length ? rows.map(nfEqRowHTML).join('') : '<div class="eq-empty">Nothing here' + (_nfEq.st === 'open' ? ' — no open enquiries or sign-ups.' : '.') + '</div>') + '</div>'
     + '<div class="eq-foot">Self sign-up: Settings → Programme rules → <button type="button" class="hs-link" onclick="_hs.stab=\'rules\';nfAdminView(\'setup\')">Self sign-up</button> (free baseline at once, per type)</div></div>';
@@ -76,6 +80,7 @@ async function nfEqSet(id, status) {
   var up = { status: status }; if (status === 'contacted') up.contactedAt = new Date().toISOString(); if (status === 'closed' || status === 'declined') up.closedAt = new Date().toISOString();
   var nx = Object.assign({}, x, up); if (status === 'new') { delete nx.closedAt; }
   var okw = await fbSet('shared/sc_leads/' + id, nx);
+  if (okw !== false && status === 'approved' && nfEqKind(x) === 'champion') setTimeout(function () { try { scAlert('Selected. Now add ' + (x.contactName || 'them') + ' (' + (x.mobile || '') + ') in Settings → Recognition → Quality Champions, with their Supervisor and the facilities they will guide. That gives them their Champion login.', 'Quality Champion', '🏅'); } catch (e) {} }, 300);
   if (okw === false) { showToast('Could not save — check the connection.', 'err'); return; }
   L[id] = nx; nfEqPaint(); showToast({ contacted: 'Marked contacted.', closed: 'Closed.', declined: 'Declined.', new: 'Reopened.' }[status] || 'Saved.', 'ok');
 }
@@ -136,6 +141,7 @@ async function nfEqRegistry(id) {
     var m = o.apply(this, arguments);
     try { if (kind === 'lead') { var x = ((_nfBiz && _nfBiz.leads) || {})[id] || {}, first = String(x.contactName || '').replace(/^(dr\.?|mr\.?|ms\.?|mrs\.?)\s+/i, '').split(' ')[0], k = nfEqKind(x);
       if (k === 'signup') m.text = 'Namaste' + (first ? ' ' + first : '') + ' ji,\nThank you for registering ' + (x.orgName || 'your facility') + ' on NQAS | FAST' + (x.ref ? ' (' + x.ref + ')' : '') + '. I am from HealSol Academy. I would like to confirm a few details before we start your free baseline. When is a good time to talk?';
+      else if (k === 'champion') m.text = 'Namaste' + (first ? ' ' + first : '') + ' ji,\nThank you for applying to be a Quality Champion with NQAS | FAST' + (x.ref ? ' (' + x.ref + ')' : '') + '. I am from HealSol Academy. When is a good time to talk about your application?';
       else if (k === 'join') m.text = 'Namaste' + (first ? ' ' + first : '') + ' ji,\nThank you for asking to bring ' + (x.orgName || 'your facility') + ' into NQAS | FAST. I am from HealSol Academy. When is a good time to talk about enrolling it?'; } } catch (e) {}
     return m;
   };
