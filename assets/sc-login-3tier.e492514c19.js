@@ -69,6 +69,7 @@ async function scStaffLogin(){
     choState.facility.district = facData.district || '';
     choState.facility.state    = facData.state || '';
     choState.facility.subscriptionStatus = facData.subscriptionStatus || null;
+    choState.facility.officePay=facData.officePay||null; choState.facility.block=facData.block||''; choState.facility.nin=facData.nin||'';   // 2 Nov 2026: invoices
     choState.facility.progId   = facData.progId || 'nqas_12A';
     if(facData.startDate) choState.startDate = facData.startDate;
     // Mark setup done — all facility data loaded from Firebase
@@ -157,6 +158,7 @@ window.addEventListener('load', async function(){
           choState.facility.district = facData.district||'';
           choState.facility.state    = facData.state||'';
           choState.facility.subscriptionStatus = facData.subscriptionStatus||null;
+          choState.facility.officePay=facData.officePay||null; choState.facility.block=facData.block||''; choState.facility.nin=facData.nin||'';   // 2 Nov 2026: invoices
           choState.facility.progId   = facData.progId||'nqas_12A';
           if(facData.startDate) choState.startDate = facData.startDate;
           await scStartApp();

@@ -1842,6 +1842,7 @@ async function scStaffRefresh(btn){
     choState.facility.name=fac.name||choState.facility.name;
     choState.facility.district=fac.district||''; choState.facility.state=fac.state||'';
     choState.facility.subscriptionStatus=fac.subscriptionStatus||null;
+    choState.facility.officePay=fac.officePay||null; choState.facility.block=fac.block||''; choState.facility.nin=fac.nin||'';   // 2 Nov 2026: invoices
     choState.facility.progId=choState.progId;
     if(fac.startDate) choState.startDate=fac.startDate;
     if(progChanged) choState.cards={};

@@ -16,7 +16,7 @@ function bpMoney(n) { return typeof nfMoney === 'function' ? nfMoney(n) : '₹' 
 async function bpCfgRender() {
   var host = document.getElementById('pricing-list'); if (!host) return;
   var card = host.parentNode, box = document.getElementById('bp-cfg');
-  if (!box) { box = document.createElement('div'); box.id = 'bp-cfg'; box.className = 'hs-only bp-cfg'; card.parentNode.insertBefore(box, card.nextSibling); }
+  if (!box) { box = document.createElement('div'); box.id = 'bp-cfg'; box.className = 'bp-cfg'; card.appendChild(box); }   // inside the Pricing card, so it shows only on Settings → Pricing
   var c = await bpCfg(true), f = function (k, l, ph, extra) { return '<label class="bp-l">' + l + '<input class="bp-i" id="bp-' + k + '" value="' + bpE(c[k] || '') + '" placeholder="' + bpE(ph || '') + '"' + (extra || '') + '></label>'; };
   box.innerHTML = '<div class="bp-h"><i class="ti ti-building-bank"></i> Bank transfer / UPI <span class="bp-tag' + (c.on ? ' on' : '') + '">' + (c.on ? 'On' : 'Off') + '</span></div>'
     + '<div class="bp-sub">A second way to pay, next to online payment: the facility pays to this account, sends the UTR, and you confirm it in Business → Payments to confirm. Shown only to signed-in facility in-charges.</div>'
