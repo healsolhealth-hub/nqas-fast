@@ -6,7 +6,7 @@
 // • Nothing else is touched: Firebase database / sign-in / functions, App Check, Razorpay, WhatsApp, the card page.
 // Emergency switch: open the app with ?nosw=reset (removes this worker and its caches on that phone), or publish a sw.js
 // that only unregisters itself.
-const BUILD = "f5773e9db520";
+const BUILD = "905dc8b48cd2";
 const ASSETS = [
  "assets/data-sc-days.288f63c88b.js",
  "assets/dept-admin.ee8d5ffab0.js",
@@ -67,6 +67,8 @@ const ASSETS = [
  "assets/sc-v2-core.329f5d3321.js",
  "assets/sc-v2.bfc3486435.css",
  "assets/sc-week-plan.126d067680.js",
+ "assets/shared-bankpay.5e748c7cdf.js",
+ "assets/shared-bankpay.628844f8c8.css",
  "assets/shared-base.296e41553e.css",
  "assets/shared-biz-dash.1058fd58bd.js",
  "assets/shared-biz-dash.c8831fea1d.css",
