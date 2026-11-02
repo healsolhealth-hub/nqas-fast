@@ -380,7 +380,8 @@ function hsFacStripHTML(code) {
     return [{ v: 'today', l: 'Today', icon: 'ti-checklist', onclick: "nfAdminView('today')", badge: n || '' }, { v: 'hsfac', l: 'Facilities', icon: 'ti-building-hospital', onclick: "nfAdminView('hsfac')" },
       { v: 'hsprog', l: 'Programme', icon: 'ti-chart-bar', onclick: "nfAdminView('hsprog')" }, { v: 'business', l: 'Business', icon: 'ti-briefcase', onclick: "nfAdminView('business')" },
       { v: 'reports', l: 'Reports', icon: 'ti-file-text', onclick: "nfAdminView('reports')" }, { v: 'content', l: 'Content', icon: 'ti-list-details', onclick: "nfAdminView('editor')" },
-      { v: 'settings', l: 'Settings', icon: 'ti-settings', onclick: "_hs.stab=_hs.stab||'enrol';nfAdminView('setup')" }];
+      { v: 'settings', l: 'Settings', icon: 'ti-settings', onclick: "_hs.stab=_hs.stab||'enrol';nfAdminView('setup')" },
+      { v: 'more', l: 'More', icon: 'ti-dots', onclick: 'hsMoreOpen()' }];   // phone only (2 Nov 2026): Programme, Content, Settings
   };
   var oApply = nfAdminApply;
   nfAdminApply = function () {
@@ -392,7 +393,8 @@ function hsFacStripHTML(code) {
     try { hsEnsureTabs(); } catch (e) { console.warn('[HS] tabs', e); }
     var side = document.getElementById('nfs-side'), map = { editor: 'content', dm: 'content', setup: 'settings', stdon: 'settings', recog: 'settings', inbox: 'today', overview: 'today', facilities: 'hsfac' };
     var cur = v === 'drill' ? (map[_nfOv.prev] || _nfOv.prev) : (map[v] || v);
-    if (side) side.querySelectorAll('.nfs-nav button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-v') === cur); });
+    if (side) side.querySelectorAll('.nfs-nav button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-v') === cur || (b.getAttribute('data-v') === 'more' && HS_MORE.indexOf(cur) >= 0)); });
+    hsMoreClose();
     return r;
   };
   var oView = nfAdminView;
@@ -415,3 +417,19 @@ function hsFacStripHTML(code) {
   };
   if (typeof logoutAdmin === 'function') { var oLo = logoutAdmin; logoutAdmin = async function () { _hs.seen = false; _hs.sessAt = 0; _hs.liveAt = 0; _hs.certs = null; return oLo.apply(this, arguments); }; }
 })();
+
+// ── phone bottom bar (2 Nov 2026, approved option A): Today · Facilities · Business · Reports · More ──
+//    More opens a sheet with Programme, Content and Settings. The laptop sidebar keeps all seven.
+var HS_MORE = ['hsprog', 'content', 'settings'];
+function hsMoreOpen() {
+  if (document.getElementById('hs-more')) { hsMoreClose(); return; }
+  var L = [['hsprog', 'ti-chart-bar', 'Programme', 'Days, cards and checkpoints by type', "nfAdminView('hsprog')"], ['content', 'ti-list-details', 'Content', 'Checkpoints, videos, How to fix', "nfAdminView('editor')"],
+    ['settings', 'ti-settings', 'Settings', 'People, rules, pricing, partners, support', "_hs.stab=_hs.stab||'enrol';nfAdminView('setup')"]];
+  var ov = document.createElement('div'); ov.id = 'hs-more'; ov.className = 'hs-more';
+  ov.innerHTML = '<div class="hs-more-bg" onclick="hsMoreClose()"></div><div class="hs-more-sh" role="dialog" aria-label="More"><i class="hs-more-grip"></i><div class="hs-more-k">MORE</div>'
+    + L.map(function (x) { return '<button type="button" onclick="hsMoreClose();' + x[4] + '"><span class="hs-more-i"><i class="ti ' + x[1] + '"></i></span><span><b>' + x[2] + '</b><small>' + x[3] + '</small></span><i class="ti ti-chevron-right"></i></button>'; }).join('') + '</div>';
+  document.body.appendChild(ov); document.body.classList.add('hs-more-on');
+  var b = document.querySelector('.nfs-nav [data-v=more]'); if (b) b.classList.add('on');
+}
+function hsMoreClose() { var o = document.getElementById('hs-more'); if (o) o.remove(); document.body.classList.remove('hs-more-on');
+  try { var cur = document.querySelector('.nfs-nav button.on:not([data-v=more])'), m = document.querySelector('.nfs-nav [data-v=more]'); if (m && cur) m.classList.toggle('on', HS_MORE.indexOf(cur.getAttribute('data-v')) >= 0); } catch (e) {} }

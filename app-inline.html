@@ -26809,7 +26809,8 @@ function hsFacStripHTML(code) {
     return [{ v: 'today', l: 'Today', icon: 'ti-checklist', onclick: "nfAdminView('today')", badge: n || '' }, { v: 'hsfac', l: 'Facilities', icon: 'ti-building-hospital', onclick: "nfAdminView('hsfac')" },
       { v: 'hsprog', l: 'Programme', icon: 'ti-chart-bar', onclick: "nfAdminView('hsprog')" }, { v: 'business', l: 'Business', icon: 'ti-briefcase', onclick: "nfAdminView('business')" },
       { v: 'reports', l: 'Reports', icon: 'ti-file-text', onclick: "nfAdminView('reports')" }, { v: 'content', l: 'Content', icon: 'ti-list-details', onclick: "nfAdminView('editor')" },
-      { v: 'settings', l: 'Settings', icon: 'ti-settings', onclick: "_hs.stab=_hs.stab||'enrol';nfAdminView('setup')" }];
+      { v: 'settings', l: 'Settings', icon: 'ti-settings', onclick: "_hs.stab=_hs.stab||'enrol';nfAdminView('setup')" },
+      { v: 'more', l: 'More', icon: 'ti-dots', onclick: 'hsMoreOpen()' }];   // phone only (2 Nov 2026): Programme, Content, Settings
   };
   var oApply = nfAdminApply;
   nfAdminApply = function () {
@@ -26821,7 +26822,8 @@ function hsFacStripHTML(code) {
     try { hsEnsureTabs(); } catch (e) { console.warn('[HS] tabs', e); }
     var side = document.getElementById('nfs-side'), map = { editor: 'content', dm: 'content', setup: 'settings', stdon: 'settings', recog: 'settings', inbox: 'today', overview: 'today', facilities: 'hsfac' };
     var cur = v === 'drill' ? (map[_nfOv.prev] || _nfOv.prev) : (map[v] || v);
-    if (side) side.querySelectorAll('.nfs-nav button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-v') === cur); });
+    if (side) side.querySelectorAll('.nfs-nav button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-v') === cur || (b.getAttribute('data-v') === 'more' && HS_MORE.indexOf(cur) >= 0)); });
+    hsMoreClose();
     return r;
   };
   var oView = nfAdminView;
@@ -26844,6 +26846,22 @@ function hsFacStripHTML(code) {
   };
   if (typeof logoutAdmin === 'function') { var oLo = logoutAdmin; logoutAdmin = async function () { _hs.seen = false; _hs.sessAt = 0; _hs.liveAt = 0; _hs.certs = null; return oLo.apply(this, arguments); }; }
 })();
+
+// ── phone bottom bar (2 Nov 2026, approved option A): Today · Facilities · Business · Reports · More ──
+//    More opens a sheet with Programme, Content and Settings. The laptop sidebar keeps all seven.
+var HS_MORE = ['hsprog', 'content', 'settings'];
+function hsMoreOpen() {
+  if (document.getElementById('hs-more')) { hsMoreClose(); return; }
+  var L = [['hsprog', 'ti-chart-bar', 'Programme', 'Days, cards and checkpoints by type', "nfAdminView('hsprog')"], ['content', 'ti-list-details', 'Content', 'Checkpoints, videos, How to fix', "nfAdminView('editor')"],
+    ['settings', 'ti-settings', 'Settings', 'People, rules, pricing, partners, support', "_hs.stab=_hs.stab||'enrol';nfAdminView('setup')"]];
+  var ov = document.createElement('div'); ov.id = 'hs-more'; ov.className = 'hs-more';
+  ov.innerHTML = '<div class="hs-more-bg" onclick="hsMoreClose()"></div><div class="hs-more-sh" role="dialog" aria-label="More"><i class="hs-more-grip"></i><div class="hs-more-k">MORE</div>'
+    + L.map(function (x) { return '<button type="button" onclick="hsMoreClose();' + x[4] + '"><span class="hs-more-i"><i class="ti ' + x[1] + '"></i></span><span><b>' + x[2] + '</b><small>' + x[3] + '</small></span><i class="ti ti-chevron-right"></i></button>'; }).join('') + '</div>';
+  document.body.appendChild(ov); document.body.classList.add('hs-more-on');
+  var b = document.querySelector('.nfs-nav [data-v=more]'); if (b) b.classList.add('on');
+}
+function hsMoreClose() { var o = document.getElementById('hs-more'); if (o) o.remove(); document.body.classList.remove('hs-more-on');
+  try { var cur = document.querySelector('.nfs-nav button.on:not([data-v=more])'), m = document.querySelector('.nfs-nav [data-v=more]'); if (m && cur) m.classList.toggle('on', HS_MORE.indexOf(cur.getAttribute('data-v')) >= 0); } catch (e) {} }
 </script>
 <style id="nf-hs-settings-css">/* HealSol Settings refinements (21 Oct 2026) */
 .hsx-pick{display:block!important;max-height:280px;overflow-y:auto;border:1px solid var(--br);border-radius:10px;padding:6px 8px;}
@@ -30673,6 +30691,28 @@ body.hs-admin.nfv-setup[data-hsst="people"] .admin-main > [data-nfv="setup"][dat
 .hsf-b{margin-top:8px;} .hsf-p{margin-top:12px;border-top:1px solid var(--br);padding-top:10px;} .hsf-p table{margin:6px 0 10px;width:100%;}
 .hsf-go{background:#B91C1C!important;border-color:#B91C1C!important;color:#fff!important;} .hsf-go:disabled{opacity:.45;}
 .hsf-done{color:#15803D;}
+
+/* phone bottom bar, option A (2 Nov 2026): 5 tabs + More sheet; the laptop sidebar keeps all seven */
+.ti-dots{--ti:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Ccircle cx=%225%22 cy=%2212%22 r=%222%22/%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%222%22/%3E%3Ccircle cx=%2219%22 cy=%2212%22 r=%222%22/%3E%3C/svg%3E");}
+.nfs-nav button[data-v=more]{display:none;}
+@media(max-width:899px){
+  body.nf-admin .nfs-nav button[data-v=hsprog],body.nf-admin .nfs-nav button[data-v=content],body.nf-admin .nfs-nav button[data-v=settings]{display:none;}
+  body.nf-admin .nfs-nav button[data-v=more]{display:flex;}
+  body.nf-admin .nfs-nav button{min-height:58px;font-size:11px;}
+  body.nf-admin .nfs-nav button span{white-space:nowrap;max-width:none;}
+  .hs-more{position:fixed;inset:0;z-index:65;}
+  .hs-more-bg{position:absolute;inset:0;background:rgba(15,40,35,.35);}
+  .hs-more-sh{position:absolute;left:0;right:0;bottom:calc(66px + env(safe-area-inset-bottom,0px));background:#fff;border-radius:20px 20px 0 0;padding:8px 16px 10px;box-shadow:0 -8px 24px rgba(15,40,35,.12);}
+  .hs-more-grip{display:block;width:40px;height:4px;border-radius:4px;background:#D5DEDB;margin:2px auto 12px;}
+  .hs-more-k{font-size:12px;font-weight:800;color:var(--t3);letter-spacing:.5px;margin:0 4px 4px;}
+  .hs-more-sh button{display:flex;align-items:center;gap:14px;width:100%;padding:13px 4px;border:0;border-bottom:1px solid #EEF2F1;background:none;text-align:left;font:inherit;cursor:pointer;color:var(--t1);}
+  .hs-more-sh button:last-child{border-bottom:0;}
+  .hs-more-sh button b{display:block;font-size:15px;} .hs-more-sh button small{display:block;color:var(--t3);font-size:12px;}
+  .hs-more-sh button>.ti{margin-left:auto;color:var(--t3);}
+  .hs-more-i{width:40px;height:40px;flex:0 0 40px;border-radius:12px;background:var(--teal-lt,#E6F2EF);color:var(--teal,#1E6B5E);display:flex;align-items:center;justify-content:center;font-size:20px;}
+}
+  body.hs-more-on .nfs-nav button.on:not([data-v=more]){background:none;color:var(--t2);}
+@media(min-width:900px){ .hs-more{display:none;} }
 </style>
 <script id="nf-hsp">// ══ Settings tidy-up (28 Oct 2026; HealSol: Partner logos → Partners · People as tabs with counts · Quality Champions →
 //    Recognition) and Programme rules → Self sign-up (free baseline at once, per facility type; off = HealSol approves) ══
