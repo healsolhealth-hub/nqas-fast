@@ -197,7 +197,7 @@ function jnBDel(i){ _jn.bulk.districts.splice(i,1); jnRender(); }
 function jnCnt(t,d,set){ var c=_jn.bulk.counts; c[t]=Math.max(0,Math.min(100000,set!=null?(parseInt(set,10)||0):(c[t]||0)+d)); if(set==null) jnRender(); else { var tot=document.getElementById('jn-tot'); if(tot) tot.textContent=jnTot()+' facilities'; } }
 function jnTot(){ var c=_jn.bulk.counts; return (c.sc||0)+(c.uphc||0)+(c.phc||0)+(c.chc||0); }
 function jnBulk(){
-  var B=_jn.bulk, rows=[['sc','Sub-Centres','HWC-SC'],['uphc','UPHCs','Urban PHC'],['phc','PHCs','incl. Block PHCs'],['chc','CHCs','FRU · Non-FRU']];
+  var B=_jn.bulk, rows=[['sc','Sub-Centres','AAM-SC'],['uphc','UPHCs','Urban PHC'],['phc','PHCs','incl. Block PHCs'],['chc','CHCs','FRU · Non-FRU']];
   var cnt=rows.map(function(r){ return '<div class="jn-cr"><span><b>'+r[1]+'</b><small>'+r[2]+'</small></span><span class="jn-step"><button type="button" aria-label="Fewer '+r[1]+'" onclick="jnCnt(\''+r[0]+'\',-1)">−</button><input aria-label="'+r[1]+'" inputmode="numeric" value="'+(B.counts[r[0]]||0)+'" oninput="jnCnt(\''+r[0]+'\',0,this.value)"><button type="button" aria-label="More '+r[1]+'" onclick="jnCnt(\''+r[0]+'\',1)">+</button></span></div>'; }).join('');
   var dl=jnDistricts(B.state).filter(function(d){ return B.districts.indexOf(d)<0; });
   return jnTop("jnGo('who')")+'<div class="nf-l-hi">'+jE(jt('Many facilities together'))+'</div><div class="nf-l-sub">Tell us who you are and what you\'d like to cover. HealSol Academy will call you with a plan and pricing.</div>'
