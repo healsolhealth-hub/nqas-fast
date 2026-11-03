@@ -109,7 +109,7 @@ async function ivShow(d) {
 async function ivMine(code) { var all = {}; try { all = (await fbGet('sc_proforma/' + code)) || {}; } catch (e) {} var k = Object.keys(all).filter(function (x) { return (all[x] || {}).status === 'issued'; }).sort(function (a, b) { return String(all[b].issuedAt).localeCompare(String(all[a].issuedAt)); })[0]; return k ? all[k] : null; }
 async function ivUpgradeExtra(container) {
   var body = container && container.querySelector('.upgrade-body'); if (!body || body.querySelector('.iv-box')) return;
-  var code = (typeof choState !== 'undefined' && choState.facilityCode) || '', isCho = typeof nfIsChoNow === 'function' ? nfIsChoNow() : true; if (!code || !isCho) return;
+  var code = nfPayCode(), isCho = window._payCtx ? true : (typeof nfIsChoNow === 'function' ? nfIsChoNow() : true); if (!code || !isCho) return;
   var pi = await ivMine(code), box = document.createElement('div'); box.className = 'iv-box'; window.__ivPi = pi;
   var valid = pi && pi.validTill >= ivToday();
   box.innerHTML = (valid ? '<div class="iv-pi"><b>📄 ' + ivE(ivT('Proforma invoice', 'प्रोफ़ॉर्मा इनवॉइस')) + ' ' + ivE(pi.no) + '</b><small>' + ivE(ivT('To', 'प्रति')) + ': ' + ivE(pi.billTo.name) + ' · ' + ivM(pi.total) + ' · ' + ivE(ivT('valid till', 'मान्य')) + ' ' + ivE(ivDate(pi.validTill)) + '</small>'
@@ -121,7 +121,7 @@ async function ivUpgradeExtra(container) {
 (function () { if (typeof renderUpgradeCard !== 'function') return; var o = renderUpgradeCard;
   renderUpgradeCard = async function (container) { var r = await o.apply(this, arguments); try { await ivUpgradeExtra(container); } catch (e) { console.warn('[invoice] card', e); } return r; }; })();
 function ivForm() {
-  var f = (typeof choState !== 'undefined' && choState.facility) || {}, st = (typeof NF_STATE_LIST !== 'undefined' ? NF_STATE_LIST : [['Uttar Pradesh']]).map(function (x) { return x[0]; });
+  var f = nfPayFac(), st = (typeof NF_STATE_LIST !== 'undefined' ? NF_STATE_LIST : [['Uttar Pradesh']]).map(function (x) { return x[0]; });
   var ov = document.createElement('div'); ov.className = 'scx-ov open'; ov.id = 'iv-form';
   ov.innerHTML = '<div class="scx-box bp-sheet"><div class="nfcf-head"><span style="font-size:22px;">📄</span><div style="flex:1;"><b>' + ivE(ivT('Proforma invoice for your office', 'आपके ऑफ़िस के लिए प्रोफ़ॉर्मा इनवॉइस')) + '</b><div style="font-size:11.5px;color:var(--t3);">' + ivE(ivT('Who will pay? The invoice is addressed to them. Valid 30 days.', 'भुगतान कौन करेगा? इनवॉइस उनके नाम बनेगा। 30 दिन मान्य।')) + '</div></div></div>'
     + '<label class="bp-l">' + ivE(ivT('Bill to — office name *', 'बिल किसके नाम — ऑफ़िस का नाम *')) + '<input class="bp-i" id="iv-n" placeholder="e.g. Medical Officer In-charge, CHC Bah / District Health Society, ' + ivE(f.district || 'Agra') + '"></label>'
@@ -137,10 +137,10 @@ async function ivCreate() {
   if (!v('iv-n') || !v('iv-a')) return show(ivT('Fill in the office name and address.', 'ऑफ़िस का नाम और पता भरें।'));
   var b = document.getElementById('iv-go'); if (b) { b.disabled = true; b.textContent = ivT('Making…', 'बन रहा है…'); }
   try {
-    var r = await nfCall('createProforma', { code: choState.facilityCode, billTo: { name: v('iv-n'), address: v('iv-a'), state: v('iv-s'), gstin: v('iv-g') } });
+    var r = await nfCall('createProforma', { code: nfPayCode(), billTo: { name: v('iv-n'), address: v('iv-a'), state: v('iv-s'), gstin: v('iv-g') } });
     var f = document.getElementById('iv-form'); if (f) f.remove();
     await ivShow(ivDoc('proforma', r.proforma));
-    try { if (typeof renderCard === 'function') renderCard(typeof window._scLastDi === 'number' ? window._scLastDi : 7); } catch (e) {}
+    nfPayAfter();
   } catch (e) { show(typeof nfErrText === 'function' ? nfErrText(e) : String(e.message || e)); if (b) { b.disabled = false; b.textContent = ivT('Make proforma invoice', 'प्रोफ़ॉर्मा इनवॉइस बनाएँ'); } }
 }
 // the programme stays open while the office pays (HealSol sets the date)

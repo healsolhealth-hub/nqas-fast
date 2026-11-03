@@ -30678,6 +30678,10 @@ function nfEqWaPrompt(title, mobile, text) {
 //   HealSol, Business → Payments to confirm: Confirm (receipt + unlock, same as any payment) or Reject with a reason.
 // ══════════════════════════════════════════════════════════════
 var _bp = { cfg: null, list: null, loading: false };
+// which facility is paying (3 Nov 2026): the Sub-Centre app (choState) or the UPHC / PHC / CHC app (window._payCtx = {code, fac, price, after})
+function nfPayCode() { return (window._payCtx && _payCtx.code) || (typeof choState !== 'undefined' && choState && choState.facilityCode) || ''; }
+function nfPayFac() { return (window._payCtx && _payCtx.fac) || (typeof choState !== 'undefined' && choState && choState.facility) || {}; }
+function nfPayAfter() { try { if (window._payCtx && typeof _payCtx.after === 'function') return _payCtx.after(); if (typeof renderCard === 'function') renderCard(typeof window._scLastDi === 'number' ? window._scLastDi : 7); } catch (e) {} }
 function bpE(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function bpHi() { return typeof _appLang !== 'undefined' && _appLang === 'hi'; }
 function bpT(en, hi) { return bpHi() && hi ? hi : en; }
@@ -30724,7 +30728,7 @@ async function bpMine(code) { try { return (await fbGet('sc_manualpay/' + code))
 function bpLatest(M) { var k = Object.keys(M || {}).sort(function (a, b) { return String((M[b] || {}).at).localeCompare(String((M[a] || {}).at)); })[0]; return k ? Object.assign({ _k: k }, M[k]) : null; }
 async function bpUpgradeExtra(container) {
   var body = container && container.querySelector('.upgrade-body'); if (!body || body.querySelector('.bp-box')) return;
-  var code = (typeof choState !== 'undefined' && choState.facilityCode) || ''; if (!code) return;
+  var code = nfPayCode(); if (!code) return;
   var c = await bpCfg(), last = bpLatest(await bpMine(code)), box = document.createElement('div'); box.className = 'bp-box';
   var payBtn = document.getElementById('upgrade-pay-btn');
   if (last && last.status === 'pending') {
@@ -30740,10 +30744,10 @@ async function bpUpgradeExtra(container) {
 (function () { if (typeof renderUpgradeCard !== 'function') return; var o = renderUpgradeCard;
   renderUpgradeCard = async function (container) { var r = await o.apply(this, arguments); try { await bpUpgradeExtra(container); } catch (e) { console.warn('[bankpay] card', e); } return r; }; })();
 
-function bpTotal() { var base = Object.values(typeof _upgradeSelected !== 'undefined' ? _upgradeSelected : {}).reduce(function (a, b) { return a + Number(b || 0); }, 0); return typeof nfWithGst === 'function' ? nfWithGst(base) : { base: base, gst: Math.round(base * 18) / 100, total: Math.round(base * 118) / 100 }; }
+function bpTotal() { if (window._payCtx && _payCtx.price) return { base: _payCtx.price.base, gst: _payCtx.price.gst, total: _payCtx.price.total }; var base = Object.values(typeof _upgradeSelected !== 'undefined' ? _upgradeSelected : {}).reduce(function (a, b) { return a + Number(b || 0); }, 0); return typeof nfWithGst === 'function' ? nfWithGst(base) : { base: base, gst: Math.round(base * 18) / 100, total: Math.round(base * 118) / 100 }; }
 function bpCopy(t) { if (typeof nfCopyText === 'function') nfCopyText(t); else { try { navigator.clipboard.writeText(t); showToast('Copied', 'ok'); } catch (e) {} } }
 async function bpOpen() {
-  var c = await bpCfg(), code = choState.facilityCode, g = bpTotal(), ref = bpRef(code), hi = bpHi();
+  var c = await bpCfg(), code = nfPayCode(), g = bpTotal(), ref = bpRef(code), hi = bpHi();
   var row = function (l, v) { return v ? '<div class="bp-r"><small>' + bpE(l) + '</small><b>' + bpE(v) + '</b><button type="button" onclick="bpCopy(\'' + bpE(v) + '\')" aria-label="Copy ' + bpE(l) + '"><i class="ti ti-copy"></i></button></div>' : ''; };
   var upiLink = c.upi ? 'upi://pay?pa=' + encodeURIComponent(c.upi) + '&pn=' + encodeURIComponent(c.payee || 'HealSol Healthcare') + '&am=' + g.total.toFixed(2) + '&cu=INR&tn=' + encodeURIComponent(ref) : '';
   var ov = document.createElement('div'); ov.className = 'scx-ov open'; ov.id = 'bp-ov';
@@ -30769,10 +30773,10 @@ async function bpSend() {
   var img = null, f = (document.getElementById('bp-f') || {}).files; if (f && f[0]) { try { img = await bpImg(f[0], 1100, 0.7); } catch (e) {} }
   var b = document.getElementById('bp-go'); if (b) { b.disabled = true; b.textContent = bpT('Sending…', 'भेजा जा रहा है…'); }
   try {
-    await nfCall('submitBankPayment', { code: choState.facilityCode, utr: utr, method: (document.getElementById('bp-m') || {}).value || 'upi', paidOn: (document.getElementById('bp-d') || {}).value || '', img: img });
+    await nfCall('submitBankPayment', { code: nfPayCode(), utr: utr, method: (document.getElementById('bp-m') || {}).value || 'upi', paidOn: (document.getElementById('bp-d') || {}).value || '', img: img });
     var ov = document.getElementById('bp-ov'); if (ov) ov.remove();
     showToast(bpT('Payment sent to HealSol for confirmation.', 'भुगतान पुष्टि के लिए HealSol को भेजा गया।'), 'ok');
-    try { if (typeof renderCard === 'function') renderCard(typeof window._scLastDi === 'number' ? window._scLastDi : 7); } catch (e) {}
+    nfPayAfter();
   } catch (e) { show(typeof nfErrText === 'function' ? nfErrText(e) : String(e.message || e)); if (b) { b.disabled = false; b.textContent = bpT('I have paid — send', 'भुगतान कर दिया — भेजें'); } }
 }
 
@@ -30945,7 +30949,7 @@ async function ivShow(d) {
 async function ivMine(code) { var all = {}; try { all = (await fbGet('sc_proforma/' + code)) || {}; } catch (e) {} var k = Object.keys(all).filter(function (x) { return (all[x] || {}).status === 'issued'; }).sort(function (a, b) { return String(all[b].issuedAt).localeCompare(String(all[a].issuedAt)); })[0]; return k ? all[k] : null; }
 async function ivUpgradeExtra(container) {
   var body = container && container.querySelector('.upgrade-body'); if (!body || body.querySelector('.iv-box')) return;
-  var code = (typeof choState !== 'undefined' && choState.facilityCode) || '', isCho = typeof nfIsChoNow === 'function' ? nfIsChoNow() : true; if (!code || !isCho) return;
+  var code = nfPayCode(), isCho = window._payCtx ? true : (typeof nfIsChoNow === 'function' ? nfIsChoNow() : true); if (!code || !isCho) return;
   var pi = await ivMine(code), box = document.createElement('div'); box.className = 'iv-box'; window.__ivPi = pi;
   var valid = pi && pi.validTill >= ivToday();
   box.innerHTML = (valid ? '<div class="iv-pi"><b>📄 ' + ivE(ivT('Proforma invoice', 'प्रोफ़ॉर्मा इनवॉइस')) + ' ' + ivE(pi.no) + '</b><small>' + ivE(ivT('To', 'प्रति')) + ': ' + ivE(pi.billTo.name) + ' · ' + ivM(pi.total) + ' · ' + ivE(ivT('valid till', 'मान्य')) + ' ' + ivE(ivDate(pi.validTill)) + '</small>'
@@ -30957,7 +30961,7 @@ async function ivUpgradeExtra(container) {
 (function () { if (typeof renderUpgradeCard !== 'function') return; var o = renderUpgradeCard;
   renderUpgradeCard = async function (container) { var r = await o.apply(this, arguments); try { await ivUpgradeExtra(container); } catch (e) { console.warn('[invoice] card', e); } return r; }; })();
 function ivForm() {
-  var f = (typeof choState !== 'undefined' && choState.facility) || {}, st = (typeof NF_STATE_LIST !== 'undefined' ? NF_STATE_LIST : [['Uttar Pradesh']]).map(function (x) { return x[0]; });
+  var f = nfPayFac(), st = (typeof NF_STATE_LIST !== 'undefined' ? NF_STATE_LIST : [['Uttar Pradesh']]).map(function (x) { return x[0]; });
   var ov = document.createElement('div'); ov.className = 'scx-ov open'; ov.id = 'iv-form';
   ov.innerHTML = '<div class="scx-box bp-sheet"><div class="nfcf-head"><span style="font-size:22px;">📄</span><div style="flex:1;"><b>' + ivE(ivT('Proforma invoice for your office', 'आपके ऑफ़िस के लिए प्रोफ़ॉर्मा इनवॉइस')) + '</b><div style="font-size:11.5px;color:var(--t3);">' + ivE(ivT('Who will pay? The invoice is addressed to them. Valid 30 days.', 'भुगतान कौन करेगा? इनवॉइस उनके नाम बनेगा। 30 दिन मान्य।')) + '</div></div></div>'
     + '<label class="bp-l">' + ivE(ivT('Bill to — office name *', 'बिल किसके नाम — ऑफ़िस का नाम *')) + '<input class="bp-i" id="iv-n" placeholder="e.g. Medical Officer In-charge, CHC Bah / District Health Society, ' + ivE(f.district || 'Agra') + '"></label>'
@@ -30973,10 +30977,10 @@ async function ivCreate() {
   if (!v('iv-n') || !v('iv-a')) return show(ivT('Fill in the office name and address.', 'ऑफ़िस का नाम और पता भरें।'));
   var b = document.getElementById('iv-go'); if (b) { b.disabled = true; b.textContent = ivT('Making…', 'बन रहा है…'); }
   try {
-    var r = await nfCall('createProforma', { code: choState.facilityCode, billTo: { name: v('iv-n'), address: v('iv-a'), state: v('iv-s'), gstin: v('iv-g') } });
+    var r = await nfCall('createProforma', { code: nfPayCode(), billTo: { name: v('iv-n'), address: v('iv-a'), state: v('iv-s'), gstin: v('iv-g') } });
     var f = document.getElementById('iv-form'); if (f) f.remove();
     await ivShow(ivDoc('proforma', r.proforma));
-    try { if (typeof renderCard === 'function') renderCard(typeof window._scLastDi === 'number' ? window._scLastDi : 7); } catch (e) {}
+    nfPayAfter();
   } catch (e) { show(typeof nfErrText === 'function' ? nfErrText(e) : String(e.message || e)); if (b) { b.disabled = false; b.textContent = ivT('Make proforma invoice', 'प्रोफ़ॉर्मा इनवॉइस बनाएँ'); } }
 }
 // the programme stays open while the office pays (HealSol sets the date)
@@ -31419,6 +31423,128 @@ function nlCounterHTML(c) {
     try { var box = document.getElementById('nf-biz'), old = document.getElementById('nl-count'), c = await nlCfg(true); if (old) old.remove();
       if (box) { var eq = document.getElementById('nf-eq'), w = document.createElement('div'); w.innerHTML = nlCounterHTML(c); if (eq) eq.insertAdjacentElement('beforebegin', w.firstChild); else box.insertBefore(w.firstChild, box.firstChild); } } catch (e) { console.warn('[launch] counter', e); }
     return r; }; })();
+</script>
+<style id="nd-unlock-css">/* UPHC / PHC / CHC Unlock card (3 Nov 2026) */
+.ndu-card{margin:12px 0;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 10px 30px -18px rgba(0,0,0,.4);border:1px solid var(--br,#E2EAE8);}
+.ndu-hd{background:linear-gradient(135deg,#7C2D12,#C2410C);color:#fff;text-align:center;padding:20px 18px;}
+.ndu-lk{font-size:30px;} .ndu-hd b{display:block;font-size:16.5px;font-weight:800;margin-top:4px;} .ndu-hd small{display:block;font-size:12.5px;opacity:.92;margin-top:4px;line-height:1.45;}
+.ndu-body{padding:14px 16px;} .ndu-wait{padding:12px;text-align:center;font-size:12.5px;color:var(--t3,#64748B);}
+.ndu-k{font-size:11.5px;font-weight:800;color:var(--t3,#64748B);letter-spacing:.4px;margin-bottom:2px;}
+.ndu-row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #EEF2F1;font-size:13px;} .ndu-row b{white-space:nowrap;}
+.ndu-tot{display:flex;justify-content:space-between;align-items:flex-end;padding:12px 0 4px;} .ndu-tot>span:first-child{font-size:12px;font-weight:800;color:var(--t3,#64748B);}
+.ndu-tot>span:last-child{text-align:right;} .ndu-tot small{display:block;font-size:11.5px;color:var(--t3,#64748B);} .ndu-tot b{font-size:21px;color:var(--teal-dk,#14514A);}
+.ndu-pay{width:100%;padding:13px;border-radius:12px;font-size:14px;margin-top:6px;}
+.ndu-staff{background:#F7FAF9;border-radius:12px;padding:12px 14px;font-size:13.5px;line-height:1.5;}
+.ndu-ban{margin:0 0 12px;border-radius:16px;background:linear-gradient(135deg,#7C2D12,#C2410C);color:#fff;padding:14px 16px;display:flex;gap:12px;align-items:center;}
+.ndu-bi{font-size:26px;} .ndu-ban>span:nth-child(2){flex:1;} .ndu-ban b{display:block;font-size:14.5px;} .ndu-ban small{font-size:12px;opacity:.92;}
+.ndu-ban button{background:#fff;color:#9A3412;border:0;border-radius:10px;padding:9px 12px;font:inherit;font-weight:800;font-size:13px;cursor:pointer;}
+.ndu-soft{margin:0 0 12px;border-radius:14px;background:#FFF7ED;border:1px solid #FCD9A8;padding:10px 14px;font-size:13px;color:#7C2D12;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.ndu-soft small{display:block;font-size:12px;} .ndu-soft button{background:#C2410C;color:#fff;border:0;border-radius:10px;padding:8px 12px;font:inherit;font-weight:800;font-size:12.5px;white-space:nowrap;cursor:pointer;}
+</style>
+<script id="nd-unlock">// ══════════════════════════════════════════════════════════════
+// UPHC / PHC / CHC: the Unlock card after the no-cost baseline (3 Nov 2026; approved mock-up "unlock-mockup-uphc-phc-chc")
+//   Trial facilities lock after their baseline days (7 UPHC / PHC, 14 CHC) unless paid, on contract, or HealSol keeps them
+//   open while the office pays (officePay). In-charge: Pay & Unlock (Razorpay) · bank transfer / UPI · proforma invoice.
+//   Staff: "Ask your <in-charge> to unlock". Today: a banner after the baseline, a reminder during it (in-charge).
+//   The price comes from the server (priceFor): the package, or for a CHC the base plus each optional department it runs.
+// ══════════════════════════════════════════════════════════════
+var _ndu = { price: undefined, code: '' };
+function nduHi() { return typeof _appLang !== 'undefined' && _appLang === 'hi'; }
+function nduT(en, hi) { return nduHi() && hi ? hi : en; }
+function nduE(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function nduToday() { return new Date(Date.now() + 5.5 * 3600e3).toISOString().slice(0, 10); }
+function nduBase() { try { return ndShape().bN; } catch (e) { return 7; } }
+function nduOpen() {   // true when the programme is open beyond the baseline
+  if (!_nd || !_nd.fac) return true; var f = _nd.fac, st = f.subscriptionStatus;
+  if (!st || st === 'contract' || st === 'paid') return true;
+  return !!(f.officePay && f.officePay.until && f.officePay.until >= nduToday());
+}
+function nduLocked(day) { return !!_nd && !_nd.view && !nduOpen() && day > nduBase(); }
+function nduInCharge() { try { return ndIsInCharge(ndMob()); } catch (e) { return false; } }
+function nduInChargeName() { var S = (typeof ndStaff === 'function' ? ndStaff() : {}) || {}, k = Object.keys(S).find(function (m) { try { return ndIsInCharge(m) && !(S[m] || {}).disabled; } catch (e) { return false; } }); return k ? (S[k].name || '') : ''; }
+async function nduPrice(force) {
+  if (_ndu.price !== undefined && _ndu.code === _nd.code && !force) return _ndu.price;
+  try { var r = await nfCall('priceFor', { code: _nd.code }); _ndu.price = r.price; } catch (e) { _ndu.price = null; }
+  _ndu.code = _nd.code; return _ndu.price;
+}
+function nduCtx(p) { window._payCtx = { code: _nd.code, fac: Object.assign({ type: _nd.fac.type }, _nd.fac), price: p, after: function () { nduAfter(); } }; }
+async function nduAfter() { try { await ndReload(); } catch (e) {} _ndu.price = undefined; try { ndRender(); } catch (e) {} }
+function nduHead() {
+  var b = nduBase(), n = (_nd.cfg && _nd.cfg.days) || 90;
+  return '<div class="ndu-hd"><div class="ndu-lk">🔒</div><b>' + nduE(nduT('Your no-cost baseline assessment is complete', 'आपका निःशुल्क बेसलाइन आकलन पूरा हो गया है')) + '</b><small>'
+    + nduE(nduT(b + ' baseline days done for ' + (_nd.fac.name || _nd.code) + '. Unlock the full ' + n + '-day programme to continue from Day ' + (b + 1) + ' — your baseline scores are saved.',
+      (_nd.fac.name || _nd.code) + ' के ' + b + ' बेसलाइन दिन पूरे हुए। दिन ' + (b + 1) + ' से आगे बढ़ने के लिए पूरा ' + n + ' दिन का कार्यक्रम अनलॉक करें — आपके बेसलाइन स्कोर सुरक्षित हैं।')) + '</small></div>';
+}
+function nduCardShell() { return '<div class="upgrade-card ndu-card" id="ndu-card">' + nduHead() + '<div class="upgrade-body ndu-body" id="ndu-body"><div class="ndu-wait">' + nduE(nduT('Loading your package…', 'आपका पैकेज लोड हो रहा है…')) + '</div></div></div>'; }
+async function nduFill() {
+  var body = document.getElementById('ndu-body'); if (!body) return;
+  if (!nduInCharge()) {
+    var nm = nduInChargeName(), lab = (_nd.cfg && (_nd.cfg.inChargeLabel || _nd.cfg.inCharge)) || 'in-charge';
+    body.innerHTML = '<div class="ndu-staff">👤 <b>' + nduE(nduT('Ask ' + (nm ? nm + ' (' + lab + ')' : 'your ' + lab), (nm ? nm + ' (' + lab + ')' : 'अपने ' + lab) + ' से कहें')) + '</b> ' + nduE(nduT('to unlock the programme. As soon as it is unlocked, your cards open again here — nothing you did is lost.', 'कि वे कार्यक्रम अनलॉक करें। अनलॉक होते ही आपके कार्ड यहाँ फिर खुल जाएँगे — आपका किया कुछ भी नहीं खोएगा।')) + '</div>';
+    return;
+  }
+  var p = await nduPrice(); if (!document.getElementById('ndu-body')) return; body = document.getElementById('ndu-body');
+  if (!p) { body.innerHTML = '<div class="ndu-wait">' + nduE(nduT('Pricing has not been set for your package yet — please contact HealSol Academy to subscribe.', 'आपके पैकेज का मूल्य अभी तय नहीं है — सदस्यता के लिए HealSol Academy से संपर्क करें।')) + '</div>'; return; }
+  nduCtx(p);
+  var M = function (n) { return typeof nfMoney === 'function' ? nfMoney(n) : '₹' + n; };
+  body.innerHTML = '<div class="ndu-k">' + nduE(nduT('YOUR PACKAGE', 'आपका पैकेज')) + ' · ' + nduE(p.label) + '</div>'
+    + (p.lines || []).map(function (l) { return '<div class="ndu-row"><span>' + nduE(l.label) + '</span><b>' + M(l.price) + '</b></div>'; }).join('')
+    + '<div class="ndu-tot"><span>' + nduE(nduT('TOTAL', 'कुल')) + '</span><span><small>' + M(p.base) + ' + GST 18% ' + M(p.gst) + '</small><b>' + M(p.total) + '</b></span></div>'
+    + '<button type="button" class="fc-add-btn ndu-pay" id="upgrade-pay-btn" onclick="nduPay(this)"><i class="ti ti-credit-card"></i> ' + nduE(nduT('Pay ' + M(p.total) + ' & Unlock', M(p.total) + ' भुगतान करें और अनलॉक करें')) + '</button>';
+  var card = document.getElementById('ndu-card');
+  try { if (typeof bpUpgradeExtra === 'function') await bpUpgradeExtra(card); } catch (e) {}
+  try { if (typeof ivUpgradeExtra === 'function') await ivUpgradeExtra(card); } catch (e) {}
+}
+async function nduPay(btn) {
+  if (!nduInCharge()) return;
+  if (typeof Razorpay === 'undefined') { try { await nfLoadScriptAny(['https://checkout.razorpay.com/v1/checkout.js'], function () { return typeof Razorpay !== 'undefined'; }); } catch (e) {} }
+  if (typeof Razorpay === 'undefined') { showToast('The payment window could not load — check your internet connection.', 'err'); return; }
+  var label = btn ? btn.innerHTML : ''; if (btn) { btn.disabled = true; btn.textContent = 'Preparing payment…'; }
+  var o; try { o = await nfCall('createPaymentOrder', { code: _nd.code }); } catch (e) { showToast(nfErrText(e), 'err'); if (btn) { btn.disabled = false; btn.innerHTML = label; } return; }
+  if (btn) { btn.disabled = false; btn.innerHTML = label; }
+  var rzp = new Razorpay({ key: o.keyId, order_id: o.orderId, amount: o.amount, currency: o.currency || 'INR', name: 'HealSol Academy', description: 'NQAS | FAST — ' + (o.packageLabel || 'subscription') + ' (incl. 18% GST)',
+    prefill: { name: (o.prefill || {}).name || '', contact: (o.prefill || {}).contact || '' }, notes: { facility: _nd.code }, theme: { color: '#1E6B5E' },
+    handler: async function (resp) {
+      showToast('Payment received — confirming…', '');
+      try { var v = await nfCall('verifyPayment', { orderId: resp.razorpay_order_id, paymentId: resp.razorpay_payment_id, signature: resp.razorpay_signature });
+        _nd.fac.subscriptionStatus = 'paid'; showToast('Payment successful — your programme is unlocked.', 'ok'); await nduAfter(); if (typeof nfShowReceipt === 'function') nfShowReceipt(v.receipt); }
+      catch (e) { scAlert('Your payment (' + resp.razorpay_payment_id + ') was received. It will be confirmed automatically within a few minutes — reopen the app shortly. If it is still locked after an hour, send this payment ID to HealSol Academy.', 'Payment received', '💳'); }
+    }, modal: { ondismiss: function () {} } });
+  if (rzp.on) rzp.on('payment.failed', function (r) { showToast('Payment failed' + (r && r.error && r.error.description ? ': ' + r.error.description : '') + '. No money was taken — you can try again.', 'err'); });
+  rzp.open();
+}
+function nduGoUnlock() { _nd.cday = nduBase() + 1; ndTab('cards'); setTimeout(function () { var c = document.getElementById('ndu-card'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300); }
+// after every render: swap the locked day's card for the Unlock card; banners on Today
+function nduApply() {
+  if (!_nd || _nd.view || !_nd.fac) { window._payCtx = null; return; }
+  var app = document.getElementById('nf-dept-app'); if (!app) return;
+  var day = ndDay(), b = nduBase(), nm = _nd.fac.name || _nd.code;
+  if (_nd.tab === 'cards' && !_nd.card && !_nd.screen && !ndFaOn() && (_nd.cv || 'day') === 'day' && nduLocked(_nd.cday || day)) {
+    var dc = app.querySelector('.nx-dc') || app.querySelector('.nx-card'), pills = app.querySelector('.nx-pills'), ban = app.querySelector('.nx-ban.b');
+    if (pills) pills.remove();
+    if (ban) ban.innerHTML = '<b style="font-size:13.5px">' + nduE((_nd.cday || day) > 100 ? 'Catch-up' : 'Day ' + (_nd.cday || day)) + '</b><span style="font-size:11.5px;color:#1E3A8A">' + nduE(nduT('Locked — the programme continues after it is unlocked', 'लॉक — अनलॉक होने के बाद कार्यक्रम आगे चलेगा')) + '</span>';
+    var w = document.createElement('div'); w.innerHTML = nduCardShell();
+    if (dc) dc.replaceWith(w.firstChild); else (app.querySelector('.nx') || app).appendChild(w.firstChild);
+    nduFill();
+  }
+  if (_nd.tab === 'today' && !_nd.card && !_nd.screen && !ndFaOn()) {
+    var top = app.querySelector('.nx'), old = document.getElementById('ndu-ban'); if (old) old.remove();
+    var html = '';
+    if (nduLocked(day)) html = '<div class="ndu-ban" id="ndu-ban"><span class="ndu-bi">🔒</span><span><b>' + nduE(nduT('Baseline complete — unlock to continue', 'बेसलाइन पूरी — आगे बढ़ने के लिए अनलॉक करें')) + '</b><small>' + nduE(nduT('Your team’s Day ' + day + ' cards open after the programme is unlocked.', 'कार्यक्रम अनलॉक होने के बाद आपकी टीम के दिन ' + day + ' के कार्ड खुलेंगे।')) + '</small></span><button type="button" onclick="nduGoUnlock()">' + nduE(nduT('Unlock', 'अनलॉक')) + '</button></div>';
+    else if (!nduOpen() && day >= 1 && day <= b && nduInCharge()) html = '<div class="ndu-soft" id="ndu-ban"><span>🎁 <b>' + nduE(nduT('No-cost baseline · Day ' + day + ' of ' + b, 'निःशुल्क बेसलाइन · दिन ' + day + ' / ' + b)) + '</b><small>' + nduE(nduT('Unlock the full programme any time — before Day ' + (b + 1) + ' keeps it running without a break.', 'पूरा कार्यक्रम कभी भी अनलॉक करें — दिन ' + (b + 1) + ' से पहले करने पर बिना रुकावट चलता रहेगा।')) + '</small></span><button type="button" onclick="nduGoUnlock()">' + nduE(nduT('Unlock', 'अनलॉक')) + '</button></div>';
+    if (html && top) top.insertAdjacentHTML('afterbegin', html);
+  }
+  if (!(_nd.tab === 'cards' && nduLocked(_nd.cday || day))) window._payCtx = window._payCtx && document.getElementById('ndu-card') ? window._payCtx : null;
+}
+(function () {
+  if (typeof ndRender !== 'function') return; var o = ndRender;
+  ndRender = function () {
+    if (_nd && _nd.card && nduLocked(_nd.card.day)) { _nd.card = null; _nd.tab = 'cards'; _nd.cday = _nd.cday || ndDay(); }   // a locked day's compare screen → the Unlock card
+    var r = o.apply(this, arguments); try { nduApply(); } catch (e) { console.warn('[unlock]', e); } return r;
+  };
+})();
+// the bank / UPI and proforma buttons ask "is this the in-charge?": in the UPHC / PHC / CHC app that is ndIsInCharge
+(function () { if (typeof nfIsChoNow !== 'function') return; var o = nfIsChoNow; nfIsChoNow = function () { if (window._payCtx && typeof _nd !== 'undefined' && _nd) return nduInCharge(); return o.apply(this, arguments); }; })();
 </script>
 <script id="nf-day-score">// ══════════════════════════════════════════════════════════════
 // Today's score on the staff cards (HealSol 21 Oct, every facility type): "Today's score 70% · 14 of 20 checked".

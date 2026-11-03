@@ -5,6 +5,10 @@
 //   HealSol, Business → Payments to confirm: Confirm (receipt + unlock, same as any payment) or Reject with a reason.
 // ══════════════════════════════════════════════════════════════
 var _bp = { cfg: null, list: null, loading: false };
+// which facility is paying (3 Nov 2026): the Sub-Centre app (choState) or the UPHC / PHC / CHC app (window._payCtx = {code, fac, price, after})
+function nfPayCode() { return (window._payCtx && _payCtx.code) || (typeof choState !== 'undefined' && choState && choState.facilityCode) || ''; }
+function nfPayFac() { return (window._payCtx && _payCtx.fac) || (typeof choState !== 'undefined' && choState && choState.facility) || {}; }
+function nfPayAfter() { try { if (window._payCtx && typeof _payCtx.after === 'function') return _payCtx.after(); if (typeof renderCard === 'function') renderCard(typeof window._scLastDi === 'number' ? window._scLastDi : 7); } catch (e) {} }
 function bpE(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function bpHi() { return typeof _appLang !== 'undefined' && _appLang === 'hi'; }
 function bpT(en, hi) { return bpHi() && hi ? hi : en; }
@@ -51,7 +55,7 @@ async function bpMine(code) { try { return (await fbGet('sc_manualpay/' + code))
 function bpLatest(M) { var k = Object.keys(M || {}).sort(function (a, b) { return String((M[b] || {}).at).localeCompare(String((M[a] || {}).at)); })[0]; return k ? Object.assign({ _k: k }, M[k]) : null; }
 async function bpUpgradeExtra(container) {
   var body = container && container.querySelector('.upgrade-body'); if (!body || body.querySelector('.bp-box')) return;
-  var code = (typeof choState !== 'undefined' && choState.facilityCode) || ''; if (!code) return;
+  var code = nfPayCode(); if (!code) return;
   var c = await bpCfg(), last = bpLatest(await bpMine(code)), box = document.createElement('div'); box.className = 'bp-box';
   var payBtn = document.getElementById('upgrade-pay-btn');
   if (last && last.status === 'pending') {
@@ -67,10 +71,10 @@ async function bpUpgradeExtra(container) {
 (function () { if (typeof renderUpgradeCard !== 'function') return; var o = renderUpgradeCard;
   renderUpgradeCard = async function (container) { var r = await o.apply(this, arguments); try { await bpUpgradeExtra(container); } catch (e) { console.warn('[bankpay] card', e); } return r; }; })();
 
-function bpTotal() { var base = Object.values(typeof _upgradeSelected !== 'undefined' ? _upgradeSelected : {}).reduce(function (a, b) { return a + Number(b || 0); }, 0); return typeof nfWithGst === 'function' ? nfWithGst(base) : { base: base, gst: Math.round(base * 18) / 100, total: Math.round(base * 118) / 100 }; }
+function bpTotal() { if (window._payCtx && _payCtx.price) return { base: _payCtx.price.base, gst: _payCtx.price.gst, total: _payCtx.price.total }; var base = Object.values(typeof _upgradeSelected !== 'undefined' ? _upgradeSelected : {}).reduce(function (a, b) { return a + Number(b || 0); }, 0); return typeof nfWithGst === 'function' ? nfWithGst(base) : { base: base, gst: Math.round(base * 18) / 100, total: Math.round(base * 118) / 100 }; }
 function bpCopy(t) { if (typeof nfCopyText === 'function') nfCopyText(t); else { try { navigator.clipboard.writeText(t); showToast('Copied', 'ok'); } catch (e) {} } }
 async function bpOpen() {
-  var c = await bpCfg(), code = choState.facilityCode, g = bpTotal(), ref = bpRef(code), hi = bpHi();
+  var c = await bpCfg(), code = nfPayCode(), g = bpTotal(), ref = bpRef(code), hi = bpHi();
   var row = function (l, v) { return v ? '<div class="bp-r"><small>' + bpE(l) + '</small><b>' + bpE(v) + '</b><button type="button" onclick="bpCopy(\'' + bpE(v) + '\')" aria-label="Copy ' + bpE(l) + '"><i class="ti ti-copy"></i></button></div>' : ''; };
   var upiLink = c.upi ? 'upi://pay?pa=' + encodeURIComponent(c.upi) + '&pn=' + encodeURIComponent(c.payee || 'HealSol Healthcare') + '&am=' + g.total.toFixed(2) + '&cu=INR&tn=' + encodeURIComponent(ref) : '';
   var ov = document.createElement('div'); ov.className = 'scx-ov open'; ov.id = 'bp-ov';
@@ -96,10 +100,10 @@ async function bpSend() {
   var img = null, f = (document.getElementById('bp-f') || {}).files; if (f && f[0]) { try { img = await bpImg(f[0], 1100, 0.7); } catch (e) {} }
   var b = document.getElementById('bp-go'); if (b) { b.disabled = true; b.textContent = bpT('Sending…', 'भेजा जा रहा है…'); }
   try {
-    await nfCall('submitBankPayment', { code: choState.facilityCode, utr: utr, method: (document.getElementById('bp-m') || {}).value || 'upi', paidOn: (document.getElementById('bp-d') || {}).value || '', img: img });
+    await nfCall('submitBankPayment', { code: nfPayCode(), utr: utr, method: (document.getElementById('bp-m') || {}).value || 'upi', paidOn: (document.getElementById('bp-d') || {}).value || '', img: img });
     var ov = document.getElementById('bp-ov'); if (ov) ov.remove();
     showToast(bpT('Payment sent to HealSol for confirmation.', 'भुगतान पुष्टि के लिए HealSol को भेजा गया।'), 'ok');
-    try { if (typeof renderCard === 'function') renderCard(typeof window._scLastDi === 'number' ? window._scLastDi : 7); } catch (e) {}
+    nfPayAfter();
   } catch (e) { show(typeof nfErrText === 'function' ? nfErrText(e) : String(e.message || e)); if (b) { b.disabled = false; b.textContent = bpT('I have paid — send', 'भुगतान कर दिया — भेजें'); } }
 }
 
