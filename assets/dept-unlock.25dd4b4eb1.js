@@ -44,8 +44,8 @@ async function nduFill() {
   if (!p) { body.innerHTML = '<div class="ndu-wait">' + nduE(nduT('Pricing has not been set for your package yet — please contact HealSol Academy to subscribe.', 'आपके पैकेज का मूल्य अभी तय नहीं है — सदस्यता के लिए HealSol Academy से संपर्क करें।')) + '</div>'; return; }
   nduCtx(p);
   var M = function (n) { return typeof nfMoney === 'function' ? nfMoney(n) : '₹' + n; };
-  body.innerHTML = '<div class="ndu-k">' + nduE(nduT('YOUR PACKAGE', 'आपका पैकेज')) + ' · ' + nduE(p.label) + '</div>'
-    + (p.lines || []).map(function (l) { return '<div class="ndu-row"><span>' + nduE(l.label) + '</span><b>' + M(l.price) + '</b></div>'; }).join('')
+  body.innerHTML = (typeof ofBadge === 'function' ? ofBadge(p) : '') + '<div class="ndu-k">' + nduE(nduT('YOUR PACKAGE', 'आपका पैकेज')) + ' · ' + nduE(p.label) + '</div>'
+    + (p.lines || []).map(function (l) { return '<div class="ndu-row"><span>' + nduE(l.label) + '</span><b>' + (l.regular > l.price ? '<s class="ndu-was">' + M(l.regular) + '</s>' : '') + M(l.price) + '</b></div>'; }).join('')
     + '<div class="ndu-tot"><span>' + nduE(nduT('TOTAL', 'कुल')) + '</span><span><small>' + M(p.base) + ' + GST 18% ' + M(p.gst) + '</small><b>' + M(p.total) + '</b></span></div>'
     + '<button type="button" class="fc-add-btn ndu-pay" id="upgrade-pay-btn" onclick="nduPay(this)"><i class="ti ti-credit-card"></i> ' + nduE(nduT('Pay ' + M(p.total) + ' & Unlock', M(p.total) + ' भुगतान करें और अनलॉक करें')) + '</button>';
   var card = document.getElementById('ndu-card');
