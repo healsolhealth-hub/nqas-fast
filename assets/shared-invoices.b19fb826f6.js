@@ -34,7 +34,8 @@ function ivDoc(kind, r) {
 function ivHTML(d) {
   var S = d.seller || {}, B = d.buyer || {}, kv = function (k, v) { return v ? '<tr><td>' + ivE(k) + '</td><td>' + ivE(v) + '</td></tr>' : ''; };
   var tax = d.igst ? '<tr><td>IGST @ 18%</td><td>' + ivM(d.igst) + '</td></tr>' : '<tr><td>CGST @ 9%</td><td>' + ivM(d.cgst) + '</td></tr><tr><td>SGST @ 9%</td><td>' + ivM(d.sgst) + '</td></tr>';
-  return '<div class="nf-rcpt iv-doc"><div class="nf-rcpt-top"><div><b>' + ivE(S.name) + '</b><small>' + ivE(S.address) + '<br>GSTIN ' + ivE(S.gstin) + ' · ' + ivE(S.email) + ' · ' + ivE(S.phone) + '</small></div><div class="nf-rcpt-t">' + ivE(d.title) + '<small>' + ivE(d.no) + '</small></div></div>'
+  var B0 = typeof SC_BRAND !== 'undefined' ? SC_BRAND : {};
+  return '<div class="nf-rcpt iv-doc"><div class="iv-brand">' + (B0.logoNqas ? '<img src="' + B0.logoNqas + '" alt="NQAS.QI" class="iv-nq">' : '') + '<span class="iv-fast"><b>NQAS<i>|</i>FAST</b><small>Make your facility NQAS-ready</small></span><span class="iv-by">by ' + (B0.logoHealsol ? '<img src="' + B0.logoHealsol + '" alt="HealSol Academy">' : 'HealSol Academy') + '</span></div><div class="nf-rcpt-top"><div><b>' + ivE(S.name) + '</b><small>' + ivE(S.address) + '<br>GSTIN ' + ivE(S.gstin) + ' · ' + ivE(S.email) + ' · ' + ivE(S.phone) + '</small></div><div class="nf-rcpt-t">' + ivE(d.title) + '<small>' + ivE(d.no) + '</small></div></div>'
     + '<table class="nf-rcpt-kv">' + kv('Date', ivDate(d.date)) + (d.validTill ? kv('Valid till', ivDate(d.validTill)) : '') + kv('Bill to', [B.name, B.address].filter(Boolean).join(', ')) + kv('Buyer GSTIN', B.gstin || 'Unregistered') + kv('Place of supply', (B.state || '') + (B.stateCode ? ' (' + B.stateCode + ')' : '')) + kv('Facility', d.facility) + kv('Location', d.place) + '</table>'
     + '<table class="nf-rcpt-amt"><tr><th>Description · SAC ' + ivE(d.sac) + '</th><th>Amount</th></tr><tr><td>' + ivE(d.item) + '</td><td>' + ivM(d.base) + '</td></tr>' + tax
     + '<tr class="tot"><td>' + (d.kind === 'tax' ? 'Total paid' : 'Total payable') + '</td><td>' + ivM(d.total) + '</td></tr></table>'
@@ -46,6 +47,15 @@ function ivHTML(d) {
 async function ivPdf(d) {
   var J = await nfLoadPdf(), doc = nfPdfNew(J, 'p'), F = doc._nfFont, M = function (n) { return nfPdfMoney(doc, n); }, T = function (s) { return nfPdfTxt(doc, s); };
   var L = 16, R = 194, y = 16, TEAL = [19, 90, 85], GREY = [100, 116, 139], INK = [15, 23, 42], S = d.seller || {}, B = d.buyer || {};
+  // brand band (3 Nov 2026): NQAS.QI logo · NQAS | FAST · HealSol Academy logo
+  var B0 = typeof SC_BRAND !== 'undefined' ? SC_BRAND : {}, lw = B0.logoNqas ? nfPdfImg(doc, B0.logoNqas, L, y - 2, 11) : 0, bx = L + (lw ? lw + 5 : 0);
+  doc.setFont(F, 'bold'); doc.setFontSize(15); doc.setTextColor.apply(doc, INK); doc.text('NQAS', bx, y + 4.6); var nw = doc.getTextWidth('NQAS ');
+  doc.setTextColor(232, 132, 30); doc.text('|', bx + nw, y + 4.6); var pw = doc.getTextWidth('| '); doc.setTextColor.apply(doc, TEAL); doc.text('FAST', bx + nw + pw, y + 4.6);
+  doc.setFont(F, 'normal'); doc.setFontSize(7.8); doc.setTextColor.apply(doc, GREY); doc.text('Make your facility NQAS-ready', bx, y + 8.6);
+  var hw = B0.logoHealsol ? nfPdfImg(doc, B0.logoHealsol, R, y, 6.5, true) : 0;
+  if (!hw) { doc.setFont(F, 'bold'); doc.setFontSize(11); doc.setTextColor.apply(doc, TEAL); doc.text('HealSol Academy', R, y + 4.6, { align: 'right' }); }
+  doc.setFont(F, 'normal'); doc.setFontSize(7.5); doc.setTextColor.apply(doc, GREY); doc.text('by', R - (hw || doc.getTextWidth('HealSol Academy') + 1) - 2, y + 4.6, { align: 'right' });
+  y += 14; doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.3); doc.line(L, y, R, y); y += 7;
   doc.setFont(F, 'bold'); doc.setFontSize(12); doc.setTextColor.apply(doc, INK); doc.text(T(S.name || ''), L, y + 3);
   doc.setFont(F, 'normal'); doc.setFontSize(8.3); doc.setTextColor.apply(doc, GREY);
   doc.text(doc.splitTextToSize(T(S.address || ''), 105), L, y + 8); doc.text(T('GSTIN ' + (S.gstin || '') + '  ·  ' + (S.email || '') + '  ·  ' + (S.phone || '')), L, y + 16.5);

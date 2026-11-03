@@ -39,3 +39,11 @@
 .iv-acts{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px;}
 .iv-words{font-size:12.5px;color:var(--t2);font-style:italic;margin:6px 0 10px;}
 .iv-doc .nf-rcpt-top small{line-height:1.45;}
+
+/* invoice brand band (3 Nov 2026) */
+.iv-brand{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid var(--br);}
+.iv-nq{height:30px;width:auto;border-radius:6px;}
+.iv-fast b{display:block;font-size:17px;font-weight:800;color:var(--t1);letter-spacing:.2px;} .iv-fast b i{font-style:normal;color:#E8841E;margin:0 4px;}
+.iv-fast small{display:block;font-size:10.5px;color:var(--t3);}
+.iv-by{margin-left:auto;font-size:11px;color:var(--t3);display:flex;align-items:center;gap:5px;} .iv-by img{height:16px;width:auto;}
+@media(max-width:520px){ .iv-nq{height:24px;} .iv-fast b{font-size:15px;} .iv-by{flex-basis:100%;justify-content:flex-end;} .iv-by img{height:14px;} }
