@@ -19,13 +19,13 @@ var JN_HI={'Already applied? Check my request':'पहले आवेदन क
   'Your name *':'आपका नाम *','Your role *':'आपकी भूमिका *','Mobile number *':'मोबाइल नंबर *','Your login. We check it has no account yet.':'यही आपका लॉगिन होगा। हम जाँचते हैं कि इस पर पहले से खाता न हो।','Email (optional)':'ईमेल (वैकल्पिक)',
   'CHECK BEFORE SENDING':'भेजने से पहले जाँचें','Facility':'स्वास्थ्य केंद्र','Where':'कहाँ','Under':'के अंतर्गत','Package':'पैकेज',
   'I am the in-charge of this facility, and HealSol Academy may call or WhatsApp me about it.':'मैं इस स्वास्थ्य केंद्र का प्रभारी हूँ, और HealSol Academy इस बारे में मुझे कॉल या WhatsApp कर सकती है।',
-  'Send for approval':'स्वीकृति के लिए भेजें','Register — free baseline':'पंजीकरण करें — निःशुल्क बेसलाइन','HealSol Academy checks every new facility, then sends your login.':'HealSol Academy हर नए स्वास्थ्य केंद्र की जाँच करती है, फिर आपका लॉगिन भेजती है।',
+  'Send for approval':'स्वीकृति के लिए भेजें','Register — no-cost baseline':'पंजीकरण करें — निःशुल्क बेसलाइन','HealSol Academy checks every new facility, then sends your login.':'HealSol Academy हर नए स्वास्थ्य केंद्र की जाँच करती है, फिर आपका लॉगिन भेजती है।',
   'Request sent':'अनुरोध भेजा गया','WHAT HAPPENS NEXT':'आगे क्या होगा','HealSol Academy checks the facility and calls or WhatsApps you.':'HealSol Academy स्वास्थ्य केंद्र की जाँच करके आपको कॉल या WhatsApp करेगी।',
   'Once approved, you get your login: this mobile and a one-time password.':'स्वीकृति के बाद आपको लॉगिन मिलेगा: यही मोबाइल और एक बार का पासवर्ड।','Log in, add your staff, and start the baseline.':'लॉग इन करें, अपना स्टाफ जोड़ें और बेसलाइन शुरू करें।',
   'Your in-charge adds you':'आपके प्रभारी आपको जोड़ते हैं','Check my number':'मेरा नंबर जाँचें','Check':'जाँचें','Send my in-charge a WhatsApp':'अपने प्रभारी को WhatsApp भेजें',
   'Many facilities together':'कई स्वास्थ्य केंद्र एक साथ','You are *':'आप हैं *','Organisation name *':'संस्था का नाम *','Districts':'ज़िले','Whole state':'पूरा राज्य','How many facilities? (roughly)':'कितने स्वास्थ्य केंद्र? (लगभग)',
   'Total':'कुल','Designation *':'पद *','Mobile *':'मोबाइल *','Email':'ईमेल','Anything else? (optional)':'और कुछ? (वैकल्पिक)','Send enquiry':'पूछताछ भेजें','Thank you':'धन्यवाद','YOUR ENQUIRY':'आपकी पूछताछ',
-  'Organisation':'संस्था','Facilities':'स्वास्थ्य केंद्र','Reference':'संदर्भ','Registered — your free baseline has started':'पंजीकरण हो गया — आपकी निःशुल्क बेसलाइन शुरू हो गई है','Log in now':'अभी लॉग इन करें'};
+  'Organisation':'संस्था','Facilities':'स्वास्थ्य केंद्र','Reference':'संदर्भ','Registered — your no-cost baseline assessment has started':'पंजीकरण हो गया — आपकी निःशुल्क बेसलाइन आकलन शुरू हो गया है','Log in now':'अभी लॉग इन करें'};
 var JN_TYPES=[['sc','SC'],['uphc','UPHC'],['phc','PHC'],['chc','CHC']];
 var JN_PKG={sc:[{id:'nqas_12A',label:'12A — 12 Services (60 days)'},{id:'nqas_12B',label:'12B — 12 Services + Delivery (60 days)'}],
   chc:[{id:'fru',label:'CHC (FRU) — NQAS · LaQshya · MusQan (90 days)'},{id:'nonfru',label:'CHC (Non-FRU) — NQAS · LaQshya · MusQan (90 days)'}]};
@@ -143,7 +143,7 @@ function jnYou(){
     +'<div class="jn-sum"><div class="jn-kick">'+jE(jt('CHECK BEFORE SENDING'))+'</div>'+row('Facility',s.name+' · '+(jnLv(_jn.type).short||_jn.type.toUpperCase()))+row('NIN',s.nin)
       +row('Where',[s.block?s.block+' '+jt('Block').toLowerCase():'',_jn.district,_jn.state].filter(Boolean).join(' · '))+row('Under',s.under)+row('Package',jnPkgLabel())+'</div>'
     +'<label class="nf-l-chk jn-agree"><input type="checkbox" id="jn-ag"'+(_jn.agree?' checked':'')+' onchange="_jn.agree=this.checked"> <span>'+jE(jt('I am the in-charge of this facility, and HealSol Academy may call or WhatsApp me about it.'))+'</span></label>'
-    +jnErr()+'<button type="button" class="nf-l-btn" id="jn-send" onclick="jnSend()"'+(_jn.busy?' disabled':'')+'>'+jE(jt(open?'Register — free baseline':'Send for approval'))+'</button>'+jnConsent()
+    +jnErr()+'<button type="button" class="nf-l-btn" id="jn-send" onclick="jnSend()"'+(_jn.busy?' disabled':'')+'>'+jE(jt(open?'Register — no-cost baseline':'Send for approval'))+'</button>'+jnConsent()
     +'<div class="jn-hint" style="text-align:center">'+jE(jt('HealSol Academy checks every new facility, then sends your login.'))+'</div>';
 }
 async function jnSend(){
@@ -159,7 +159,7 @@ async function jnSend(){
 }
 function jnSent(){
   var r=_jn.res||{};
-  if(r.code) return '<div class="jn-done"><span class="jn-ok"><i class="ti ti-check"></i></span><div class="nf-l-hi">'+jE(jt('Registered — your free baseline has started'))+'</div>'
+  if(r.code) return '<div class="jn-done"><span class="jn-ok"><i class="ti ti-check"></i></span><div class="nf-l-hi">'+jE(jt('Registered — your no-cost baseline assessment has started'))+'</div>'
     +'<div class="nf-l-sub">'+jE(r.fname||'')+' · '+jE(r.code)+'</div><div class="nf-tmp"><div><small>Mobile</small><b>'+jE(r.identifier)+'</b></div><div><small>Temporary password</small><b class="pw">'+jE(r.tempPassword||'')+'</b></div></div>'
     +'<button type="button" class="nf-l-btn" onclick="jnLoginWith(\''+jE(r.identifier)+'\',\''+jE(r.tempPassword||'')+'\')">'+jE(jt('Log in now'))+'</button></div>';
   var st=function(n,txt,on){ return '<div class="jn-st"><span class="'+(on?'on':'')+'">'+n+'</span><span>'+jE(jt(txt))+'</span></div>'; };

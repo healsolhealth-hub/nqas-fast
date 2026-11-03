@@ -69,7 +69,7 @@ function nfEqHTML() {
     + '<div class="eq-kinds" role="tablist" aria-label="Kind">' + kb('', 'All') + kb('signup', 'Sign-ups to approve') + kb('bulk', 'District / bulk') + kb('join', 'Request to join') + kb('champion', 'Quality Champions') + '</div>'
     + '<div class="eq-types"><span>Facility type</span>' + tb('', 'All') + tb('sc', 'SC') + tb('uphc', 'UPHC') + tb('phc', 'PHC') + tb('chc', 'CHC') + '<span class="eq-tn">rows · facilities asked about</span></div>'
     + '<div class="eq-list">' + (rows.length ? rows.map(nfEqRowHTML).join('') : '<div class="eq-empty">Nothing here' + (_nfEq.st === 'open' ? ' — no open enquiries or sign-ups.' : '.') + '</div>') + '</div>'
-    + '<div class="eq-foot">Self sign-up: Settings → Programme rules → <button type="button" class="hs-link" onclick="_hs.stab=\'rules\';nfAdminView(\'setup\')">Self sign-up</button> (free baseline at once, per type)</div></div>';
+    + '<div class="eq-foot">Self sign-up: Settings → Programme rules → <button type="button" class="hs-link" onclick="_hs.stab=\'rules\';nfAdminView(\'setup\')">Self sign-up</button> (no-cost baseline at once, per type)</div></div>';
 }
 function nfEqPaint() { var el = document.getElementById('nf-eq'); if (el) el.outerHTML = nfEqHTML(); }
 function nfEqSetF(k, v) { _nfEq[k] = v; nfEqPaint(); }
@@ -92,7 +92,7 @@ async function nfEqSet(id, status) {
 }
 async function nfEqApprove(id) {
   var x = (_nfBiz.leads || {})[id]; if (!x) return;
-  var ok = await scDialog({ title: 'Approve & enrol', icon: '✅', okLabel: 'Approve & enrol', message: (x.orgName || '') + ' (' + ((NF_LEVELS[x.ftype] || {}).short || '') + ')' + (x.nin ? ' · NIN ' + x.nin : '') + '\n' + [x.block ? x.block + ' block' : '', x.district, x.state].filter(Boolean).join(', ') + '\nIn-charge: ' + (x.contactName || '') + ' · ' + (x.mobile || '') + '\n\nMakes the facility' + (x.rid ? ' from its registry row' : ' and its registry row') + ', the in-charge login with a one-time password, the tree links, and starts the free baseline.' });
+  var ok = await scDialog({ title: 'Approve & enrol', icon: '✅', okLabel: 'Approve & enrol', message: (x.orgName || '') + ' (' + ((NF_LEVELS[x.ftype] || {}).short || '') + ')' + (x.nin ? ' · NIN ' + x.nin : '') + '\n' + [x.block ? x.block + ' block' : '', x.district, x.state].filter(Boolean).join(', ') + '\nIn-charge: ' + (x.contactName || '') + ' · ' + (x.mobile || '') + '\n\nMakes the facility' + (x.rid ? ' from its registry row' : ' and its registry row') + ', the in-charge login with a one-time password, the tree links, and starts the no-cost baseline.' });
   if (!ok) return;
   _nfEq.busy = id; nfEqPaint();
   try {
@@ -146,7 +146,7 @@ async function nfEqRegistry(id) {
   nfBizMsgText = function (kind, id) {
     var m = o.apply(this, arguments);
     try { if (kind === 'lead') { var x = ((_nfBiz && _nfBiz.leads) || {})[id] || {}, first = String(x.contactName || '').replace(/^(dr\.?|mr\.?|ms\.?|mrs\.?)\s+/i, '').split(' ')[0], k = nfEqKind(x);
-      if (k === 'signup') m.text = 'Namaste' + (first ? ' ' + first : '') + ' ji,\nThank you for registering ' + (x.orgName || 'your facility') + ' on NQAS | FAST' + (x.ref ? ' (' + x.ref + ')' : '') + '. I am from HealSol Academy. I would like to confirm a few details before we start your free baseline. When is a good time to talk?';
+      if (k === 'signup') m.text = 'Namaste' + (first ? ' ' + first : '') + ' ji,\nThank you for registering ' + (x.orgName || 'your facility') + ' on NQAS | FAST' + (x.ref ? ' (' + x.ref + ')' : '') + '. I am from HealSol Academy. I would like to confirm a few details before we start your no-cost baseline assessment. When is a good time to talk?';
       else if (k === 'champion') m.text = 'Namaste' + (first ? ' ' + first : '') + ' ji,\nThank you for applying to be a Quality Champion with NQAS | FAST' + (x.ref ? ' (' + x.ref + ')' : '') + '. I am from HealSol Academy. When is a good time to talk about your application?';
       else if (k === 'join') m.text = 'Namaste' + (first ? ' ' + first : '') + ' ji,\nThank you for asking to bring ' + (x.orgName || 'your facility') + ' into NQAS | FAST. I am from HealSol Academy. When is a good time to talk about enrolling it?'; } } catch (e) {}
     return m;
@@ -161,7 +161,7 @@ var NF_EQ_REASON_TXT = { verify: 'we could not verify the facility details', exi
 function nfEqFirst(x) { return String(x.contactName || '').replace(/^(dr\.?|mr\.?|ms\.?|mrs\.?)\s+/i, '').split(' ')[0]; }
 function nfEqApprovedText(x, r) {
   var f = nfEqFirst(x);
-  return 'Namaste' + (f ? ' ' + f : '') + ' ji, 🎉\n' + (x.orgName || 'Your facility') + ' is now enrolled in NQAS | FAST' + (x.ref ? ' (' + x.ref + ')' : '') + '.\n\nLog in at app.thehealsol.com\nMobile: ' + (r.identifier || x.mobile || '') + '\nOne-time password: ' + (r.tempPassword || '') + '\n\nYou will set your own password at first login. Your free 7-day baseline starts today.\n— HealSol Academy';
+  return 'Namaste' + (f ? ' ' + f : '') + ' ji, 🎉\n' + (x.orgName || 'Your facility') + ' is now enrolled in NQAS | FAST' + (x.ref ? ' (' + x.ref + ')' : '') + '.\n\nLog in at app.thehealsol.com\nMobile: ' + (r.identifier || x.mobile || '') + '\nOne-time password: ' + (r.tempPassword || '') + '\n\nYou will set your own password at first login. Your no-cost baseline assessment (' + (typeof nfBlDays === 'function' ? nfBlDays(x.ftype) : 7) + ' days) starts today.\n— HealSol Academy';
 }
 function nfEqDeclinedText(x) {
   var f = nfEqFirst(x), why = x.declineReason === 'other' ? (x.declineNote || '') : (NF_EQ_REASON_TXT[x.declineReason] || '');

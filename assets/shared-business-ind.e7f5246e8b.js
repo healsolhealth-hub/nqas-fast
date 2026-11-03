@@ -8,10 +8,12 @@
 var _nfBiz={leads:{},pricing:null,at:0};
 function nfRupee(n){ n=Math.round(n||0); var s=String(n), last=s.slice(-3), rest=s.slice(0,-3); if(rest) last=','+last; return '₹'+rest.replace(/\B(?=(\d{2})+(?!\d))/g,',')+last; }
 function nfMonthKey(iso){ return iso?String(iso).slice(0,7):''; }
+// the no-cost baseline: 7 days (SC / UPHC / PHC), 14 days (CHC) — the type's own plan (3 Nov 2026)
+function nfBlDays(t){ try{ var L=(typeof NF_LEVELS!=='undefined'&&NF_LEVELS[t||'sc'])||{}; return (L.plan&&L.plan.base)||7; }catch(e){ return 7; } }
 function nfTrialInfo(f){
   if(!f||f.subscriptionStatus!=='trial') return null;
   var start=f.startDate||(f.trialStartDate?String(f.trialStartDate).slice(0,10):null); if(!start) return null;
-  var p=start.split('-'), end=new Date(+p[0],+p[1]-1,+p[2]+7), today=new Date(); today.setHours(0,0,0,0);
+  var p=start.split('-'), end=new Date(+p[0],+p[1]-1,+p[2]+nfBlDays(f.type)), today=new Date(); today.setHours(0,0,0,0);
   var over=Math.floor((today-end)/86400000);
   return {ended:over>=0,daysOver:over,endISO:end.getFullYear()+'-'+String(end.getMonth()+1).padStart(2,'0')+'-'+String(end.getDate()).padStart(2,'0')};
 }

@@ -2182,8 +2182,8 @@ function upgradeCardHTML(day){
     +'<div class="upgrade-hd"><div style="font-size:34px;margin-bottom:6px;">🔒</div>'
     +(function(){ var td=0, hi=typeof _appLang!=='undefined'&&_appLang==='hi'; try{ td=scb1TodayIdx(); }catch(e){}   // 2 Nov 2026: still inside the free 7 days → "Day 8 onwards", not "trial has ended"
       var ended=td>=7;
-      return '<div style="font-size:16px;font-weight:800;">'+(ended?(hi?'आपका 7 दिन का मुफ़्त ट्रायल समाप्त हो गया है':'Your 7-day free trial has ended'):(hi?'दिन 8 से पूरा कार्यक्रम':'Day 8 onwards is the full programme'))+'</div>'
-        +'<div style="font-size:12px;opacity:0.9;margin-top:4px;">'+(ended?(hi?'जहाँ छोड़ा था, वहीं से कार्यक्रम जारी रखने के लिए सदस्यता लें।':'Subscribe to continue your programme from where you left off.'):(hi?'आपके 7 मुफ़्त बेसलाइन दिन चल रहे हैं। पूरे 60 दिन का कार्यक्रम अभी या ट्रायल के बाद अनलॉक करें।':'Your 7 free baseline days are running. Unlock the full 60-day programme now or when the trial ends.'))+'</div></div>'; })()
+      return '<div style="font-size:16px;font-weight:800;">'+(ended?(hi?'आपका निःशुल्क बेसलाइन आकलन पूरा हो गया है':'Your no-cost baseline assessment is complete'):(hi?'दिन 8 से पूरा कार्यक्रम':'Day 8 onwards is the full programme'))+'</div>'
+        +'<div style="font-size:12px;opacity:0.9;margin-top:4px;">'+(ended?(hi?'जहाँ छोड़ा था, वहीं से 60 दिन का कार्यक्रम जारी रखने के लिए सदस्यता लें।':'Subscribe to continue the 60-day programme from where you left off.'):(hi?'आपका 7 दिन का निःशुल्क बेसलाइन आकलन चल रहा है। पूरा 60 दिन का कार्यक्रम अभी या बेसलाइन के बाद अनलॉक करें।':'Your 7-day no-cost baseline assessment is running. Unlock the full 60-day programme now or when the baseline ends.'))+'</div></div>'; })()
     +'<div class="upgrade-body"><div id="upgrade-pkg-list" style="margin-bottom:14px;"></div>'
     +'<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1.5px solid var(--br);margin-bottom:14px;">'
     +'<span style="font-size:12px;font-weight:800;color:var(--t3);">Total</span>'

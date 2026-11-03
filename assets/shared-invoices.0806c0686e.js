@@ -99,7 +99,9 @@ async function ivShow(d) {
 }
 // payment receipts → tax invoices (older payments without an invoice keep the receipt)
 (function () {
-  if (typeof nfShowReceipt === 'function') { var o = nfShowReceipt; nfShowReceipt = function (r) { if (r && r.invoice) return ivShow(ivDoc('tax', r)); return o.apply(this, arguments); }; }
+  // the receipt window stays (Print, Send to CHO on WhatsApp …); only what it shows and downloads becomes the tax invoice
+  if (typeof nfReceiptHTML === 'function') { var oh = nfReceiptHTML; nfReceiptHTML = function (r) { return r && r.invoice ? ivHTML(ivDoc('tax', r)) : oh.apply(this, arguments); }; }
+  if (typeof nfDownloadReceiptPdf === 'function') { var od = nfDownloadReceiptPdf; nfDownloadReceiptPdf = function (r, btn) { return r && r.invoice ? ivDownload(ivDoc('tax', r), btn) : od.apply(this, arguments); }; }
   try { if (typeof HINDI_UI === 'object') Object.assign(HINDI_UI, { 'Payment receipts': 'भुगतान रसीदें / टैक्स इनवॉइस' }); } catch (e) {}
 })();
 

@@ -1,5 +1,5 @@
 // ══ Settings tidy-up (28 Oct 2026; HealSol: Partner logos → Partners · People as tabs with counts · Quality Champions →
-//    Recognition) and Programme rules → Self sign-up (free baseline at once, per facility type; off = HealSol approves) ══
+//    Recognition) and Programme rules → Self sign-up (no-cost baseline at once, per facility type; off = HealSol approves) ══
 var HSP_TABS = [['sup', 'Supervisors', 'ti-binoculars'], ['dist', 'District Admins', 'ti-map-2'], ['moic', 'MOIC & MO', 'ti-building-hospital'], ['hsa', 'HealSol Admins', 'ti-shield-lock']];
 function hspGroupOf(el) {
   var id = el.id || '';
@@ -83,15 +83,15 @@ async function hspSignupRender(load) {
   el.setAttribute('data-hsg', 'rules');
   if (load || !_hspSU) { try { _hspSU = (await fbGet('shared/sc_signup_config')) || {}; } catch (e) { _hspSU = _hspSU || {}; } }
   var T = [['sc', 'Sub-Centre'], ['uphc', 'UPHC'], ['phc', 'PHC'], ['chc', 'CHC']];
-  el.innerHTML = '<b><i class="ti ti-user-plus"></i> Self sign-up (Join NQAS FAST)</b><p>Off: every sign-up from the login screen waits for your approval in Business → Enquiries &amp; sign-ups. On: that type is enrolled at once and its free baseline starts; you still see it in the list as approved.</p>'
+  el.innerHTML = '<b><i class="ti ti-user-plus"></i> Self sign-up (Join NQAS FAST)</b><p>Off: every sign-up from the login screen waits for your approval in Business → Enquiries &amp; sign-ups. On: that type is enrolled at once and its no-cost baseline starts; you still see it in the list as approved.</p>'
     + '<div class="hsp-sw">' + T.map(function (t) { var on = _hspSU[t[0]] === true;
-      return '<label class="hsp-swr"><span><b>' + t[1] + '</b><small>' + (on ? 'Free baseline at once' : 'Needs your approval') + '</small></span><span class="hsp-tg"><input type="checkbox" id="hsp-su-' + t[0] + '"' + (on ? ' checked' : '') + ' onchange="hspSignupSet(\'' + t[0] + '\',this.checked)"> Free baseline at once</span></label>'; }).join('') + '</div>';
+      return '<label class="hsp-swr"><span><b>' + t[1] + '</b><small>' + (on ? 'No-cost baseline at once' : 'Needs your approval') + '</small></span><span class="hsp-tg"><input type="checkbox" id="hsp-su-' + t[0] + '"' + (on ? ' checked' : '') + ' onchange="hspSignupSet(\'' + t[0] + '\',this.checked)"> No-cost baseline at once</span></label>'; }).join('') + '</div>';
 }
 async function hspSignupSet(t, on) {
   var prev = _hspSU || {}, nx = Object.assign({}, prev); nx[t] = !!on;
   var ok = await fbSet('shared/sc_signup_config', nx);
   if (ok === false) { showToast('Could not save — check the connection.', 'err'); hspSignupRender(); return; }
-  _hspSU = nx; showToast((t === 'sc' ? 'Sub-Centre' : t.toUpperCase()) + ': ' + (on ? 'free baseline starts at once on sign-up.' : 'sign-ups wait for your approval.'), 'ok'); hspSignupRender();
+  _hspSU = nx; showToast((t === 'sc' ? 'Sub-Centre' : t.toUpperCase()) + ': ' + (on ? 'no-cost baseline starts at once on sign-up.' : 'sign-ups wait for your approval.'), 'ok'); hspSignupRender();
 }
 // wiring: Settings view
 (function () {

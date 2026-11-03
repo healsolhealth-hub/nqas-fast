@@ -47,3 +47,11 @@
 .iv-fast small{display:block;font-size:10.5px;color:var(--t3);}
 .iv-by{margin-left:auto;font-size:11px;color:var(--t3);display:flex;align-items:center;gap:5px;} .iv-by img{height:16px;width:auto;}
 @media(max-width:520px){ .iv-nq{height:24px;} .iv-fast b{font-size:15px;} .iv-by{flex-basis:100%;justify-content:flex-end;} .iv-by img{height:14px;} }
+/* launch (3 Nov 2026) */
+.nl-banner{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:#FFF7ED;border:1px solid #FCD9A8;text-align:center;font-size:12.5px;line-height:1.45;color:#7C2D12;}
+.nl-banner span{display:block;} .nl-banner b{display:block;color:#B45309;font-weight:800;}
+.nl-set{border-top:1px solid var(--br);margin-top:14px;padding-top:12px;} .nl-set p{font-size:12px;color:var(--t3);margin:4px 0 8px;}
+.nl-count .nl-ch{display:flex;justify-content:space-between;align-items:center;gap:12px;} .nl-count b{font-size:16px;font-weight:800;display:block;} .nl-count small{font-size:12.5px;color:var(--t2);}
+.nl-n{font-size:30px;font-weight:800;color:var(--teal-dk,#14514A);} .nl-n i{font-style:normal;font-size:16px;color:var(--t3);font-weight:700;}
+.nl-bar{height:10px;border-radius:999px;background:#EEF2F1;margin-top:10px;overflow:hidden;} .nl-bar i{display:block;height:100%;background:linear-gradient(90deg,#1E6B5E,#F59E0B);border-radius:999px;}
+.nl-hint{margin-top:8px;font-size:12.5px;color:#B45309;font-weight:700;}
