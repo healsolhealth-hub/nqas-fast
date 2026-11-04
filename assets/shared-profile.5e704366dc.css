@@ -88,3 +88,16 @@ body.fpo-open{overflow:hidden}
 .dm-tab th,.dm-tab td{text-align:left;padding:6px 8px;border-bottom:1px solid #E5E7EB}
 .dm-tab th{font-size:11px;color:#6B7280;text-transform:uppercase}
 .dm-tip{font-size:12px;color:#374151;margin-top:8px}
+/* Programme start date (4 Nov 2026) */
+.sd-now{font-size:13px;color:#111827;margin:6px 0}
+.sd-row{display:flex;gap:8px;align-items:stretch;margin:8px 0}
+.sd-in{flex:1;min-width:0;padding:10px 12px;border:1.5px solid #CFE3DE;border-radius:12px;font:inherit;font-size:15px;background:#F9FBFA}
+.sd-btn{background:#1E6B5E;color:#fff;border:0;border-radius:12px;padding:10px 16px;font:700 13.5px 'Poppins',sans-serif;cursor:pointer}
+.sd-btn.ghost{background:#fff;color:#1E6B5E;border:1.5px solid #1E6B5E;margin-top:10px;width:100%}
+.sd-dim{font-size:12px;color:#6B7280;line-height:1.5;margin:6px 0 0}
+.sd-req{border-radius:10px;padding:9px 11px;font-size:12.5px;margin-top:10px;background:#F3F4F6;color:#374151}
+.sd-req small{display:block;margin-top:4px;color:#4B5563}
+.sd-req.w{background:#FEF3C7;color:#78350F}.sd-req.ok{background:#DCFCE7;color:#14532D}.sd-req.no{background:#FEE2E2;color:#7F1D1D}
+.sd-reqs .sd-ri{border-top:1px solid #E5E7EB;padding:10px 0}
+.sd-reqs .sd-ri small{color:#6B7280}
+.sd-rl{font-size:12.5px;color:#374151;margin-top:3px}
