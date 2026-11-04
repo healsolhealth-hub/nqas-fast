@@ -31866,7 +31866,7 @@ function fpoDay(M) {
 function fpoStaff(M) { var S = (M.f && M.f.staff) || {}, ic = M.L.inCharge || 'CHO';
   return Object.keys(S).filter(function (m) { return S[m] && !S[m].disabled; }).map(function (m) { var r = S[m]; return { mob: m, name: r.name || m, role: r.role || ic, ic: (r.role || ic) === ic, imp: r.impact || null }; })
     .sort(function (a, b) { return (b.ic - a.ic) || ((b.imp && b.imp.stars || 0) - (a.imp && a.imp.stars || 0)) || String(a.name).localeCompare(String(b.name)); }); }
-function fpoMyName(M) { var S = (M.f && M.f.staff) || {}, r = S[M.mob]; var n = (r && r.name) || (typeof choState !== 'undefined' && choState.staffName) || ''; return String(n).split(' ')[0]; }
+function fpoMyName(M) { var S = (M.f && M.f.staff) || {}, r = S[M.mob]; var n = (r && r.name) || (typeof choState !== 'undefined' && choState.staffName) || ''; var w = String(n).trim().split(/\s+/); return /^(dr|dr\.|mr|mrs|ms|smt|shri|sri)$/i.test(w[0] || '') && w[1] ? w[0].replace(/\.$/, '') + ' ' + w[1] : (w[0] || ''); }
 function fpoInit(n) { var p = String(n || '').trim().split(/\s+/); return ((p[0] || '?')[0] + (p.length > 1 ? p[p.length - 1][0] : '')).toUpperCase(); }
 
 // ── open / close ──
@@ -32025,15 +32025,18 @@ async function fpoPosterCanvas(M) {
   var P = _fpo.prof || {}, f = M.f || {}, W = 1240, H = 1754, c = document.createElement('canvas'); c.width = W; c.height = H; var g = c.getContext('2d'); if (!g) return null;
   var F = '"Noto Sans Devanagari","Poppins","Mangal",sans-serif', tn = { sc: 'उप-स्वास्थ्य केंद्र', uphc: 'शहरी प्राथमिक स्वास्थ्य केंद्र', phc: 'प्राथमिक स्वास्थ्य केंद्र', chc: 'सामुदायिक स्वास्थ्य केंद्र' }[M.t] || 'स्वास्थ्य केंद्र';
   var ok = P.status === 'ready' || P.status === 'certified', R = typeof nfImpRound === 'function' ? nfImpRound : function (g, x, y, w, h) { g.beginPath(); g.rect(x, y, w, h); };
-  var wrap = function (t, x, y, max, lh) { if (typeof nfImpWrap === 'function') return nfImpWrap(g, t, x, y, max, lh); g.fillText(t, x, y); };
+  var wrap = function (t, x, y, max, lh) { var w = String(t || '').split(' '), line = '', yy = y; w.forEach(function (word) { var test = line ? line + ' ' + word : word; if (g.measureText(test).width > max && line) { g.fillText(line, x, yy); line = word; yy += lh; } else line = test; }); if (line) g.fillText(line, x, yy); return yy; };
   g.fillStyle = '#ffffff'; g.fillRect(0, 0, W, H);
   var grd = g.createLinearGradient(0, 0, W, 520); grd.addColorStop(0, '#144D44'); grd.addColorStop(1, '#2A8A79'); g.fillStyle = grd; g.fillRect(0, 0, W, 520);
   var B = typeof SC_BRAND !== 'undefined' ? SC_BRAND : {}, li = function (src) { var L = typeof nfImpLoadImg === 'function' ? nfImpLoadImg(src) : Promise.resolve(null); return Promise.race([L, new Promise(function (r) { setTimeout(function () { r(null); }, 4000); })]); };
   var l1 = await li(B.logoNqas), l2 = await li(B.logoHealsol);
-  g.fillStyle = '#fff'; R(g, 60, 50, W - 120, 120, 24); g.fill(); if (l1) g.drawImage(l1, 90, 65, 90 * l1.width / l1.height, 90); if (l2) { var w2 = 90 * l2.width / l2.height; g.drawImage(l2, W - 90 - w2, 65, w2, 90); }
-  g.fillStyle = '#144D44'; g.font = 'bold 44px ' + F; g.textAlign = 'center'; g.fillText('NQAS | FAST', W / 2, 125);
-  g.fillStyle = '#fff'; g.font = 'bold 66px ' + F; wrap(f.name || M.code, W / 2, 285, W - 160, 78);
-  g.font = '34px ' + F; g.fillText([tn, f.block, f.district].filter(Boolean).join(' · '), W / 2, 440);
+  // logo strip: each logo fits in its own half (no overlap, no stretching); the name 'NQAS | FAST' is only drawn when there is room
+  g.fillStyle = '#fff'; R(g, 60, 50, W - 120, 120, 24); g.fill();
+  var half = (W - 120 - 90) / 2, fit = function (im, maxW) { var h = 84, w = h * im.width / im.height; if (w > maxW) { w = maxW; h = w * im.height / im.width; } return { w: w, h: h }; };
+  var used = 0; if (l1) { var s1 = fit(l1, half); g.drawImage(l1, 90, 110 - s1.h / 2, s1.w, s1.h); used += s1.w; } if (l2) { var s2 = fit(l2, half); g.drawImage(l2, W - 90 - s2.w, 110 - s2.h / 2, s2.w, s2.h); used += s2.w; }
+  g.textAlign = 'center'; g.font = 'bold 40px ' + F; if (W - 180 - used > g.measureText('NQAS | FAST').width + 60) { g.fillStyle = '#144D44'; g.fillText('NQAS | FAST', W / 2, 124); }
+  g.fillStyle = '#fff'; g.font = 'bold 66px ' + F; var ny = wrap(f.name || M.code, W / 2, (g.measureText(f.name || M.code).width > W - 160) ? 285 : 315, W - 160, 78);
+  g.font = '34px ' + F; g.globalAlpha = 0.92; g.fillText([tn, f.block, f.district].filter(Boolean).join(' · '), W / 2, Math.min(ny + 82, 470)); g.globalAlpha = 1;
   g.fillStyle = '#144D44'; g.font = 'bold 74px ' + F; g.fillText(ok ? (P.status === 'certified' ? 'यह केंद्र NQAS प्रमाणित है' : 'यह केंद्र NQAS के लिए तैयार है') : 'यह केंद्र गुणवत्ता की ओर', W / 2, 660);
   g.fillStyle = '#374151'; g.font = '36px ' + F; g.fillText('हम राष्ट्रीय गुणवत्ता आश्वासन मानकों (NQAS) के अनुसार', W / 2, 740); g.fillText('आपकी देखभाल को बेहतर बना रहे हैं', W / 2, 790);
   if (P.pct != null) {
@@ -32044,10 +32047,11 @@ async function fpoPosterCanvas(M) {
   }
   var care = fpoHi() ? fpoCare(M) : (function () { var k = _appLang; try { _appLang = 'hi'; return fpoCare(M); } finally { _appLang = k; } })();
   if (care) { g.fillStyle = '#D4891A'; g.font = 'bold 38px ' + F; wrap(care, W / 2, 1240, W - 200, 50); }
-  try { var q = qrcode(0, 'M'); q.addData(fpoVerifyUrl(P.pid)); q.make(); var n = q.getModuleCount(), qs = 230, cell = qs / n, qx = W / 2 - qs / 2, qy = 1340;
+  try { var q = qrcode(0, 'M'); q.addData(fpoVerifyUrl(P.pid)); q.make(); var n = q.getModuleCount(), qs = 290, cell = qs / n, qx = W / 2 - qs / 2, qy = 1335;
     g.fillStyle = '#0F172A'; for (var r = 0; r < n; r++) for (var cc = 0; cc < n; cc++) if (q.isDark(r, cc)) g.fillRect(qx + cc * cell, qy + r * cell, Math.ceil(cell), Math.ceil(cell)); } catch (e) {}
-  g.fillStyle = '#6B7280'; g.font = '26px ' + F; g.fillText('जाँचने के लिए QR स्कैन करें · NHSRC, MoHFW के NQAS मानकों पर आधारित', W / 2, 1620);
-  g.fillText('NQAS | FAST · HealSol Academy', W / 2, 1665);
+  g.fillStyle = '#6B7280'; g.font = '26px ' + F; g.fillText('जाँचने के लिए QR स्कैन करें · NHSRC, MoHFW के NQAS मानकों पर आधारित', W / 2, 1672);
+  g.fillText('NQAS | FAST · HealSol Academy', W / 2, 1712);
+  g.strokeStyle = '#2A8A79'; g.lineWidth = 6; g.strokeRect(3, 3, W - 6, H - 6);
   return c;
 }
 async function fpoPoster(kind) {
