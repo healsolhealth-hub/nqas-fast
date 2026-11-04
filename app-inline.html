@@ -336,6 +336,8 @@ function nfEnrollTypeChanged(sel){
 // the departments unticked on the enrolment form (saved as switched off once the facility is created)
 function nfEnrollDeptsOff(){ return [].map.call(document.querySelectorAll('#sc-enroll-depts input[data-nf-dept]'),function(c){ return c.checked?null:c.getAttribute('data-nf-dept'); }).filter(Boolean); }
 document.addEventListener('DOMContentLoaded',function(){ try{ nfLvlApply(); }catch(e){} try{ nfFillTypeSelect(document.getElementById('sc-enroll-type')); }catch(e){} });
+// short name for greetings: "Dr Sanjay Rao" → "Dr Sanjay" (a title is kept with the first name), "Sunita Devi" → "Sunita" (4 Nov)
+function nfShortName(n){ var w=String(n||'').trim().split(/\s+/); return /^(dr|mr|mrs|ms|smt|shri|sri|sr|sister)\.?$/i.test(w[0]||'')&&w[1]?w[0].replace(/\.$/,'')+' '+w[1]:(w[0]||''); }
 </script>
 <script id="nf-assets">var NF_ASSETS={"uphc-checklist":"#nf-data-uphc-checklist","phc-checklist":"#nf-data-phc-checklist","chc-checklist":"#nf-data-chc-checklist","uphc-hindi":"#nf-data-uphc-hindi","phc-hindi":"#nf-data-phc-hindi","chc-hindi":"#nf-data-chc-hindi","uphc-fix":"#nf-data-uphc-fix","phc-fix":"#nf-data-phc-fix","chc-fix":"#nf-data-chc-fix","sc-checkpoints":"#inline","sign-font":"#inline","pdf-fonts":"#inline","sc-fix":"#inline"};</script>
 <script id="nf-data-loader">// Data files loaded on demand (phase 3): a facility type's checklist is fetched only when a facility of that type opens.
@@ -14314,7 +14316,7 @@ function nfRing(pct,base,size,stroke,col,track){
   return '<svg viewBox="0 0 '+size+' '+size+'" width="'+size+'" height="'+size+'"><circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" stroke="'+track+'" stroke-width="'+stroke+'" fill="none"/>'
     +'<circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" stroke="'+col+'" stroke-width="'+stroke+'" fill="none" stroke-linecap="round" stroke-dasharray="'+a+' '+c+'" transform="rotate(-90 '+size/2+' '+size/2+')"/>'+b+'</svg>';
 }
-function nfFirstName(){ return String(choState.staffName||'').split(' ')[0]||''; }
+function nfFirstName(){ return nfShortName(choState.staffName); }
 function nfIsStaff(){ return appMode==='cho'&&!!choState.facilityCode; }
 
 // ── TODAY ──────────────────────────────────────────────────────
@@ -17533,7 +17535,7 @@ function nfSupportApply(){
 function nfWaPayInfo(){ var c=_nfSup.cfg||{}, a=[]; if(c.upi) a.push('UPI: '+c.upi); if(c.payLink) a.push('Payment link: '+c.payLink); return a.join('\n'); }
 function nfChoOf(f){ var st=(f&&f.staff)||{}, ic='CHO'; try{ ic=(NF_LEVELS[nfTypeOf(f||{})]||{}).inCharge||'CHO'; }catch(e){} var m=Object.keys(st).find(function(k){ return st[k]&&!st[k].disabled&&(st[k].role||ic)===ic; }); return m?{mob:m,name:st[m].name||''}:{mob:(f&&f.contactMobile)||'',name:(f&&f.choName)||''}; }
 function nfWaMsg(kind,code,extra){
-  var f=(scMasterFacilities||{})[code]||{}, cho=nfChoOf(f), nm=f.name||code, first=String(cho.name||'').split(' ')[0];
+  var f=(scMasterFacilities||{})[code]||{}, cho=nfChoOf(f), nm=f.name||code, first=nfShortName(cho.name);
   var price=null; try{ price=typeof nfFacPrice==='function'?nfFacPrice(f):nfPriceFor(f.progId); }catch(e){}
   if(kind==='due') return {mob:cho.mob,text:'Namaste'+(first?' '+first:'')+' ji,\nThe no-cost baseline assessment ('+(typeof nfBlDays==='function'?nfBlDays(f.type):7)+' days) for '+nm+' ('+code+') is complete. To continue the 60-day NQAS | FAST programme, please complete the payment'+(price?' of '+nfMoney(price*1.18)+' ('+nfMoney(price)+' + 18% GST)':'')+' — open the app and tap "Pay & Unlock".'+(nfWaPayInfo()?'\nYou can also pay here:\n'+nfWaPayInfo()+'\nand reply with the payment reference.':'')+'\n\nNeed help? Just reply here.\n— HealSol Academy'};
   if(kind==='paid'){ var lp=extra||f.lastPayment||{}; return {mob:cho.mob,text:'Namaste'+(first?' '+first:'')+' ji,\nWe have received your payment'+(lp.amount||lp.total?' of '+nfMoney(lp.amount||lp.total):'')+' for '+nm+' ('+code+')'+(lp.receiptNo?'. Receipt: '+lp.receiptNo:'')+'.\nYour NQAS | FAST programme is unlocked — open the app to continue. The receipt is in the app under Me → Payment receipts.\n\nThank you!\n— HealSol Academy'}; }
@@ -18144,7 +18146,7 @@ function nfBizListBody(T0){
 function nfBizMsgText(kind,id){
   if(kind==='lead'){ var x=((_nfBiz&&_nfBiz.leads)||{})[id]||{}, first=String(x.contactName||'').replace(/^(dr\.?|mr\.?|ms\.?|mrs\.?)\s+/i,'').split(' ')[0];
     return {mob:x.mobile,to:(x.contactName||'')+(x.orgName?' · '+x.orgName:''),text:'Namaste'+(first?' '+first:'')+' ji,\nThank you for your enquiry about NQAS | FAST'+(x.orgName?' for '+x.orgName:'')+(x.facilityCount?' (~'+x.facilityCount+' facilities)':'')+'. I am from HealSol Academy.\nWhen would be a good time to talk about the programme and the next steps?\n\n— HealSol Academy'}; }
-  var f=(scMasterFacilities||{})[id]||{}, ic=nfBizInCharge(f), first=String(ic.name||'').split(' ')[0], price=nfFacPrice(f), ti=nfTrialInfo(f), pay=typeof nfWaPayInfo==='function'?nfWaPayInfo():'';
+  var f=(scMasterFacilities||{})[id]||{}, ic=nfBizInCharge(f), first=nfShortName(ic.name), price=nfFacPrice(f), ti=nfTrialInfo(f), pay=typeof nfWaPayInfo==='function'?nfWaPayInfo():'';
   var amt=price!=null?' of '+nfMoney(nfBizWithGst(price))+' ('+nfMoney(price)+' + 18% GST)':'';
   if(kind==='due') return {mob:ic.mob,to:ic.name+' · '+(f.name||id),text:'Namaste'+(first?' '+first:'')+' ji,\nThe no-cost baseline assessment ('+nfBlDays(f.type)+' days) for '+(f.name||id)+' ('+id+') is complete. To continue the NQAS | FAST programme, please complete the payment'+amt+' — open the app and tap "Pay & Unlock".'+(pay?'\nYou can also pay here:\n'+pay+'\nand reply with the payment reference.':'')+'\n\n— HealSol Academy'};
   return {mob:ic.mob,to:ic.name+' · '+(f.name||id),text:'Namaste'+(first?' '+first:'')+' ji,\nThe no-cost baseline assessment ('+nfBlDays(f.type)+' days) for '+(f.name||id)+' ('+id+') ends '+(ti&&ti.daysOver===0?'today':ti&&ti.daysOver<0?'in '+(-ti.daysOver)+' day'+(ti.daysOver===-1?'':'s'):'soon')+'. To continue without a break, please complete the payment'+amt+' in the app ("Pay & Unlock").\n\n— HealSol Academy'};
@@ -18723,7 +18725,7 @@ function nfPwPeople(st){
     .sort(function(a,b){ return (b.od-a.od)||String(a.name).localeCompare(String(b.name)); });
 }
 function nfPwText(st,p){
-  var f=st.fac||{}, nm=f.name||st.code, first=String(p.name||'').split(' ')[0], me=scActor()||{}, L=p.acts, N=6;
+  var f=st.fac||{}, nm=f.name||st.code, first=nfShortName(p.name), me=scActor()||{}, L=p.acts, N=6;
   var lines=['Namaste'+(first?' '+first:'')+' ji,','The NQAS | FAST Action Plan for '+nm+' is ready. You have '+L.length+' action'+(L.length===1?'':'s')+(p.od?' ('+p.od+' overdue)':'')+':',''];
   L.slice(0,N).forEach(function(a,i){ lines.push((i+1)+'. '+(a.action||'')+(a.cpId?' ['+a.cpId+']':'')+(a._with?' (together with '+a._with+')':'')+(a.dueDate?' — due '+scFmtDate(a.dueDate):'')+(a._s==='overdue'?' (overdue)':'')); });
   if(L.length>N) lines.push('…and '+(L.length-N)+' more in the app.');
@@ -19433,7 +19435,7 @@ var _nfPwLang='hi';
   var oT=nfPwText;
   nfPwText=function(st,p){
     if(_nfPwLang!=='hi') return oT.apply(this,arguments);
-    var f=st.fac||{}, nm=f.name||st.code, first=String(p.name||'').split(' ')[0], me=scActor()||{}, L=p.acts, N=6;
+    var f=st.fac||{}, nm=f.name||st.code, first=nfShortName(p.name), me=scActor()||{}, L=p.acts, N=6;
     var lines=['नमस्ते'+(first?' '+first:'')+' जी,',nm+' की NQAS | FAST कार्य योजना तैयार है। आपके '+L.length+' कार्य हैं'+(p.od?' ('+p.od+' समय से पीछे)':'')+':',''];
     L.slice(0,N).forEach(function(a,i){ lines.push((i+1)+'. '+nfActText(a,'hi')+(a.cpId?' ['+a.cpId+']':'')+(a._with?' ('+(a._withHi||a._with)+' के साथ)':'')+(a.dueDate?' — '+scFmtDate(a.dueDate)+' तक':'')+(a._s==='overdue'?' (समय निकल गया)':'')); });
     if(L.length>N) lines.push('…और '+(L.length-N)+' कार्य ऐप में।');
@@ -19867,7 +19869,7 @@ async function nfMoSwitch(code){
 
 // ── WhatsApp nudge to a CHO (MO overview, MOIC / District view) ──
 function nfNudgeText(kind,f,s,me){
-  var cho=s.cho, first=String(cho.name||'').split(' ')[0], nm=f.name||'';
+  var cho=s.cho, first=nfShortName(cho.name), nm=f.name||'';
   var lines=['Namaste'+(first?' '+first:'')+' ji,','NQAS | FAST at '+nm+': '+(s.day!=null?'Day '+s.day+' of 60, ':'')+'readiness '+s.pct+'%.'];
   if(s.blLeft) lines.push(s.blLeft+' staff member'+(s.blLeft===1?' has':'s have')+' not finished the 7-day baseline yet.');
   if(s.od) lines.push(s.od+' corrective action'+(s.od===1?' is':'s are')+' overdue — please complete and mark them done.');
@@ -23681,7 +23683,7 @@ function ndTodayHTML() {
   var who = _nd.view ? (_nd.view === 'sup' ? 'Facility Supervisor' : 'Facility view') : nxRoleOf(me);
   var top = '<div class="nx-top">' + (_nd.view ? '<button type="button" class="nx-ib" aria-label="Back to the facility list" title="Back" onclick="ndCloseView()"><i class="ti ti-arrow-left"></i></button>' : '')
     + '<div><small>' + ndEsc(_nd.fac.name || _nd.code) + (pk ? ' <span class="nx-pk"><b>' + ndEsc(_nd.cfg.short || 'UPHC') + '</b><span>' + pk + '</span></span>' : '') + ' · ' + ndEsc(who) + '</small>'
-    + '<h1>' + (_nd.view ? ndEsc(_nd.fac.name || _nd.code) : 'Namaste, ' + ndEsc(String(st.name || '').split(' ')[0])) + '</h1></div>'
+    + '<h1>' + (_nd.view ? ndEsc(_nd.fac.name || _nd.code) : 'Namaste, ' + ndEsc(nfShortName(st.name))) + '</h1></div>'
     + '<span class="nd-qb" id="nd-q" hidden></span>'
     + (_nd.view ? '' : '<button type="button" class="nx-streak" onclick="ndTab(\'ready\')" title="Days in a row with all my cards done" aria-label="Days in a row with all my cards done"><i class="ti ti-flame"></i>' + ndStreak() + '</button>')
     + '<button type="button" class="nx-ib nd-rf" onclick="ndReload()" aria-label="Refresh" title="Refresh"><i class="ti ti-refresh"></i></button></div>';
@@ -31866,7 +31868,7 @@ function fpoDay(M) {
 function fpoStaff(M) { var S = (M.f && M.f.staff) || {}, ic = M.L.inCharge || 'CHO';
   return Object.keys(S).filter(function (m) { return S[m] && !S[m].disabled; }).map(function (m) { var r = S[m]; return { mob: m, name: r.name || m, role: r.role || ic, ic: (r.role || ic) === ic, imp: r.impact || null }; })
     .sort(function (a, b) { return (b.ic - a.ic) || ((b.imp && b.imp.stars || 0) - (a.imp && a.imp.stars || 0)) || String(a.name).localeCompare(String(b.name)); }); }
-function fpoMyName(M) { var S = (M.f && M.f.staff) || {}, r = S[M.mob]; var n = (r && r.name) || (typeof choState !== 'undefined' && choState.staffName) || ''; var w = String(n).trim().split(/\s+/); return /^(dr|dr\.|mr|mrs|ms|smt|shri|sri)$/i.test(w[0] || '') && w[1] ? w[0].replace(/\.$/, '') + ' ' + w[1] : (w[0] || ''); }
+function fpoMyName(M) { var S = (M.f && M.f.staff) || {}, r = S[M.mob]; var n = (r && r.name) || (typeof choState !== 'undefined' && choState.staffName) || ''; return nfShortName(n); }
 function fpoInit(n) { var p = String(n || '').trim().split(/\s+/); return ((p[0] || '?')[0] + (p.length > 1 ? p[p.length - 1][0] : '')).toUpperCase(); }
 
 // ── open / close ──
