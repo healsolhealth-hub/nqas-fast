@@ -6,7 +6,7 @@
 // • Nothing else is touched: Firebase database / sign-in / functions, App Check, Razorpay, WhatsApp, the card page.
 // Emergency switch: open the app with ?nosw=reset (removes this worker and its caches on that phone), or publish a sw.js
 // that only unregisters itself.
-const BUILD = "28acea8b5b26";
+const BUILD = "bcbfa5a59f93";
 const ASSETS = [
  "assets/data-sc-days.3fc0d19725.js",
  "assets/dept-admin.ee8d5ffab0.js",
@@ -114,7 +114,8 @@ const ASSETS = [
  "assets/shared-pdf-reports.1da837fa8c.js",
  "assets/shared-pdf.da58c8e364.js",
  "assets/shared-profile.126eb81480.js",
- "assets/shared-profile.18af59bc0f.css",
+ "assets/shared-profile.22a6b98558.css",
+ "assets/shared-push.59cb00ab3b.js",
  "assets/shared-registration.6833f0a40c.js",
  "assets/shared-registry.0152bb4061.css",
  "assets/shared-registry.a19478cbcf.js",
@@ -209,4 +210,17 @@ self.addEventListener('fetch', e => {
     return;                                             // manifest, icons, app-inline.html …: normal network
   }
   if (LIB_RE.test(req.url)) e.respondWith(cacheFirst(LIBS, req));
+});
+
+// ── Push notifications (4 Nov 2026): messages come from the server (functions/push.js) as data {title, body, url, tag} ──
+self.addEventListener('push', e => {
+  let d = {}; try { const j = e.data ? e.data.json() : {}; d = j.data || j.notification || j || {}; } catch (x) { try { d = { body: e.data.text() }; } catch (y) {} }
+  const title = d.title || 'NQAS | FAST';
+  e.waitUntil(self.registration.showNotification(title, { body: d.body || '', tag: d.tag || 'nqf', renotify: true, icon: scopeUrl('icons/icon-192.png'), badge: scopeUrl('icons/icon-192.png'), data: { url: d.url || scopeUrl('./') } }));
+});
+self.addEventListener('notificationclick', e => {
+  e.notification.close(); const url = (e.notification.data && e.notification.data.url) || scopeUrl('./');
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    for (const c of list) { if (c.url.indexOf(self.registration.scope) === 0 && 'focus' in c) return c.focus(); }
+    return self.clients.openWindow ? self.clients.openWindow(url) : null; }));
 });
