@@ -6,7 +6,7 @@
 // • Nothing else is touched: Firebase database / sign-in / functions, App Check, Razorpay, WhatsApp, the card page.
 // Emergency switch: open the app with ?nosw=reset (removes this worker and its caches on that phone), or publish a sw.js
 // that only unregisters itself.
-const BUILD = "f3cfddb9b430";
+const BUILD = "389a1914c8a2";
 const ASSETS = [
  "assets/data-sc-days.3fc0d19725.js",
  "assets/dept-admin.ee8d5ffab0.js",
@@ -115,9 +115,9 @@ const ASSETS = [
  "assets/shared-payments.12fb4e5a71.js",
  "assets/shared-pdf-reports.1da837fa8c.js",
  "assets/shared-pdf.da58c8e364.js",
- "assets/shared-profile.126eb81480.js",
  "assets/shared-profile.22a6b98558.css",
- "assets/shared-push.59cb00ab3b.js",
+ "assets/shared-profile.2a39e064e9.js",
+ "assets/shared-push.827fb3f07d.js",
  "assets/shared-registration.6833f0a40c.js",
  "assets/shared-registry.0152bb4061.css",
  "assets/shared-registry.a19478cbcf.js",
@@ -129,7 +129,7 @@ const ASSETS = [
  "assets/shared-startdate.643905932c.js",
  "assets/shared-vocab.22993a26fc.js",
  "assets/shared-whatsapp.7bb495c6df.js",
- "assets/types-settings.c9093f9dc9.js",
+ "assets/types-settings.3893684a3e.js",
  "assets/vendor-poppins-font.0ea9314335.css",
  "assets/vendor-qrcode.fabb956c75.js",
  "icons/apple-touch-icon.png",

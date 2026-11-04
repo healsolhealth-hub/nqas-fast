@@ -12,7 +12,12 @@
 <link rel="preconnect" href="https://www.gstatic.com"/>
 <script id="nf-asset-fallback">// Step 5: the published page keeps big blocks in assets/…; each of those tags calls this if it cannot load (for example
 // an upload without the assets folder). The page then opens app-inline.html — the same app as one file — instead.
-function nfAssetFail(el){ try{ console.warn('[NQAS] asset missing:',el&&(el.src||el.href)); location.replace('app-inline.html'+location.search+location.hash); }catch(e){} }
+// 4 Nov 2026: first reload once (a new version was just published and this browser still had the old page), and only then
+// open the one-file copy — that copy is 15 MB and freezes slow phones.
+function nfAssetFail(el){ try{ console.warn('[NQAS] asset missing:',el&&(el.src||el.href));
+  var k='nf_asset_retry', t=+(sessionStorage.getItem(k)||0);
+  if(!t||Date.now()-t>60000){ sessionStorage.setItem(k,String(Date.now())); var u=location.pathname+(location.search?location.search+'&':'?')+'v='+Date.now()+location.hash; location.replace(u); return; }
+  location.replace('app-inline.html'+location.search+location.hash); }catch(e){ try{ location.replace('app-inline.html'); }catch(x){} } }
 </script>
 <!-- Razorpay checkout: loaded when someone pays (shared/payments.js) -->
 <title>NQAS | FAST · HealSol Academy</title>
@@ -58,6 +63,10 @@ var NF_APP={
   verifyBase:NF_STAGE?'https://staging.thehealsol.com/':'https://www.thehealsol.com/nqas-fast-sc-certificate'
 };
 if(NF_STAGE) NF_APP.appCheckKey='';   // staging runs without App Check (its functions do not enforce it)
+// Safe mode (4 Nov 2026): app.thehealsol.com/?safe=1 starts without reCAPTCHA / App Check, the service worker, reminders and the
+// automatic Facility Profile — to find out which of them stops a browser; ?safe=0 ends it. Kept for this tab only.
+var NF_SAFE=(function(){ try{ var q=location.search||''; if(/[?&]safe=1\b/.test(q)) sessionStorage.setItem('nf_safe','1'); if(/[?&]safe=0\b/.test(q)) sessionStorage.removeItem('nf_safe'); return sessionStorage.getItem('nf_safe')==='1'; }catch(e){ return /[?&]safe=1\b/.test(location.search||''); } })();
+if(NF_SAFE){ NF_APP.appCheckKey=''; try{ console.warn('[NQAS] safe mode: no reCAPTCHA, no service worker, no reminders'); }catch(e){} }
 // staging ribbon, so nobody mistakes the test copy for the live app
 if(NF_STAGE) document.addEventListener('DOMContentLoaded',function(){ try{ var r=document.createElement('div'); r.id='nf-stage-ribbon';
   r.textContent='TEST SITE · staging data (healsol-nqas-uphc) — not the live app';
@@ -31848,7 +31857,7 @@ async function fpoOpen(auto) {
 function fpoClose() { var ov = document.getElementById('fpo-ov'); if (ov) ov.remove(); document.body.classList.remove('fpo-open'); }
 function fpoContinue() { fpoClose(); var M = fpoCtx(); try { if (M && M.dept) ndTab('today'); else if (typeof nfTab === 'function') nfTab('today'); } catch (e) {} }
 function fpoSeenToday(M) { try { return localStorage.getItem('fpo_day_' + M.code + '_' + M.mob) === fpoToday(); } catch (e) { return true; } }
-function fpoAuto() { try { if ((navigator.webdriver || window.__dq) && !window.__fpoAuto) return; if (document.getElementById('fpo-ov')) return; var M = fpoCtx(); if (!M || fpoSeenToday(M)) return; fpoOpen(true); } catch (e) {} }
+function fpoAuto() { try { if ((navigator.webdriver || window.__dq) && !window.__fpoAuto) return; if (typeof NF_SAFE !== 'undefined' && NF_SAFE) return; if (document.getElementById('fpo-ov')) return; var M = fpoCtx(); if (!M || fpoSeenToday(M)) return; fpoOpen(true); } catch (e) {} }
 
 // ── the page ──
 function fpoRender() {
@@ -32503,7 +32512,7 @@ function npAskNo() { npAskClose(); npLS('nfp_skip', String(Date.now())); }
 async function npTick() {
   try {
     if (!npLoggedIn() || !npSupported()) return;
-    if (window.navigator.webdriver && !window.__npAuto) return;
+    if ((window.navigator.webdriver && !window.__npAuto) || (typeof NF_SAFE !== 'undefined' && NF_SAFE)) return;
     // already on: make sure this phone is saved for whoever is logged in now (shared phones)
     if (Notification.permission === 'granted' && npLS('nfp_on')) { if (_np.reg !== npKey()) { _np.reg = npKey(); var t = await npToken().catch(function () { return null; }); if (t) await npSave(t).catch(function () {}); } return; }
     if (_np.asked || Notification.permission === 'denied' || document.getElementById('np-ask')) return;
@@ -32758,7 +32767,7 @@ function nfDeptCardScore(dept, day, mob) {
       if(window.caches) caches.keys().then(function(ks){ ks.forEach(function(k){ if(/^nqf-/.test(k)) caches.delete(k); }); }).catch(function(){});
       return;
     }
-    if(/[?&]nosw\b/.test(q)) return;
+    if(/[?&]nosw\b/.test(q)||(typeof NF_SAFE!=='undefined'&&NF_SAFE)) return;
     if(!(location.protocol==='https:'||h==='localhost'||h==='127.0.0.1')) return;
     if(!document.querySelector('link[rel="manifest"]')) return;
     var go=function(){ navigator.serviceWorker.register('sw.js').catch(function(e){ console.warn('[PWA] service worker not registered:',e&&e.message); }); };
