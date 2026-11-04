@@ -77,3 +77,14 @@ body.fpo-open{overflow:hidden}
 .fpo-partner img{height:28px;margin:4px 4px 0;vertical-align:middle}
 .fpo-chip{display:inline-block;margin-top:6px;background:#E8F5F2;color:#1E6B5E;border:0;border-radius:20px;padding:4px 11px;font:600 11.5px 'Poppins',sans-serif;cursor:pointer}
 .fpo-chiprow{padding:4px 0 2px}
+/* Demo facilities card (Settings → Programme rules) */
+.dm-st{font-size:12.5px;background:#F3F4F6;border-radius:10px;padding:8px 10px;margin:8px 0}
+.dm-st.ok{background:#DCFCE7;color:#14532D}
+.dm-pw label{display:block;font-size:12.5px;font-weight:600;color:#374151}
+.dm-pw input{display:block;width:100%;max-width:340px;margin-top:4px;padding:9px 10px;border:1px solid #D1D5DB;border-radius:8px;font:inherit}
+.dm-pw small{display:block;color:#6B7280;font-size:11.5px;margin-top:4px}
+.dm-msg{font-size:12.5px;color:#1E6B5E;margin:8px 0;min-height:1em}.dm-msg.err{color:#B91C1C}
+.dm-tab{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+.dm-tab th,.dm-tab td{text-align:left;padding:6px 8px;border-bottom:1px solid #E5E7EB}
+.dm-tab th{font-size:11px;color:#6B7280;text-transform:uppercase}
+.dm-tip{font-size:12px;color:#374151;margin-top:8px}
