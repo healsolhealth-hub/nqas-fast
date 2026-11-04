@@ -30481,10 +30481,10 @@ function rgPromptHTML(f) {
 // Approve & enrol → approveSignup (server). Mark contacted / Close / Decline write the status (HealSol may write sc_leads).
 // Replaces the old Leads panel of the retired Facilities screen. Today shows "N sign-ups to approve · N new enquiries".
 var _nfEq = { kind: '', type: '', st: 'open', busy: '' };
-var NF_EQ_KIND = { signup: ['Sign-up', 't'], bulk: ['District / bulk', 'q'], join: ['Request to join', 'o'], champion: ['Quality Champion', 'g'] };
+var NF_EQ_KIND = { signup: ['Sign-up', 't'], bulk: ['District / bulk', 'q'], join: ['Request to join', 'o'], champion: ['Quality Champion', 'g'], delete: ['Delete account', 'x'] };
 function nfEqE(s) { return typeof scEsc === 'function' ? scEsc(s) : String(s == null ? '' : s); }
 function nfEqJ(s) { return typeof scJs === 'function' ? scJs(s) : String(s || '').replace(/'/g, "\\'"); }
-function nfEqKind(x) { return x.source === 'signup' ? 'signup' : x.source === 'join' ? 'join' : x.source === 'champion' ? 'champion' : 'bulk'; }
+function nfEqKind(x) { return x.source === 'signup' ? 'signup' : x.source === 'join' ? 'join' : x.source === 'champion' ? 'champion' : x.source === 'delete' ? 'delete' : 'bulk'; }
 function nfEqOpen(x) { return ['approved', 'declined', 'closed'].indexOf(x.status || 'new') < 0; }
 function nfEqRows() { var L = (typeof _nfBiz !== 'undefined' && _nfBiz.leads) || {}; return Object.keys(L).map(function (k) { return Object.assign({ _k: k }, L[k] || {}); }).filter(function (x) { return x.orgName || x.contactName; }); }
 function nfEqTypes(x) { var o = {}; if (x.ftype) o[x.ftype] = 1; var c = x.counts || {}; Object.keys(c).forEach(function (t) { if (c[t]) o[t] = c[t]; }); return o; }
@@ -30510,6 +30510,7 @@ function nfEqRowHTML(x) {
   if (k === 'signup') line2 = x.rid ? '<small class="eq-g">Found in the registry' + (x.nin ? ' · NIN ' + nfEqE(x.nin) : '') + '</small>' : '<small class="eq-a">Typed by the applicant' + (x.nin ? ' · NIN ' + nfEqE(x.nin) : '') + ' — Approve adds it to the registry too</small>';
   else if (k === 'champion') { var q = x.champ || {}, NQ = { certified: 'NQAS-certified facility', process: 'NQAS in process', no: 'Not yet certified' };
     line2 = '<small class="eq-g">' + nfEqE([x.ftype ? (NF_LEVELS[x.ftype] || {}).short || x.ftype.toUpperCase() : '', x.nin ? 'NIN ' + x.nin : '', q.years ? q.years + ' yrs in role' : '', NQ[q.nqas] || '', q.reach ? 'can support ' + q.reach + ' facilities' : '', q.langs ? 'guides in ' + q.langs : ''].filter(Boolean).join(' · ')) + '</small>'; }
+  else if (k === 'delete') line2 = '<small class="eq-a">Close the login (People → remove) and delete the personal details within 30 days, then tell them on WhatsApp' + (x.message ? ' · reason: ' + nfEqE(x.message) : '') + '</small>';
   else if (cnt.length) line2 = '<small class="eq-b">' + nfEqE(cnt.join(' · ')) + ' = ' + nfEqE(x.facilityCount || '') + ' facilities</small>';
   else if (x.facilityCount) line2 = '<small class="eq-b">~' + nfEqE(x.facilityCount) + ' facilities</small>';
   if (x.checks) line2 += '<small class="eq-m">Applicant checked their request ' + nfEqE(x.checks) + '×' + (x.checkedAt ? ' · last ' + nfEqE(nfEqWhen(x.checkedAt)) : '') + '</small>';
@@ -30542,7 +30543,7 @@ function nfEqHTML() {
   return '<div class="nfo-card eq" id="nf-eq"><div class="eq-head"><div><b>Enquiries &amp; sign-ups</b><small>' + (toAp ? toAp + ' sign-up' + (toAp === 1 ? '' : 's') + ' to approve · ' : '') + newE + ' new enquir' + (newE === 1 ? 'y' : 'ies') + ' · open ones always show, whatever dates you pick</small></div>'
     + '<div class="eq-hr"><select aria-label="Status" onchange="nfEqSetF(\'st\',this.value)">' + [['open', 'Open (new + contacted)'], ['approved', 'Approved'], ['closed', 'Closed / declined'], ['all', 'All']].map(function (o) { return '<option value="' + o[0] + '"' + (_nfEq.st === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>'
     + '<button type="button" class="nfo-ic" title="Refresh" aria-label="Refresh enquiries" onclick="nfEqRefresh()"><i class="ti ti-refresh"></i></button></div></div>'
-    + '<div class="eq-kinds" role="tablist" aria-label="Kind">' + kb('', 'All') + kb('signup', 'Sign-ups to approve') + kb('bulk', 'District / bulk') + kb('join', 'Request to join') + kb('champion', 'Quality Champions') + '</div>'
+    + '<div class="eq-kinds" role="tablist" aria-label="Kind">' + kb('', 'All') + kb('signup', 'Sign-ups to approve') + kb('bulk', 'District / bulk') + kb('join', 'Request to join') + kb('champion', 'Quality Champions') + kb('delete', 'Account deletion') + '</div>'
     + '<div class="eq-types"><span>Facility type</span>' + tb('', 'All') + tb('sc', 'SC') + tb('uphc', 'UPHC') + tb('phc', 'PHC') + tb('chc', 'CHC') + '<span class="eq-tn">rows · facilities asked about</span></div>'
     + '<div class="eq-list">' + (rows.length ? rows.map(nfEqRowHTML).join('') : '<div class="eq-empty">Nothing here' + (_nfEq.st === 'open' ? ' — no open enquiries or sign-ups.' : '.') + '</div>') + '</div>'
     + '<div class="eq-foot">Self sign-up: Settings → Programme rules → <button type="button" class="hs-link" onclick="_hs.stab=\'rules\';nfAdminView(\'setup\')">Self sign-up</button> (no-cost baseline at once, per type)</div></div>';
@@ -31838,6 +31839,12 @@ body.fpo-open{overflow:hidden}
 .pm-dot{width:12px;height:12px;border-radius:50%;flex:none}
 .pm-rt{flex:1;min-width:200px}.pm-rt b{display:block;font-size:13px}.pm-rt small{display:block;font-size:11.5px;color:#6B7280}.pm-st{color:#1E6B5E!important}
 .pm-ra{display:flex;gap:4px;flex-wrap:wrap}
+/* Google Play app + Delete my account (4 Nov 2026) */
+.pl-note .pl-p{margin:0 0 8px;font-size:13.5px;line-height:1.5;color:var(--t2,#475654)}.pl-note .pl-sm{font-size:12px;color:var(--t3,#6B7A78)}
+.nf-play .nf-l-legal a[href*="#about"]{display:none}
+.pl-del{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px 2px 8px;padding-top:12px;border-top:1px solid var(--br,#E2EAE8)}
+.pl-del-b{background:none;border:0;color:#B42318;font:inherit;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;padding:6px 0;cursor:pointer}
+.pl-del-l{font-size:12.5px;color:var(--t3,#6B7A78)}
 </style>
 <script id="fpo-js">// ══════════════════════════════════════════════════════════════
 // FACILITY PROFILE — the first page of the day for facility staff (SC · UPHC · PHC · CHC), approved 3 Nov 2026
@@ -32895,6 +32902,87 @@ async function pmMove(id, dir) { var L = _pm.list || [], i = L.findIndex(functio
       if (su && !el) { el = document.createElement('div'); el.id = 'hs-promos'; el.dataset.nfv = 'setup'; el.className = 'nfo-card hs-signup'; el.setAttribute('data-hsg', 'rules'); su.insertAdjacentElement('afterend', el); pmAdminRender(); } } catch (e) { console.warn('[promos]', e); }
     return r; }; }
   if (typeof hsSetupGroup === 'function') { var g = hsSetupGroup; hsSetupGroup = function (el) { if (el && el.id === 'hs-promos') return 'rules'; return g.apply(this, arguments); }; }
+})();
+</script>
+<script id="pl-js">// ══════════════════════════════════════════════════════════════
+// GOOGLE PLAY APP (4 Nov 2026)
+//   The Play Store app (package com.thehealsol.nqasfast) is this website inside a Trusted Web Activity, opened at
+//   /?src=play (nfIsPlay() in promos.js). In it:
+//   · no prices and no way to pay: the "Day 8 onwards" unlock cards (Sub-Centre and UPHC / PHC / CHC), bank transfer
+//     and Razorpay are replaced by a plain note — access is arranged with HealSol / the district outside the app
+//     (Google Play payments policy). "Website only" promotions are already hidden (promos.js).
+//   · everyone (website too) can ask to delete their account from Me → "Delete my account"; the request reaches
+//     HealSol as an enquiry (source 'delete', ref DEL-…) and the person is told what is deleted and what is kept.
+//     The same request can be made without the app at delete-account.html (Google Play needs both).
+// ══════════════════════════════════════════════════════════════
+var NF_PLAY_PKG = 'com.thehealsol.nqasfast';
+function plHi() { return typeof _appLang !== 'undefined' && _appLang === 'hi'; }
+function plT(en, hi) { return plHi() && hi ? hi : en; }
+function plE(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function plOn() { return typeof nfIsPlay === 'function' && nfIsPlay(); }
+
+// ── the note shown instead of a price / pay button ──
+function plAccessHTML() {
+  return '<div class="upgrade-card pl-note"><div class="upgrade-hd"><div style="font-size:30px;margin-bottom:6px;">🔒</div>'
+    + '<div style="font-size:16px;font-weight:800;">' + plE(plT('Day 8 onwards is part of the full programme', 'दिन 8 से आगे पूरा कार्यक्रम है')) + '</div></div>'
+    + '<div class="upgrade-body"><p class="pl-p">' + plE(plT('Your facility\'s access to the full programme is arranged by HealSol Academy with your facility in-charge or district. Once it is active, the next days open here automatically.',
+      'पूरे कार्यक्रम की सुविधा HealSol Academy आपके केंद्र प्रभारी या ज़िले के साथ तय करती है। सक्रिय होते ही अगले दिन यहाँ अपने-आप खुल जाएँगे।')) + '</p>'
+    + '<p class="pl-p pl-sm">' + plE(plT('Your baseline work is saved.', 'आपका बेसलाइन काम सहेजा हुआ है।')) + '</p></div></div>';
+}
+function plNoPay() { if (typeof showToast === 'function') showToast(plT('Payments are not available in this app. Your access is arranged with HealSol Academy.', 'इस ऐप में भुगतान उपलब्ध नहीं है। आपकी सुविधा HealSol Academy के साथ तय होती है।'), 'info'); }
+
+(function () {
+  var hook = function () {
+    if (!plOn()) return;
+    try { document.documentElement.classList.add('nf-play'); } catch (e) {}
+    // Sub-Centre: the upgrade card on Day 8+
+    if (typeof renderUpgradeCard === 'function' && !renderUpgradeCard._pl) { renderUpgradeCard = function (container) { if (container) container.innerHTML = plAccessHTML(); }; renderUpgradeCard._pl = 1; }
+    // UPHC / PHC / CHC: the unlock card
+    if (typeof nduCardShell === 'function' && !nduCardShell._pl) { nduCardShell = function () { return '<div id="ndu-card">' + plAccessHTML() + '</div>'; }; nduCardShell._pl = 1; }
+    if (typeof nduFill === 'function' && !nduFill._pl) { nduFill = async function () {}; nduFill._pl = 1; }
+    if (typeof nduPay === 'function' && !nduPay._pl) { nduPay = async function () { plNoPay(); }; nduPay._pl = 1; }
+    // bank transfer and Razorpay, wherever they are opened from
+    if (typeof bpOpen === 'function' && !bpOpen._pl) { bpOpen = async function () { plNoPay(); }; bpOpen._pl = 1; }
+    if (typeof phcStartCheckout === 'function' && !phcStartCheckout._pl) { phcStartCheckout = async function () { plNoPay(); }; phcStartCheckout._pl = 1; }
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hook); else setTimeout(hook, 0);
+})();
+
+// ── Delete my account (Me page, all staff; website and Play app) ──
+function plWho() {
+  var mob = (typeof _nfAuth !== 'undefined' && _nfAuth && _nfAuth.claims && _nfAuth.claims.mob) || '', name = '', fac = '';
+  try { if (typeof choState !== 'undefined' && choState) { name = choState.staffName || ''; fac = (choState.facility && choState.facility.name) || choState.facilityCode || ''; } } catch (e) {}
+  try { var dv = document.getElementById('nf-dept-app'); if (dv && dv.offsetParent !== null && typeof _nd !== 'undefined' && _nd && _nd.fac) { fac = _nd.fac.name || _nd.code || fac; var r = ((_nd.fac.staff || {})[mob]) || {}; name = r.name || name; } } catch (e) {}
+  return { mob: mob, name: name, fac: fac };
+}
+function plDelHTML() {
+  return '<div class="pl-del" id="pl-del"><button type="button" class="pl-del-b" onclick="plDelete()"><i class="ti ti-user-x"></i> ' + plE(plT('Delete my account', 'मेरा खाता हटाएँ')) + '</button>'
+    + '<a class="pl-del-l" href="legal.html#privacy" target="_blank" rel="noopener">' + plE(plT('Privacy policy', 'गोपनीयता नीति')) + '</a></div>';
+}
+async function plDelete() {
+  var W = plWho(); if (!W.mob) { if (typeof showToast === 'function') showToast(plT('Please sign in again first.', 'पहले फिर से लॉग इन करें।'), 'err'); return; }
+  var v = await scDialog({ title: plT('Delete my account', 'मेरा खाता हटाएँ'), icon: '🗑', okLabel: plT('Send request', 'अनुरोध भेजें'), wide: true,
+    message: plT('HealSol Academy will close your login and delete your personal details (name, mobile number, email) within 30 days, and confirm to you on this mobile number. '
+      + 'The facility\'s programme records (checklists, scores, actions) stay with the facility, without your name, because they belong to the facility\'s NQAS work. Payment records are kept as the law requires.',
+      'HealSol Academy 30 दिनों में आपका लॉग इन बंद करके आपकी निजी जानकारी (नाम, मोबाइल नंबर, ईमेल) हटा देगी और इसी मोबाइल नंबर पर पुष्टि करेगी। '
+      + 'केंद्र के कार्यक्रम रिकॉर्ड (चेकलिस्ट, स्कोर, कार्य) आपके नाम के बिना केंद्र के पास रहेंगे, क्योंकि वे केंद्र के NQAS काम का हिस्सा हैं। भुगतान रिकॉर्ड क़ानून के अनुसार रखे जाते हैं।'),
+    fields: [{ key: 'reason', label: plT('Reason (optional)', 'कारण (वैकल्पिक)'), type: 'textarea', value: '', maxLength: 300 },
+      { key: 'ok', type: 'checklist', value: [], options: [{ value: 'y', label: plT('I understand and want my account deleted', 'मैं समझता/समझती हूँ और अपना खाता हटवाना चाहता/चाहती हूँ') }] }],
+    validate: function (x) { return (x.ok || []).length ? null : plT('Tick the box to confirm.', 'पुष्टि के लिए बॉक्स पर टिक करें।'); } });
+  if (!v || !(v.ok || []).length) return;
+  try {
+    var r = await nfCall('submitEnquiry', { source: 'delete', orgName: W.fac || 'NQAS | FAST user', contactName: W.name || W.mob, mobile: W.mob, message: String(v.reason || '').slice(0, 300) });
+    await scDialog({ title: plT('Request sent', 'अनुरोध भेजा गया'), icon: '✅', okLabel: 'OK', message: plT('Reference ' + (r && r.ref || '') + '. HealSol Academy will confirm on ' + W.mob + ' within 30 days.', 'संदर्भ ' + (r && r.ref || '') + '। HealSol Academy 30 दिनों में ' + W.mob + ' पर पुष्टि करेगी।') });
+  } catch (e) { if (typeof showToast === 'function') showToast((e && e.message) || plT('Could not send. Check the internet and try again.', 'भेजा नहीं जा सका। इंटरनेट जाँचकर फिर कोशिश करें।'), 'err'); }
+}
+(function () {
+  var hook = function () {
+    if (typeof nfRenderMe === 'function' && !nfRenderMe._pl) { var m = nfRenderMe; nfRenderMe = function () { var x = m.apply(this, arguments);
+      try { var p = document.getElementById('nf-me'); if (p && !p.querySelector('.pl-del')) p.insertAdjacentHTML('beforeend', plDelHTML()); } catch (e) {} return x; }; nfRenderMe._pl = 1; }
+    if (typeof ndRender === 'function' && !ndRender._pl) { var d = ndRender; ndRender = function () { var x = d.apply(this, arguments);
+      try { if (_nd && _nd.tab === 'me' && !_nd.view && !_nd.card && !_nd.screen) { var top = document.querySelector('.nx'); if (top && !top.querySelector('.pl-del')) top.insertAdjacentHTML('beforeend', plDelHTML()); } } catch (e) {} return x; }; ndRender._pl = 1; }
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hook); else setTimeout(hook, 0);
 })();
 </script>
 <script id="nf-day-score">// ══════════════════════════════════════════════════════════════
