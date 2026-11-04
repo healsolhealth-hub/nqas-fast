@@ -63,6 +63,11 @@ var NF_APP={
   verifyBase:NF_STAGE?'https://staging.thehealsol.com/':'https://www.thehealsol.com/nqas-fast-sc-certificate'
 };
 if(NF_STAGE) NF_APP.appCheckKey='';   // staging runs without App Check (its functions do not enforce it)
+// 4 Nov 2026: App Check (reCAPTCHA Enterprise) is switched OFF on live. From ~11 AM today its script froze normal Chrome windows
+// that are signed in to a Google account ("Page Unresponsive", "reCAPTCHA Timeout"); Incognito, Firefox and ?safe=1 worked.
+// Nothing enforces App Check yet (database, sign-in and functions all worked in safe mode), so the app loses nothing.
+// To try it again later: ?appcheck=1 turns it on for one tab (sessionStorage) — once it no longer freezes, remove this line.
+(function(){ try{ var q=location.search||''; if(/[?&]appcheck=1\b/.test(q)) sessionStorage.setItem('nf_ac','1'); if(/[?&]appcheck=0\b/.test(q)) sessionStorage.removeItem('nf_ac'); if(sessionStorage.getItem('nf_ac')!=='1') NF_APP.appCheckKey=''; }catch(e){ NF_APP.appCheckKey=''; } })();
 // Safe mode (4 Nov 2026): app.thehealsol.com/?safe=1 starts without reCAPTCHA / App Check, the service worker, reminders and the
 // automatic Facility Profile — to find out which of them stops a browser; ?safe=0 ends it. Kept for this tab only.
 var NF_SAFE=(function(){ try{ var q=location.search||''; if(/[?&]safe=1\b/.test(q)) sessionStorage.setItem('nf_safe','1'); if(/[?&]safe=0\b/.test(q)) sessionStorage.removeItem('nf_safe'); return sessionStorage.getItem('nf_safe')==='1'; }catch(e){ return /[?&]safe=1\b/.test(location.search||''); } })();
