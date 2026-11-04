@@ -189,7 +189,7 @@ async function nfVerifyBoot(){
   pg.innerHTML='<div class="nfv-top"><img src="'+SC_BRAND.logoNqas+'" alt="NQAS"><img src="'+SC_BRAND.logoHealsol+'" alt="HealSol Academy"></div><div class="nfv-st" style="background:#fff;">Checking certificate '+scEsc(id)+'…</div>';
   document.body.appendChild(pg);
   var rec=null;
-  if(/^NQF-[A-Z]+-\d{4}-\d{5}$/.test(id)){ try{ if(typeof db==='undefined'||!db) initFirebase(); }catch(e){}
+  if(/^NQF-[A-Z]+-\d{4}-(\d{5}|[A-Z0-9]{6})$/.test(id)){ try{ if(typeof db==='undefined'||!db) initFirebase(); }catch(e){}
     for(var i=0;i<50&&(typeof db==='undefined'||!db);i++) await new Promise(function(r){ setTimeout(r,100); });
     rec=await fbGet('sc_cert_public/'+id); }
   var home=NF_APP_HOME;

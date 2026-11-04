@@ -16916,7 +16916,7 @@ function jnStatusCard(R){
 // a failed log in from a mobile whose sign-up is still waiting → say so instead of "wrong password"
 async function nfPendingHint(id){
   var mob=String(id||'').replace(/\D/g,'').replace(/^(91|0)(?=\d{10}$)/,''); if(!/^[6-9]\d{9}$/.test(mob)) return;
-  try{ var r=await nfCall('requestStatus',{mode:'login',mobile:mob}); if(!r||!r.pending) return;
+  try{ var r=await nfCall('requestStatus',{mode:'login',mobile:mob}); if(!r||!r.pending) return; if(!r.ref){ try{ var sv=JSON.parse(localStorage.getItem('nf_req')||'{}')||{}; if(sv.ref&&(!sv.mob||sv.mob===mob)) r.ref=sv.ref; }catch(x){} }   // the server no longer sends the reference (security review); this phone may remember it
     var e=document.getElementById('nf-err'); if(!e) return;
     e.innerHTML=jE(jt('Your request'))+' <b>'+jE(r.ref||'')+'</b> '+jE(jt('is still waiting for approval by HealSol Academy. You will get your password once it is approved.'))+' <button type="button" class="nf-l-link" onclick="jnOpenStatus(\''+jE(r.ref||'')+'\',\''+mob+'\')">'+jE(jt('Check my request'))+'</button>';
     e.style.display='block'; }catch(err){}
@@ -17391,7 +17391,7 @@ async function nfVerifyBoot(){
   pg.innerHTML='<div class="nfv-top"><img src="'+SC_BRAND.logoNqas+'" alt="NQAS"><img src="'+SC_BRAND.logoHealsol+'" alt="HealSol Academy"></div><div class="nfv-st" style="background:#fff;">Checking certificate '+scEsc(id)+'…</div>';
   document.body.appendChild(pg);
   var rec=null;
-  if(/^NQF-[A-Z]+-\d{4}-\d{5}$/.test(id)){ try{ if(typeof db==='undefined'||!db) initFirebase(); }catch(e){}
+  if(/^NQF-[A-Z]+-\d{4}-(\d{5}|[A-Z0-9]{6})$/.test(id)){ try{ if(typeof db==='undefined'||!db) initFirebase(); }catch(e){}
     for(var i=0;i<50&&(typeof db==='undefined'||!db);i++) await new Promise(function(r){ setTimeout(r,100); });
     rec=await fbGet('sc_cert_public/'+id); }
   var home=NF_APP_HOME;
@@ -32580,6 +32580,114 @@ async function npAnnounce(dry) {
       if (su && !el) { el = document.createElement('div'); el.id = 'hs-push'; el.dataset.nfv = 'setup'; el.className = 'nfo-card hs-signup'; el.setAttribute('data-hsg', 'rules'); su.insertAdjacentElement('afterend', el); npCfgRender(); } } catch (e) { console.warn('[push]', e); }
     return r; }; }
   if (typeof hsSetupGroup === 'function') { var g = hsSetupGroup; hsSetupGroup = function (el) { if (el && el.id === 'hs-push') return 'rules'; return g.apply(this, arguments); }; }
+})();
+</script>
+<script id="nd-perf">// ══════════════════════════════════════════════════════════════
+// DEPARTMENT APP SPEED (4 Nov 2026) — measured on a Day-30 CHC (4,589 checkpoints, 13 departments, 1,000+ actions): every tab
+// took ~1 s on a low-cost phone because the same lists were worked out thousands of times per screen (ndStaff 19,000×,
+// ndRecheckIds 429× over every action, the Today badge counting all checks) and the Actions tab drew every action card.
+//  1 Remember results while one screen is being drawn: cleared at the start of every ndRender, after every local change
+//    (ndApplyLocal / ndPut) and by itself as soon as the current piece of work ends (microtask), so nothing can go stale.
+//  2 ndRecheckIds: the "fixed, re-check due" actions grouped by department once, not filtered from all actions each time.
+//  3 Actions: the cards inside each person's list (and "Closed") are drawn when the list is opened.
+// ══════════════════════════════════════════════════════════════
+var _ndM = null;
+function ndMemoBox() { if (!_ndM) { _ndM = {}; Promise.resolve().then(function () { _ndM = null; }); } return _ndM; }
+function ndMemoClear() { _ndM = null; }
+function ndMemoize(name, copy) {
+  var f = window[name]; if (typeof f !== 'function' || f.__memo) return;
+  var w = function () {
+    var M = ndMemoBox(), k = name + '|' + Array.prototype.join.call(arguments, '|');
+    if (!(k in M)) M[k] = f.apply(this, arguments);
+    var v = M[k]; return copy && Array.isArray(v) ? v.slice() : v;
+  };
+  w.__memo = true; window[name] = w;
+}
+(function () {
+  ['ndStaff', 'ndDeptDefs', 'ndLatestFinal', 'ndAnyRoles', 'ndShape'].forEach(function (n) { ndMemoize(n, false); });
+  ['ndDayInfo', 'ndRecheckIds', 'ndDayIds', 'ndMyIds', 'ndFillers', 'ndCardsIn', 'ndChecksDue', 'ndUnassigned', 'ndEscItems', 'nxLeads'].forEach(function (n) { ndMemoize(n, true); });
+  ['nxJobCount', 'ndDaySt', 'ndMySt'].forEach(function (n) { ndMemoize(n, false); });
+  // re-check ids per department, once per screen
+  if (typeof ndRecheckIds === 'function') {
+    var byDept = function () { var M = ndMemoBox(); if (M.__fx) return M.__fx; var A = (_nd && _nd.actions) || {}, o = {};
+      Object.keys(A).forEach(function (id) { var a = A[id]; if (a && a.status === 'fixed') (o[a.dept] = o[a.dept] || []).push(id); }); return (M.__fx = o); };
+    var inner = function (dept, day) { var A = _nd.actions || {}; return (byDept()[dept] || []).filter(function (id) { var a = A[id]; return !a.fixed || !a.fixed.day || a.fixed.day < day; }); };
+    window.ndRecheckIds = inner; ndMemoize('ndRecheckIds', true);
+  }
+  if (typeof ndRender === 'function') { var r = ndRender; ndRender = function () { ndMemoClear(); return r.apply(this, arguments); }; }
+  ['ndApplyLocal', 'ndPut'].forEach(function (n) { var f = window[n]; if (typeof f !== 'function') return; window[n] = function () { ndMemoClear(); var x = f.apply(this, arguments); ndMemoClear(); return x; }; });
+})();
+
+// ── Actions: draw a list's cards when it is opened ──
+var _nxLz = {}, _nxLzN = 0;
+function nxLazyList(ids) { var k = 'lz' + (++_nxLzN); _nxLz[k] = ids; return k; }
+function nxLazyFill(el) { try { if (!el.open) return; var k = el.getAttribute('data-lz'), box = el.querySelector('.nx-lz'); if (!k || !box || box.getAttribute('data-done')) return;
+  box.insertAdjacentHTML('beforeend', (_nxLz[k] || []).map(nxActCard).join('')); box.setAttribute('data-done', '1'); } catch (e) { console.warn('[nx] lazy', e); } }
+(function () {
+  if (typeof nxPlanHTML === 'function') { var o = nxPlanHTML; nxPlanHTML = function (me, ro) { _nxLz = {}; _nxLzN = 0; var keep = nxActCard, lists = [];
+    nxActCard = function () { return '\u0000'; };   // placeholder while the frame is drawn
+    var h; try {
+      var A = _nd.actions || {}, mine = {}; (_nd.view ? ndDeptDefs() : nxLeads(me)).forEach(function (d) { mine[d.id] = 1; });
+      var ids = Object.keys(A).filter(function (id) { return mine[A[id].dept] && (A[id].status === 'open' || A[id].status === 'fixed' || A[id].status === 'sup'); }), owners = {};
+      ids.forEach(function (id) { var x = A[id].status === 'sup' ? '__sup' : A[id].owner; (owners[x] = owners[x] || []).push(id); });
+      Object.keys(owners).sort(function (a, b) { return a === '__sup' ? 1 : b === '__sup' ? -1 : String(ndName(a)).localeCompare(String(ndName(b))); }).forEach(function (x) { lists.push(owners[x]); });
+      h = o.apply(this, arguments);
+    } finally { nxActCard = keep; }
+    var i = 0; return h.replace(/<details class="nx-it" style="gap:0">([\s\S]*?)<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">([^\u0000]*?)(\u0000)+<\/div><\/details>/g, function (m, sum, wa) {
+      var k = nxLazyList(lists[i++] || []); return '<details class="nx-it" style="gap:0" data-lz="' + k + '" ontoggle="nxLazyFill(this)">' + sum + '<div class="nx-lz" style="display:flex;flex-direction:column;gap:8px;margin-top:10px">' + wa + '</div></details>'; }); }; }
+  if (typeof nxActListsHTML === 'function') { nxActListsHTML = function () {
+    var A = _nd.actions || {}, me = ndMob(), mine = {}; (_nd.view ? ndDeptDefs() : nxLeads(me)).forEach(function (d) { mine[d.id] = 1; });
+    var closed = Object.keys(A).filter(function (id) { return mine[A[id].dept] && A[id].status === 'closed'; });
+    return closed.length ? '<details class="nx-card" data-lz="' + nxLazyList(closed) + '" ontoggle="nxLazyFill(this)"><summary style="cursor:pointer;font-weight:700;font-size:14px">Closed · ' + closed.length + '</summary><div class="nx-lz"></div></details>' : ''; }; }
+})();
+</script>
+<script id="sc-perf">// ══════════════════════════════════════════════════════════════
+// SUB-CENTRE APP SPEED (4 Nov 2026) — measured after a CHO logs in on a low-cost phone: ~3 s of busy screen in the first
+// seconds, mostly the welcome block (scb2RenderWsMini) drawn 6 times in a row as each piece of data arrived, and the role
+// list of a checkpoint (scCpRoles) worked out 60,000 times.
+//  1 Heavy redraws that several loaders ask for one after another run at once the first time, and the calls that follow
+//    within 400 ms become one redraw at the end (nothing is skipped, only repeated work).
+//  2 A checkpoint's role list is remembered until its role tags change.
+// ══════════════════════════════════════════════════════════════
+function scCoalesce(name, ms) {
+  var f = window[name]; if (typeof f !== 'function' || f.__co) return;
+  var last = 0, timer = null;
+  var w = function () {
+    var now = Date.now(), self = this, args = arguments;
+    if (now - last >= ms && !timer) { last = now; return f.apply(self, args); }
+    if (!timer) timer = setTimeout(function () { timer = null; last = Date.now(); try { f.apply(self, args); } catch (e) { console.warn('[perf]', name, e); } }, ms);
+  };
+  w.__co = true; window[name] = w;
+}
+(function () {
+  ['scb2RenderWsMini', 'scRenderWsVerify'].forEach(function (n) { scCoalesce(n, 400); });
+  if (typeof scCpRoles === 'function') { var o = scCpRoles, C = new WeakMap();
+    scCpRoles = function (cp) { if (!cp || typeof cp !== 'object') return o.apply(this, arguments);
+      var k = cp.r, h = C.get(cp); if (h && h.r === k && h.j === (Array.isArray(k) ? k.join(',') : k && typeof k === 'object' ? JSON.stringify(k) : String(k))) return h.v.slice();
+      var v = o.apply(this, arguments); C.set(cp, { r: k, j: Array.isArray(k) ? k.join(',') : k && typeof k === 'object' ? JSON.stringify(k) : String(k), v: v.slice() }); return v; }; }
+})();
+// 3 Day definitions and the checkpoint list, remembered while one piece of work runs (cleared at its end, so Card Editor
+//   changes and new data always show): getDaysArr was rebuilt ~800 times per screen, scCpmAll ~30 times.
+var _scM = null;
+function scMemoBox() { if (!_scM) { _scM = {}; Promise.resolve().then(function () { _scM = null; }); } return _scM; }
+function scMemoize(name, copy) {
+  var f = window[name]; if (typeof f !== 'function' || f.__memo) return;
+  var w = function () { var M = scMemoBox(), k = name + '|' + Array.prototype.map.call(arguments, function (a) { return a && typeof a === 'object' ? JSON.stringify(a) : String(a); }).join('|');
+    if (!(k in M)) M[k] = f.apply(this, arguments); var v = M[k]; return copy && Array.isArray(v) ? v.slice() : v; };
+  w.__memo = true; window[name] = w;
+}
+(function () { scMemoize('scCpmAll', true); scMemoize('scDayDef', false); })();
+// 4 The old welcome block (scb2RenderWsMini) is hidden in the staff app (display:none) but was drawn 6 times after login:
+//   while it is hidden it is only marked "to draw", and drawn the moment a tab shows it.
+var _scMiniDirty = false;
+(function () {
+  var f = window.scb2RenderWsMini; if (typeof f !== 'function') return;
+  window.scb2RenderWsMini = function () {
+    try { var el = document.getElementById('scb2-ws-mini'); if (el && document.body.classList.contains('nf-staff') && getComputedStyle(el).display === 'none' && el.getAttribute('data-drawn')) { _scMiniDirty = true; return; } } catch (e) {}
+    _scMiniDirty = false; var r = f.apply(this, arguments); try { var e2 = document.getElementById('scb2-ws-mini'); if (e2) e2.setAttribute('data-drawn', '1'); } catch (e) {} return r;
+  };
+  if (typeof nfTab === 'function') { var t = nfTab; nfTab = function () { var r = t.apply(this, arguments);
+    try { if (_scMiniDirty) { var el = document.getElementById('scb2-ws-mini'); if (el && getComputedStyle(el).display !== 'none') scb2RenderWsMini(); } } catch (e) {} return r; }; }
 })();
 </script>
 <script id="nf-day-score">// ══════════════════════════════════════════════════════════════

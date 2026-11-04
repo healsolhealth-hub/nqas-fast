@@ -335,7 +335,7 @@ function jnStatusCard(R){
 // a failed log in from a mobile whose sign-up is still waiting → say so instead of "wrong password"
 async function nfPendingHint(id){
   var mob=String(id||'').replace(/\D/g,'').replace(/^(91|0)(?=\d{10}$)/,''); if(!/^[6-9]\d{9}$/.test(mob)) return;
-  try{ var r=await nfCall('requestStatus',{mode:'login',mobile:mob}); if(!r||!r.pending) return;
+  try{ var r=await nfCall('requestStatus',{mode:'login',mobile:mob}); if(!r||!r.pending) return; if(!r.ref){ try{ var sv=JSON.parse(localStorage.getItem('nf_req')||'{}')||{}; if(sv.ref&&(!sv.mob||sv.mob===mob)) r.ref=sv.ref; }catch(x){} }   // the server no longer sends the reference (security review); this phone may remember it
     var e=document.getElementById('nf-err'); if(!e) return;
     e.innerHTML=jE(jt('Your request'))+' <b>'+jE(r.ref||'')+'</b> '+jE(jt('is still waiting for approval by HealSol Academy. You will get your password once it is approved.'))+' <button type="button" class="nf-l-link" onclick="jnOpenStatus(\''+jE(r.ref||'')+'\',\''+mob+'\')">'+jE(jt('Check my request'))+'</button>';
     e.style.display='block'; }catch(err){}
