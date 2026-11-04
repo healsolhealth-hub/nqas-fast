@@ -101,3 +101,9 @@ body.fpo-open{overflow:hidden}
 .sd-reqs .sd-ri{border-top:1px solid #E5E7EB;padding:10px 0}
 .sd-reqs .sd-ri small{color:#6B7280}
 .sd-rl{font-size:12.5px;color:#374151;margin-top:3px}
+/* Demo & test facilities (4 Nov 2026) */
+.nf-hid-line{font-size:12.5px;color:#6B7280;margin:8px 2px 0;display:flex;align-items:center;gap:6px}
+.nf-hid-line button{background:none;border:0;color:#1E6B5E;font:700 12.5px inherit;cursor:pointer;text-decoration:underline;padding:0}
+.nf-hid-tag{font-size:10px;font-weight:800;border-radius:6px;padding:1px 6px;margin-left:4px}
+.nf-hid-tag.d{background:#E0E7FF;color:#3730A3}.nf-hid-tag.t{background:#FEF3C7;color:#92400E}
+.nf-hid-box{max-width:620px;width:calc(100% - 32px)}
