@@ -30197,23 +30197,75 @@ function rgLoadLeaflet() {
   });
   return rgLoadLeaflet._p;
 }
+// all pins on ONE canvas, drawn in a single pass grouped by colour and shape (5 Nov 2026): 30,000+ facilities stay smooth on a phone.
+// Shapes: CHC triangle, PHC square, UPHC diamond, SC circle. A tap picks the nearest pin.
+function rgDotsLayer(L) {
+  if (rgDotsLayer._c) return rgDotsLayer._c;
+  rgDotsLayer._c = L.Layer.extend({
+    initialize: function (pts, opt) { this._pts = pts; this._opt = opt || {}; },
+    onAdd: function (map) {
+      this._map = map; var c = this._cv = L.DomUtil.create('canvas', 'rg-dots'); c.style.position = 'absolute'; c.style.pointerEvents = 'none';
+      map.getPane('overlayPane').appendChild(c);
+      map.on('moveend zoomend resize viewreset', this._draw, this); map.on('zoomstart', this._hide, this); map.on('click', this._tap, this);
+      this._draw();
+    },
+    onRemove: function (map) { map.off('moveend zoomend resize viewreset', this._draw, this); map.off('zoomstart', this._hide, this); map.off('click', this._tap, this); L.DomUtil.remove(this._cv); },
+    _hide: function () { if (this._cv) this._cv.style.opacity = '0'; },
+    _size: function (t, many) { return (t === 'chc' ? 9 : t === 'sc' ? 5.5 : 7) * (many ? 0.8 : 1); },
+    _path: function (c, t, x, y, r) {
+      if (t === 'chc') { c.moveTo(x, y - r * 1.15); c.lineTo(x + r * 1.1, y + r * 0.85); c.lineTo(x - r * 1.1, y + r * 0.85); c.closePath(); }
+      else if (t === 'phc') { c.rect(x - r * 0.9, y - r * 0.9, r * 1.8, r * 1.8); }
+      else if (t === 'uphc') { c.moveTo(x, y - r * 1.1); c.lineTo(x + r * 1.1, y); c.lineTo(x, y + r * 1.1); c.lineTo(x - r * 1.1, y); c.closePath(); }
+      else { c.moveTo(x + r, y); c.arc(x, y, r, 0, Math.PI * 2, false); }
+    },
+    _draw: function () {
+      var m = this._map, cv = this._cv; if (!m || !cv) return;
+      var sz = m.getSize(), dpr = window.devicePixelRatio || 1, z = m.getZoom(), o = m.getPixelBounds().min, many = this._pts.length > 3000;
+      cv.width = sz.x * dpr; cv.height = sz.y * dpr; cv.style.width = sz.x + 'px'; cv.style.height = sz.y + 'px'; cv.style.opacity = '1';
+      L.DomUtil.setPosition(cv, m.containerPointToLayerPoint([0, 0]));
+      var c = cv.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, sz.x, sz.y);
+      if (this._z !== z) { this._z = z; this._pts.forEach(function (p) { var q = m.project([p.lat, p.lng], z); p._x = q.x; p._y = q.y; }); }
+      var G = {}, pick = this._opt.pick, sel = null, self = this;
+      this._pts.forEach(function (p) {
+        var x = p._x - o.x, y = p._y - o.y; p._cx = x; p._cy = y;
+        if (x < -12 || y < -12 || x > sz.x + 12 || y > sz.y + 12) return;
+        if (p.id === pick) { sel = p; return; }
+        var k = p.t + '|' + p.fill + '|' + p.stroke; (G[k] = G[k] || []).push(p);
+      });
+      // not-enrolled (white) first, enrolled on top, then the picked one
+      Object.keys(G).sort(function (a, b) { return (a.indexOf('#FFFFFF|') > 0 ? 0 : 1) - (b.indexOf('#FFFFFF|') > 0 ? 0 : 1); }).forEach(function (k) {
+        var L0 = G[k], f = k.split('|'), r = self._size(f[0], many);
+        c.beginPath(); L0.forEach(function (p) { self._path(c, f[0], p._cx, p._cy, r); });
+        c.fillStyle = f[1]; c.fill(); c.lineWidth = many ? 1 : 1.5; c.strokeStyle = f[2]; c.stroke();
+      });
+      if (sel) { var r = this._size(sel.t, false) * 1.5; c.beginPath(); this._path(c, sel.t, sel._cx, sel._cy, r); c.fillStyle = sel.fill; c.fill(); c.lineWidth = 3; c.strokeStyle = '#14514A'; c.stroke(); }
+    },
+    _tap: function (e) {
+      var pt = e.containerPoint, best = null, bd = 18 * 18;
+      this._pts.forEach(function (p) { var dx = p._cx - pt.x, dy = p._cy - pt.y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = p; } });
+      if (best && this._opt.onPick) this._opt.onPick(best);
+    }
+  });
+  return rgDotsLayer._c;
+}
 function rgMapDraw(nodes) {
   var pts = rgMapPoints(nodes), el = document.getElementById('rg-map'), msg = document.getElementById('rg-map-msg');
   if (!el) return;
   rgLoadLeaflet().then(function (L) {
     if (!document.body.contains(el)) return;
     if (_rg.map) { try { _rg.map.remove(); } catch (e) {} _rg.map = null; }
-    var m = L.map(el, { scrollWheelZoom: true }); _rg.map = m;
+    var m = L.map(el, { scrollWheelZoom: true, preferCanvas: true }); _rg.map = m;   // one canvas for all pins: 30,000+ facilities stay smooth on a phone (5 Nov 2026)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors' }).addTo(m);
     var byId = {}; pts.forEach(function (p) { byId[p.id] = p; });
-    if (_rg.links) nodes.forEach(function (n) { var a = byId[n.id]; if (!a) return; [n.t === 'sc' ? n.phc : '', n.t !== 'chc' ? n.chc : ''].forEach(function (pn) { var pnode = pn && nodes.byNin[pn], b = pnode && byId[pnode.id]; if (b) L.polyline([[a.lat, a.lng], [b.lat, b.lng]], { color: '#5D6D68', weight: 1.5, opacity: .7, dashArray: '4 4' }).addTo(m); }); });
-    pts.forEach(function (p) { var sz = p.t === 'chc' ? 26 : p.t === 'sc' ? 16 : 20;
-      var ic = L.divIcon({ className: 'rg-pin' + (_rg.pick === p.id ? ' on' : ''), html: rgShapeSVG(p.t, p.fill, p.stroke, sz), iconSize: [sz, sz], iconAnchor: [sz / 2, sz / 2] });
-      L.marker([p.lat, p.lng], { icon: ic, title: p.name + ' · ' + p.label, keyboard: true }).addTo(m).on('click', function () { _rg.pick = p.id; var c = _rg.map && _rg.map.getCenter(), z = _rg.map && _rg.map.getZoom(); _rg.keep = c ? { c: c, z: z } : null; rgRender(); }); });
+    var many = pts.length > 3000;
+    if (_rg.links && many && msg) { msg.hidden = false; msg.textContent = 'Choose a state or district to see the SC → PHC → CHC links (too many facilities to draw them all).'; }
+    if (_rg.links && !many) nodes.forEach(function (n) { var a = byId[n.id]; if (!a) return; [n.t === 'sc' ? n.phc : '', n.t !== 'chc' ? n.chc : ''].forEach(function (pn) { var pnode = pn && nodes.byNin[pn], b = pnode && byId[pnode.id]; if (b) L.polyline([[a.lat, a.lng], [b.lat, b.lng]], { color: '#5D6D68', weight: 1.5, opacity: .7, dashArray: '4 4' }).addTo(m); }); });
+    var Dots = rgDotsLayer(L), dots = new Dots(pts, { pick: _rg.pick, onPick: function (p) { _rg.pick = p.id; var c = _rg.map && _rg.map.getCenter(), z = _rg.map && _rg.map.getZoom(); _rg.keep = c ? { c: c, z: z } : null; rgRender(); } });
     if (_rg.keep) { m.setView(_rg.keep.c, _rg.keep.z); _rg.keep = null; }
     else if (pts.length) m.fitBounds(L.latLngBounds(pts.map(function (p) { return [p.lat, p.lng]; })).pad(0.15), { maxZoom: 13 });
     else m.setView([23.5, 80.5], 5);
-    if (msg) { msg.hidden = !!pts.length; msg.textContent = pts.length ? '' : 'No facility with a location here yet.'; }
+    dots.addTo(m);
+    if (msg && !(_rg.links && many)) { msg.hidden = !!pts.length; msg.textContent = pts.length ? '' : 'No facility with a location here yet.'; }
   }).catch(function () { if (msg) { msg.hidden = false; msg.textContent = 'The map could not load — check the internet connection and open the Map tab again.'; } });
 }
 
