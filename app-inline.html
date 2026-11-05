@@ -4448,6 +4448,7 @@ document.addEventListener('selectstart', function(e){
   if(appMode==='cho'){ e.preventDefault(); return false; }
 });
 document.addEventListener('copy', function(e){
+  var t=e.target; if(t&&(t.tagName==='TEXTAREA'||t.tagName==='INPUT')) return;   // the app's own "copy caption / copy link" and typed text — not the programme content (5 Nov 2026)
   if(appMode==='cho'){ e.preventDefault(); showToast('Content is protected - HealSol Academy','err'); return false; }
 });
 // Detect print/screenshot attempt
@@ -33006,7 +33007,8 @@ function plViewer(html) {
   ov.innerHTML = '<div class="pl-vbar"><button type="button" class="pl-vx" aria-label="Close">✕ ' + plE(plT('Close', 'बंद करें')) + '</button>'
     + '<button type="button" class="pl-vp"><i class="ti ti-printer"></i> ' + plE(plT('Print / Save as PDF', 'प्रिंट / PDF सहेजें')) + '</button></div><iframe class="pl-vf" title="Report"></iframe>';
   document.body.appendChild(ov);
-  var f = ov.querySelector('iframe'), shut = function () { if (ov.parentNode) ov.remove(); };
+  var f = ov.querySelector('iframe'), shut = function () { if (ov.parentNode) ov.remove(); window._nfAllowPrint = false; };
+  window._nfAllowPrint = true;   // printing a report the user opened is allowed (the content protection blanks other prints)
   ov.querySelector('.pl-vx').onclick = shut;
   ov.querySelector('.pl-vp').onclick = function () { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { } };
   f.addEventListener('load', function () { try { f.contentWindow.close = shut; } catch (e) { } });   // the report's own "Close" button
