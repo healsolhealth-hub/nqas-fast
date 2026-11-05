@@ -32761,7 +32761,7 @@ function pmE(s) { return typeof scEsc === 'function' ? scEsc(s == null ? '' : s)
 function pmLS(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
 function pmToday() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
 // the Play Store app opens the site with ?src=play (Trusted Web Activity start URL); remembered for the visit
-function nfIsPlay() { try { if (/[?&]src=play\b/.test(location.search || '')) sessionStorage.setItem('nf_play', '1'); return sessionStorage.getItem('nf_play') === '1' || /^android-app:\/\//.test(document.referrer || ''); } catch (e) { return false; } }
+function nfIsPlay() { try { if (/[?&]src=play\b/.test(location.search || '') || /^android-app:\/\/com\.thehealsol\.nqasfast(\/|$)/.test(document.referrer || '')) sessionStorage.setItem('nf_play', '1'); return sessionStorage.getItem('nf_play') === '1'; } catch (e) { return false; } }   // only our Play app (TWA opens with this referrer); Gmail / WhatsApp links stay the website
 async function pmLoad(force) {
   if (!force && _pm.list && Date.now() - _pm.at < 10 * 60e3) return _pm.list;
   var P = null; try { P = await fbGet('shared/sc_promos'); } catch (e) {}
