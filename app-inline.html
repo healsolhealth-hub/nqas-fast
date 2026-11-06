@@ -1551,9 +1551,21 @@ textarea.scx-in{resize:vertical;min-height:70px;}
 #login-screen:not(.nf-on){background:#EEF3F2;}
 #login-screen:not(.nf-on) > *{visibility:hidden;animation:nfBootShow 0s 6s forwards;}
 @keyframes nfBootShow{to{visibility:visible;}}
+/* Opening screen (6 Nov 2026) — same light background as the Android splash, so opening looks like one smooth step */
+#nf-boot{position:fixed;inset:0;z-index:2147483000;background:#FFFFFF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-family:Poppins,system-ui,sans-serif;color:#14514A;transition:opacity .2s;}
+#nf-boot img{border-radius:18px;box-shadow:0 6px 18px rgba(20,81,74,.18);margin-bottom:8px;}
+#nf-boot b{font-size:20px;font-weight:700;letter-spacing:.2px;}
+#nf-boot small{font-size:12.5px;color:#5B6B68;}
+#nf-boot i{width:22px;height:22px;border-radius:50%;border:3px solid #D5E6E2;border-top-color:#1E6B5E;margin-top:18px;animation:nfBootSpin .8s linear infinite;}
+#nf-boot span{font-size:12.5px;color:#5B6B68;}
+@keyframes nfBootSpin{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
+<!-- Opening screen (6 Nov 2026): shown from the very first moment until the app knows whether you are signed in —
+     never a blank page or the login form flashing for people who are already signed in. Removed by nfBootOff() (shared/secure.js). -->
+<div id="nf-boot" role="status" aria-live="polite"><img src="data:image/png;base64,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" width="72" height="72" alt=""><b>NQAS | FAST</b><small>HealSol Academy</small><i></i><span>Opening…</span></div>
+<script>setTimeout(function(){var b=document.getElementById('nf-boot');if(b)b.remove();},12000);</script>
 
 <!-- LOGIN SCREEN -->
 <div id="login-screen" class="login-screen">
@@ -15686,7 +15698,7 @@ function nfStdToggle(hostId){ _nfStdOpen[hostId]=!_nfStdOpen[hostId]; var t=docu
 body.nf-staff #scb2-ws-mini{display:none!important;}
 #nf-tt{margin-top:18px;}
 .nftt-tabs{display:flex;background:var(--bg);border-radius:14px;padding:4px;gap:4px;}
-.nftt-tabs button{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:600;color:var(--t2);padding:9px 6px;border-radius:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;}
+.nftt-tabs button{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:600;color:var(--t2);padding:8px 4px;border-radius:11px;cursor:pointer;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 5px;white-space:normal;line-height:1.2;text-align:center;min-height:46px;overflow-wrap:anywhere;}
 .nftt-tabs button.on{background:#fff;color:var(--teal);box-shadow:var(--shadow-sm);}
 .nftt-tabs b{font-size:11px;background:var(--teal-lt);color:var(--teal);border-radius:10px;padding:1px 7px;} .nftt-tabs b.r{background:var(--red-dk);color:#fff;}
 .nftt-pane{margin-top:10px;}
@@ -16197,10 +16209,13 @@ function nfShowTempPassword(name,identifier,pw,title,waText){
   // automatic sign-in on return visits (Remember me), never with a stored password
   window.addEventListener('load',function(){
     try{ if(!db) initFirebase(); }catch(e){}
+    if(typeof firebase==='undefined'||!firebase.auth){ if(typeof nfBootOff==='function') nfBootOff(); return; }   // no connection to sign-in: show the login and its message
+    setTimeout(function(){ if(typeof nfBootOff==='function') nfBootOff(); },8000);   // never longer than 8 s
     var done=false;
-    firebase.auth().onAuthStateChanged(function(u){ if(done||!u) return; done=true;
+    firebase.auth().onAuthStateChanged(function(u){ if(!u&&typeof nfBootOff==='function') nfBootOff();   // not signed in: show the login (6 Nov 2026)
+      if(done||!u) return; done=true;
       if(_nfLogin.busy) return;                       // a login from the form is already opening the screen
-      var ls=document.getElementById('login-screen'); if(ls&&ls.style.display==='none') return;
+      var ls=document.getElementById('login-screen'); if(ls&&ls.style.display==='none'){ if(typeof nfBootOff==='function') nfBootOff(); return; }
       nfCoverOn(); nfAfterSignIn().catch(function(e){ console.warn('[SC] auto sign-in',e); }).then(nfCoverDone); });
     if(location.hash==='#setup') setTimeout(nfShowBootstrap,400);
     // one browser keeps one login for all its windows and tabs (Incognito windows share one too): if someone logs in as another
@@ -17571,7 +17586,7 @@ async function nfSaveSupportSetup(btn){
 (function(){
   // side menus: Supervisors, District Admins, Quality Champions (not HealSol)
   var oShell=nfShellHTML;
-  nfShellHTML=function(items,user){ try{ if(nfSupportOn()&&user&&user.role!=='Administrator'&&!items.some(function(i){ return i.v==='help'; })) items=items.concat([{v:'help',l:'Help on WhatsApp',icon:'ti-message',onclick:"nfOpenSupport('menu')"}]); }catch(e){} return oShell.call(this,items,user); };
+  nfShellHTML=function(items,user){ try{ if(nfSupportOn()&&user&&user.role!=='Administrator'&&!items.some(function(i){ return i.v==='help'; })) items=items.concat([{v:'help',l:'Help',icon:'ti-brand-whatsapp',onclick:"nfOpenSupport('menu')"}]); }catch(e){} return oShell.call(this,items,user); };
   var oMe=nfRenderMe; nfRenderMe=function(){ var r=oMe.apply(this,arguments); try{ nfSupportApply(); }catch(e){} return r; };
   var oPaint=nfPaint; nfPaint=function(){ var r=oPaint.apply(this,arguments); try{ nfSupportApply(); }catch(e){} return r; };
   var oApply=nfAdminApply; nfAdminApply=function(){ try{ nfEnsureSupportSetup(); }catch(e){} return oApply.apply(this,arguments); };
@@ -18238,7 +18253,9 @@ function nfEnsureBizReportCard(){
 function nfWithin(p,ms){ return new Promise(function(res,rej){ var tm=setTimeout(function(){ var e=new Error('timeout'); e.nfTimeout=true; rej(e); },ms);
   Promise.resolve(p).then(function(v){ clearTimeout(tm); res(v); },function(e){ clearTimeout(tm); rej(e); }); }); }
 var _nfCover={el:null,dash:false,timer:null};
+function nfBootOff(){ var b=document.getElementById('nf-boot'); if(b){ b.style.opacity='0'; setTimeout(function(){ if(b.parentNode) b.remove(); },220); } }
 function nfCoverOn(){
+  setTimeout(nfBootOff,30);   // the "Opening…" cover takes over from the opening screen
   _nfCover.dash=false; _nfCover.pending=false;
   var c=_nfCover.el||document.getElementById('nf-open-cover-el');
   if(!c){ c=document.createElement('div'); c.id='nf-open-cover-el';
@@ -18306,6 +18323,7 @@ function nfCoverDone(){
     if(ignore){ ignore--; return; }
     if(depth>0) depth--;
     if(closeTop()){ push(); return; }                                  // stay on this screen
+    var st=window.nfBackSteps||[]; for(var i=0;i<st.length;i++){ try{ if(st[i]()) return; }catch(e){} }   // department app, dashboards: one screen back (6 Nov 2026)
     if(document.body.classList.contains('nf-fadm')){ if(typeof window.nfFaBack==='function') window.nfFaBack(); return; }   // Facility dashboard: tab → Home → My cards
     if(typeof nfIsStaff==='function'&&nfIsStaff()&&tabs.length&&typeof nfTab==='function'){
       silent=true; try{ nfTab(tabs.pop()); }finally{ silent=false; }
@@ -18440,6 +18458,10 @@ body.nf-fadm .toast{bottom:96px;}
 .fa-sh-b .nf-task{cursor:pointer;}
 .fa-sh-x{width:100%;margin-top:10px;min-height:44px;border-radius:12px;border:1.5px solid var(--br);background:#fff;font:inherit;font-size:13.5px;font-weight:600;color:var(--t2);cursor:pointer;}
 @media(min-width:700px){ #fa-nav{justify-content:center;gap:56px;} }
+/* phones / large text (6 Nov 2026): the facility name gets the room — "My cards" becomes an icon, the name may use two lines */
+@media (max-width:480px){ .fa-mc span{display:none;} .fa-mc{width:44px;padding:0;justify-content:center;} }
+.fa-hd-l h1{flex-wrap:wrap;row-gap:2px;}
+.fa-hd-l h1 span.n{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.2;}
 </style>
 <script id="nf-fadm">
 // ══════════════════════════════════════════════════════════════
@@ -18451,7 +18473,7 @@ body.nf-fadm .toast{bottom:96px;}
 var _faTab='home', _faBuilt=false, _faStepped=false;
 var FA_HI={'Facility dashboard':'स्वास्थ्य केंद्र डैशबोर्ड','Home':'होम','Staff':'स्टाफ','Readiness':'तैयारी','More':'और','My cards':'मेरे कार्ड','Day':'दिन','of':'में से',
   'Needs your attention':'आपका ध्यान चाहिए','Quick actions':'त्वरित कार्य','Add staff':'स्टाफ जोड़ें','Download':'डाउनलोड','Live session':'लाइव सत्र',
-  'All clear':'सब ठीक है','Nothing needs your attention right now.':'अभी किसी बात पर ध्यान देने की ज़रूरत नहीं है।','Open readiness':'तैयारी देखें',
+  'All clear':'सब ठीक है','Facility home':'केंद्र होम','Nothing needs your attention right now.':'अभी किसी बात पर ध्यान देने की ज़रूरत नहीं है।','Open readiness':'तैयारी देखें',
   'Facility readiness':'स्वास्थ्य केंद्र की तैयारी','Baseline':'बेसलाइन','Growth':'बढ़त','Checkpoints':'चेकपॉइंट','Loading…':'लोड हो रहा है…',
   'Programme':'कार्यक्रम','Account':'खाता','Change my password':'मेरा पासवर्ड बदलें','Help on WhatsApp':'WhatsApp पर मदद','Logout':'लॉग आउट','Live sessions':'लाइव सत्र',
   'Programme start date':'कार्यक्रम शुरू होने की तारीख','Set date':'तारीख सेट करें','people':'लोग','person':'व्यक्ति','Close':'बंद करें','you':'आप',
@@ -18515,6 +18537,7 @@ function faTab(tab,o){
   ['home','staff','ready','more'].forEach(function(k){ var p=document.getElementById('fa-'+k); if(p) p.classList.toggle('on',k===tab); });
   if(tab==='home') faHome(); else if(tab==='more') faMore(); else if(tab==='staff') faStaffMeta();
   var nav=document.getElementById('fa-nav'); if(nav) nav.innerHTML=faNavHTML();
+  try{ var pn=document.getElementById('fa-'+tab); if(pn&&tab!=='home'&&!pn.querySelector(':scope > .nx-tabbk')) pn.insertAdjacentHTML('afterbegin','<button type="button" class="nx-tabbk" onclick="faTab(\'home\')"><i class="ti ti-arrow-left"></i> '+faT('Facility home')+'</button>'); }catch(e){}   // a visible way back (6 Nov 2026)
   if(!o.noStep&&prev==='home'&&tab!=='home'&&!_faStepped&&typeof window.nfBackPush==='function'){ window.nfBackPush(); _faStepped=true; }
   if(tab==='home') _faStepped=false;
   if(!o.keepScroll){ try{ window.scrollTo(0,0); }catch(e){} }
@@ -21119,9 +21142,9 @@ function nfImpHi(){ return typeof _appLang!=='undefined'&&_appLang==='hi'; }
 function nfImpLv(l){ var x=NF_LEVEL[l]; return x?(nfImpHi()?x.hi:x.en):''; }
 function nfImpStarParts(n){ n=+n||0; var f=Math.floor(n), h=n-f>=0.5?1:0; return {f:f,h:h,e:Math.max(0,5-f-h)}; }
 function nfImpStars(n,plain){ if(!n) return ''; var p=nfImpStarParts(n);
-  if(plain) return '★'.repeat(p.f)+(p.h?'½':'')+'☆'.repeat(p.e);
+  if(plain) return '★'.repeat(p.f)+'☆'.repeat(5-p.f)+(p.h?' ('+n+'/5)':'');   // text (captions): no '½' sign — a half star reads as 2.5/5 (6 Nov 2026)
   return '<span class="nfi-st" role="img" aria-label="'+n+' / 5">'+'★'.repeat(p.f)+(p.h?'<b class="nfi-half">★</b>':'')+'<i>'+'★'.repeat(p.e)+'</i></span>'; }
-function nfImpTagHTML(t){ if(!t||!t.level) return ''; return ' <span class="nfi-tag" title="'+scEsc(nfImpLv(t.level))+'">'+(t.stars?nfImpStars(t.stars,true).replace(/☆/g,''):NF_LEVEL[t.level].ic)+'</span>'; }
+function nfImpTagHTML(t){ if(!t||!t.level) return ''; return ' <span class="nfi-tag" title="'+scEsc(nfImpLv(t.level))+'">'+(t.stars?nfImpStars(t.stars):NF_LEVEL[t.level].ic)+'</span>'; }
 function nfImpSlug(x){ return String(x||'').trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
 async function nfImpCfg(){ if(_nfImp.cfg&&_nfImp.partners) return; try{ _nfImp.cfg=await fbGet('shared/sc_impact_config')||{}; _nfImp.partners=await fbGet('shared/sc_impact_partners')||{}; }catch(e){ _nfImp.cfg=_nfImp.cfg||{}; _nfImp.partners=_nfImp.partners||{}; } }
 async function nfImpLoad(key,force){ if(!key) return null; if(!force&&_nfImp.key===key&&Date.now()-_nfImp.at<120000) return _nfImp.rec;
@@ -21420,7 +21443,7 @@ function nfrAllBody(){ var R=nfrAllRows();
   if(!R.length) return '<div class="nfr-empty">Nobody matches these filters.</div>';
   return '<div class="nfr-muted" style="margin:4px 0 8px">'+R.length+' '+(R.length===1?'person':'people')+'</div><div class="nfr-tw"><table class="nfr-t"><thead><tr><th>Name</th><th>Level</th><th>Who</th><th>Facility</th><th>District · State</th><th>Since</th></tr></thead><tbody>'
     +R.slice(0,500).map(function(r){ var l=NF_LEVEL[r.level], fs=r.facilities||[], f=fs[0]||{}, t=nfrAllType(r);
-      return '<tr><td><b>'+scEsc(r.name||'')+'</b><small>'+scEsc(r.role||'')+'</small></td><td>'+l.ic+' '+scEsc(l.en)+(r.stars?' <small>'+nfImpStars(r.stars,true)+'</small>':'')+'</td><td>'+scEsc(nfrAllKind(r))+'</td>'
+      return '<tr><td><b>'+scEsc(r.name||'')+'</b><small>'+scEsc(r.role||'')+'</small></td><td>'+l.ic+' '+scEsc(l.en)+(r.stars?' <small class="fpo-st">'+nfImpStars(r.stars)+'</small>':'')+'</td><td>'+scEsc(nfrAllKind(r))+'</td>'
         +'<td>'+(fs.length?scEsc(f.name||f.code||'')+(fs.length>1?' <small>+'+(fs.length-1)+' more</small>':'')+(t?'<small>'+scEsc(NF_LEVELS[t].name)+'</small>':''):'—')+'</td><td>'+scEsc([f.district,r.state||f.state].filter(Boolean).join(' · ')||'—')+'</td>'
         +'<td>'+scEsc(r.levelSince?scFmtDate(String(r.levelSince).slice(0,10)):'')+'</td></tr>'; }).join('')+'</tbody></table></div>'+(R.length>500?'<div class="nfr-muted">Showing the first 500 — use the filters or Excel.</div>':''); }
 async function nfrAllExcel(){ try{ var X=await nfLoadXlsx(), rows=[['Name','Role','Level','Stars','Who','Facility type','Facilities','District','State','Level since']];
@@ -22582,6 +22605,16 @@ body.nd-on .toast{bottom:96px;white-space:normal;max-width:calc(100vw - 32px);te
 #nf-dept-app .nx-mi-lang .nf-lang{display:flex;flex:none;background:#F1F5F9;border-radius:20px;padding:3px;}
 #nf-dept-app .nx-mi-lang .nf-lang button{border:0;background:transparent;font:inherit;font-size:12px;font-weight:600;color:#64748B;padding:5px 12px;border-radius:16px;cursor:pointer;}
 #nf-dept-app .nx-mi-lang .nf-lang button.on{background:var(--nx-td,#0F5E5A);color:#fff;}
+/* large text on phones (6 Nov 2026): the facility name gets the room, figures wrap instead of running off the card */
+@media (max-width:480px){
+  #nf-dept-app .nx-mc{padding:0 12px;}
+  #nf-dept-app .nx-mc span{display:none;}                       /* "My cards" → icon only on phones; the name needs the space */
+  #nf-dept-app .nx-mc{width:44px;justify-content:center;}
+}
+#nf-dept-app .nx-fa-hd-in h1>span:first-child{white-space:normal;overflow:visible;text-overflow:clip;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.2;}
+#nf-dept-app .nx-hero-n{flex-wrap:wrap;row-gap:10px;}
+#nf-dept-app .nx-hero-n b{font-size:clamp(20px,7vw,26px);overflow-wrap:anywhere;}
+#nf-dept-app .nx-hero-n>div{min-width:0;}
 </style>
 <script id="nf-dept-plan">// ══════════════════════════════════════════════════════════════
 // DEPARTMENT CORE — day plan (UPHC, PHC, CHC). Plain functions, no screen code.
@@ -24393,6 +24426,7 @@ function ndFaHTML() {
     + '<button type="button" class="nx-mc" onclick="ndMyCards()"><i class="ti ti-cards"></i><span>My cards</span></button></div></div>';
   var body = t === 'staff' ? nxFaStaffHTML() : t === 'ready' ? nxFaReadyHTML() : t === 'more' ? nxFaMoreHTML() : nxFaHomeHTML();
   var c = nxFaCount(), b = function (k, icon, label, em) { return '<button type="button" class="' + (t === k ? 'on' : '') + '" onclick="ndFaTab(\'' + k + '\')"><i class="ti ' + icon + '"></i>' + label + (em ? '<em>' + em + '</em>' : '') + '</button>'; };
+  if (t !== 'home') body = '<button type="button" class="nx-tabbk" onclick="ndFaTab(\'home\')"><i class="ti ti-arrow-left"></i> Facility home</button>' + body;   // a visible way back (6 Nov 2026)
   return hd + '<div class="nx">' + body + '</div><nav class="nx-nav">' + b('home', 'ti-home', 'Home', c || '') + b('staff', 'ti-users', 'Staff') + b('ready', 'ti-chart-bar', 'Readiness') + b('more', 'ti-settings', 'More') + '</nav>';
 }
 function nxFaHomeHTML() {
@@ -30596,7 +30630,7 @@ function nfEqHTML() {
   return '<div class="nfo-card eq" id="nf-eq"><div class="eq-head"><div><b>Enquiries &amp; sign-ups</b><small>' + (toAp ? toAp + ' sign-up' + (toAp === 1 ? '' : 's') + ' to approve · ' : '') + newE + ' new enquir' + (newE === 1 ? 'y' : 'ies') + ' · open ones always show, whatever dates you pick</small></div>'
     + '<div class="eq-hr"><select aria-label="Status" onchange="nfEqSetF(\'st\',this.value)">' + [['open', 'Open (new + contacted)'], ['approved', 'Approved'], ['closed', 'Closed / declined'], ['all', 'All']].map(function (o) { return '<option value="' + o[0] + '"' + (_nfEq.st === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>'
     + '<button type="button" class="nfo-ic" title="Refresh" aria-label="Refresh enquiries" onclick="nfEqRefresh()"><i class="ti ti-refresh"></i></button></div></div>'
-    + '<div class="eq-kinds" role="tablist" aria-label="Kind">' + kb('', 'All') + kb('signup', 'Sign-ups to approve') + kb('bulk', 'District / bulk') + kb('join', 'Request to join') + kb('champion', 'Quality Champions') + kb('delete', 'Account deletion') + '</div>'
+    + '<div class="eq-kinds" role="tablist" aria-label="Kind">' + kb('', 'All') + kb('signup', 'Sign-ups to approve') + kb('bulk', 'District / bulk') + kb('join', 'Request to join') + kb('champion', 'Quality Champions') + (kinds['delete'] ? kb('delete', 'Account deletion') : '') + '</div>'
     + '<div class="eq-types"><span>Facility type</span>' + tb('', 'All') + tb('sc', 'SC') + tb('uphc', 'UPHC') + tb('phc', 'PHC') + tb('chc', 'CHC') + '<span class="eq-tn">rows · facilities asked about</span></div>'
     + '<div class="eq-list">' + (rows.length ? rows.map(nfEqRowHTML).join('') : '<div class="eq-empty">Nothing here' + (_nfEq.st === 'open' ? ' — no open enquiries or sign-ups.' : '.') + '</div>') + '</div>'
     + '<div class="eq-foot">Self sign-up: Settings → Programme rules → <button type="button" class="hs-link" onclick="_hs.stab=\'rules\';nfAdminView(\'setup\')">Self sign-up</button> (no-cost baseline at once, per type)</div></div>';
@@ -31790,8 +31824,8 @@ body.fpo-open{overflow:hidden}
 .fpo-share button{flex:1;font:600 12px 'Poppins',sans-serif;border-radius:10px;padding:9px;background:#fff;color:#1E6B5E;border:1.5px solid #1E6B5E;cursor:pointer}
 .fpo-share button.wa{background:#25D366;border-color:#25D366;color:#fff}
 .fpo-ms{display:flex;gap:10px;align-items:center;font-size:12.5px;padding:5px 0}
-.fpo-ms span{width:30px;height:30px;border-radius:50%;background:#DCFCE7;display:flex;align-items:center;justify-content:center;flex:none}
-.fpo-ms.me span{background:#F1ECF9}
+.fpo-ms > span{width:30px;height:30px;border-radius:50%;background:#DCFCE7;display:flex;align-items:center;justify-content:center;flex:none}
+.fpo-ms.me > span{background:#F1ECF9}
 .fpo-ms b{font-weight:600}
 .fpo-next{font-size:11.5px;color:#D4891A;margin:8px 0 0;font-weight:600}
 .fpo-certs{display:flex;gap:6px;flex-wrap:wrap}
@@ -31904,6 +31938,18 @@ body.fpo-open{overflow:hidden}
 .pl-vbar button{border:0;border-radius:10px;font:inherit;font-size:14px;font-weight:700;padding:9px 14px;cursor:pointer}
 .pl-vx{background:rgba(255,255,255,.14);color:#fff}.pl-vp{background:#fff;color:#14514A;display:inline-flex;align-items:center;gap:6px}
 .pl-vf{flex:1;width:100%;border:0;background:#fff}
+/* stars on light cards (6 Nov 2026): drawn stars, half star filled half */
+.fpo-st .nfi-st{font-size:13px;letter-spacing:1px;color:#F59E0B;white-space:nowrap}
+.fpo-st .nfi-st i{color:#E5E7EB}
+.fpo-st .nfi-half{background:linear-gradient(90deg,#F59E0B 50%,#E5E7EB 50%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.nfi-tag .nfi-st{font-size:11px;letter-spacing:0;color:#F59E0B} .nfi-tag .nfi-st i{color:#E5E7EB}
+.nfi-tag .nfi-half{background:linear-gradient(90deg,#F59E0B 50%,#E5E7EB 50%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.fpo-ms b{min-width:0}
+.fpo-card .nfi-st,.fpo-lead .nfi-st{font-size:13px;letter-spacing:1px;color:#F59E0B;white-space:nowrap} .fpo-card .nfi-st i,.fpo-lead .nfi-st i{color:#E5E7EB}
+.fpo-card .nfi-half,.fpo-lead .nfi-half{background:linear-gradient(90deg,#F59E0B 50%,#E5E7EB 50%);-webkit-background-clip:text;background-clip:text;color:transparent}
+/* "← Facility home" at the top of Readiness / Staff / More (6 Nov 2026) */
+.nx-tabbk{display:inline-flex;align-items:center;gap:6px;border:0;background:none;color:#1E6B5E;font:inherit;font-size:14px;font-weight:700;padding:6px 2px 10px;cursor:pointer}
+.nx-tabbk .ti{font-size:18px}
 </style>
 <script id="fpo-js">// ══════════════════════════════════════════════════════════════
 // FACILITY PROFILE — the first page of the day for facility staff (SC · UPHC · PHC · CHC), approved 3 Nov 2026
@@ -32008,7 +32054,7 @@ function fpoJourneyHTML(M) {
     + fpoSteps(M, D.day) + '<p class="fpo-upd">' + fpoE(fpoT('Updated every night', 'हर रात अपडेट')) + '</p></div>';
 }
 function fpoTeamHTML(M) {
-  var S = fpoStaff(M), show = _fpo.all ? S : S.slice(0, 4), lv = function (x) { if (!x.imp || !x.imp.level || typeof NF_LEVEL === 'undefined' || !NF_LEVEL[x.imp.level]) return ''; return '<span class="fpo-lv">' + NF_LEVEL[x.imp.level].ic + ' ' + fpoE(nfImpLv(x.imp.level)) + (x.imp.stars ? '<br><span class="fpo-st">' + nfImpStars(x.imp.stars, true) + '</span>' : '') + '</span>'; };
+  var S = fpoStaff(M), show = _fpo.all ? S : S.slice(0, 4), lv = function (x) { if (!x.imp || !x.imp.level || typeof NF_LEVEL === 'undefined' || !NF_LEVEL[x.imp.level]) return ''; return '<span class="fpo-lv">' + NF_LEVEL[x.imp.level].ic + ' ' + fpoE(nfImpLv(x.imp.level)) + (x.imp.stars ? '<br><span class="fpo-st">' + nfImpStars(x.imp.stars) + '</span>' : '') + '</span>'; };
   return '<div class="fpo-card"><h3>' + fpoE(fpoT('Our team', 'हमारी टीम')) + '<small>' + fpoE(fpoT('level · stars', 'स्तर · स्टार')) + '</small></h3>'
     + show.map(function (x) { return '<div class="fpo-mem"><span class="fpo-av">' + fpoE(fpoInit(x.name)) + '</span><span class="fpo-mn">' + fpoE(x.name) + '<small>' + fpoE(x.role) + (x.ic ? ' · ' + fpoT('in-charge', 'प्रभारी') : '') + (x.mob === M.mob ? ' · ' + fpoT('you', 'आप') : '') + '</small></span>' + lv(x) + '</div>'; }).join('')
     + (S.length > 4 && !_fpo.all ? '<button type="button" class="fpo-more" onclick="_fpo.all=true;fpoRender()">' + fpoE(fpoT('See all ' + S.length + ' ›', 'सभी ' + S.length + ' देखें ›')) + '</button>' : '') + '</div>';
@@ -32047,7 +32093,7 @@ var FPO_MS_ORDER = ['start', 'baseline', 'gaps10', 'pct70', 'graduated', 'ready'
 function fpoMsHTML(M) {
   var P = _fpo.prof || {}, got = P.ms || [], next = FPO_MS_ORDER.find(function (k) { return got.indexOf(k) < 0; }), me = ((M.f && M.f.staff) || {})[M.mob], tag = me && me.impact;
   var rows = FPO_MS_ORDER.filter(function (k) { return got.indexOf(k) >= 0; }).reverse().slice(0, 3).map(function (k) { var x = FPO_MS[k]; return '<div class="fpo-ms"><span>' + x[0] + '</span><b>' + fpoE(fpoT(x[1], x[2])) + '</b></div>'; }).join('');
-  if (tag && tag.level && typeof NF_LEVEL !== 'undefined' && NF_LEVEL[tag.level]) rows = '<div class="fpo-ms me"><span>' + NF_LEVEL[tag.level].ic + '</span><b>' + fpoE(fpoT('You are a ', 'आप ')) + fpoE(nfImpLv(tag.level)) + (fpoHi() ? ' हैं' : '') + (tag.stars ? ' <span class="fpo-st">' + nfImpStars(tag.stars, true) + '</span>' : '') + '</b></div>' + rows;
+  if (tag && tag.level && typeof NF_LEVEL !== 'undefined' && NF_LEVEL[tag.level]) rows = '<div class="fpo-ms me"><span>' + NF_LEVEL[tag.level].ic + '</span><b>' + fpoE(fpoT('You are a ', 'आप ')) + fpoE(nfImpLv(tag.level)) + (fpoHi() ? ' हैं' : '') + (tag.stars ? ' <span class="fpo-st">' + nfImpStars(tag.stars) + '</span>' : '') + '</b></div>' + rows;
   if (!rows && !next) return '';
   return '<div class="fpo-card"><h3>' + fpoE(fpoT('Recognition & milestones', 'सम्मान और उपलब्धियाँ')) + '</h3>' + (rows || '<p class="fpo-dim">' + fpoE(fpoT('Your first milestone is on its way.', 'आपकी पहली उपलब्धि जल्द।')) + '</p>')
     + (next ? '<p class="fpo-next">' + fpoE(fpoT('Next: ', 'अगला: ')) + FPO_MS[next][0] + ' ' + fpoE(fpoT(FPO_MS[next][1], FPO_MS[next][2])) + '</p>' : '') + '</div>';
@@ -32156,7 +32202,7 @@ function fpoStarsHTML(M) {
   if (d.ready && d.ready.n) { var nm = (d.ready.names || []).filter(Boolean); h += '<div class="fpo-sub">' + fpoE(fpoT('NQAS Ready', 'NQAS तैयार')) + '</div><div class="fpo-lead"><span class="fpo-md g">✅</span><span class="fpo-mn">' + fpoE(nm.slice(0, 3).join(' · ') || fpoT(d.ready.n + ' facilities', d.ready.n + ' केंद्र')) + '<small>' + fpoE(fpoT(d.ready.n + ' ' + (d.ready.n === 1 ? 'facility has' : 'facilities have') + ' reached NQAS Ready', d.ready.n + ' केंद्र NQAS तैयार')) + '</small></span></div>'; }
   if ((d.staff || []).length) h += '<div class="fpo-sub">' + fpoE(fpoT('Top quality staff', 'शीर्ष गुणवत्ता कर्मी')) + '</div>' + d.staff.map(function (x) {
     var lv = typeof NF_LEVEL !== 'undefined' && NF_LEVEL[x.level] ? NF_LEVEL[x.level].ic + ' ' + nfImpLv(x.level) : '';
-    return '<div class="fpo-lead"><span class="fpo-md v">⭐</span><span class="fpo-mn">' + fpoE(x.name) + (x.role ? ' · ' + fpoE(x.role) : '') + '<small>' + fpoE([x.fac, x.helped ? fpoT('helped ' + x.helped + ' facilities', x.helped + ' केंद्रों की मदद') : '', lv].filter(Boolean).join(' · ')) + '</small></span><span class="fpo-v st">' + nfImpStars(x.stars, true) + '</span></div>'; }).join('');
+    return '<div class="fpo-lead"><span class="fpo-md v">⭐</span><span class="fpo-mn">' + fpoE(x.name) + (x.role ? ' · ' + fpoE(x.role) : '') + '<small>' + fpoE([x.fac, x.helped ? fpoT('helped ' + x.helped + ' facilities', x.helped + ' केंद्रों की मदद') : '', lv].filter(Boolean).join(' · ')) + '</small></span><span class="fpo-v st">' + nfImpStars(x.stars) + '</span></div>'; }).join('');
   if (!(d.improved || []).length && !(d.ready && d.ready.n) && !(d.staff || []).length) h += '<p class="fpo-dim">' + fpoE(fpoT('The first Quality Stars appear once facilities finish their baseline.', 'बेसलाइन पूरी होने के बाद पहले क्वालिटी स्टार्स दिखेंगे।')) + '</p>';
   var R = _fpo.prof.rank; if (R && R.n) h += '<div class="fpo-you">🎯 ' + fpoE(fpoT((f.name || 'Your facility') + ' is #' + R.n + ' most improved in ' + R.area + ' (+' + R.gain + ' points).', (f.name || 'आपका केंद्र') + ' ' + R.area + ' में सुधार में #' + R.n + ' है (+' + R.gain + ' अंक)।')) + '</div>';
   if (M.mob) h += '<label class="fpo-opt"><input type="checkbox" ' + (_fpo.opt ? '' : 'checked') + ' onchange="fpoOptSet(!this.checked)"> ' + fpoE(fpoT('Show my name in Quality Stars', 'क्वालिटी स्टार्स में मेरा नाम दिखाएँ')) + '</label>';
@@ -33140,6 +33186,79 @@ async function plCardAct(kind, rec, f) {
     }
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hook); else setTimeout(hook, 0);
+})();
+</script>
+<script id="bk-steps-js">// ══════════════════════════════════════════════════════════════
+// PHONE BACK, ONE SCREEN AT A TIME (6 Nov 2026)
+//   Department / facility app (UPHC, PHC, CHC staff and in-charge) and the dashboards (HealSol, district, block,
+//   supervisor). Every move to another screen records where you were; the phone's Back returns there. From the
+//   home screen Back leaves the app as before. Uses back-button.js (window.nfBackPush / nfBackSteps).
+// ══════════════════════════════════════════════════════════════
+(function () {
+  window.nfBackSteps = window.nfBackSteps || [];
+  var push = function () { try { if (typeof window.nfBackPush === 'function') window.nfBackPush(); } catch (e) {} };
+
+  // ── department / facility app ──
+  var ND_KEYS = ['fa', 'fatab', 'tab', 'cv', 'cday', 'cdept', 'card', 'screen', 'ltab', 'endDept', 'supOpen'];
+  var ndStack = [], ndLast = null, ndRestoring = false;
+  var ndSnap = function () { var o = {}; ND_KEYS.forEach(function (k) { o[k] = _nd[k]; }); return o; };
+  var ndKey = function (s) { return [s.fa ? 'fa' : '', s.fa ? s.fatab : s.tab, s.fa ? '' : s.cv, s.fa ? '' : s.cday, s.fa ? '' : s.cdept, s.card ? (s.card.dept + '/' + s.card.day) : '', s.screen || '', s.screen === 'lead' ? s.ltab : ''].join('|'); };
+  var ndHome = function (s) { return !s.card && !s.screen && (s.fa ? (s.fatab || 'home') === 'home' : (s.tab || 'today') === 'today'); };
+  var hookNd = function () {
+    if (typeof ndRender !== 'function' || ndRender._bk) return;
+    var o = ndRender;
+    ndRender = function () {
+      var r = o.apply(this, arguments);
+      try {
+        if (typeof _nd === 'undefined' || !_nd || !_nd.cfg) return r;
+        var cur = ndSnap(), k = ndKey(cur);
+        if (ndLast && ndLast.k !== k && !ndRestoring) {
+          if (ndHome(cur)) { ndStack = []; if (typeof window.nfBackReset === 'function') window.nfBackReset(); }
+          else { ndStack.push(ndLast.s); push(); }
+        }
+        ndLast = { k: k, s: cur };
+      } catch (e) {}
+      return r;
+    };
+    ndRender._bk = 1;
+  };
+  window.nfBackSteps.push(function () {
+    var app = document.getElementById('nf-dept-app'); if (!app || app.offsetParent === null || !ndStack.length || typeof _nd === 'undefined' || !_nd) return false;
+    var s = ndStack.pop(); ND_KEYS.forEach(function (k) { _nd[k] = s[k]; });
+    ndRestoring = true; try { ndRender(); window.scrollTo(0, 0); } finally { ndRestoring = false; }
+    ndLast = { k: ndKey(ndSnap()), s: ndSnap() };
+    return true;
+  });
+
+  // ── dashboards: views and the facility drill-down ──
+  var avStack = [], avRestoring = false;
+  var avHome = function (v) { return v === 'today' || v === 'overview'; };
+  var hookAv = function () {
+    if (typeof nfAdminView !== 'function' || nfAdminView._bk) return;
+    var o = nfAdminView;
+    nfAdminView = function (v) {
+      var before = typeof _nfOv !== 'undefined' ? _nfOv.view : null, r = o.apply(this, arguments), after = typeof _nfOv !== 'undefined' ? _nfOv.view : null;
+      try { if (!avRestoring && before && after && before !== after) { if (avHome(after)) { avStack = []; if (typeof window.nfBackReset === 'function') window.nfBackReset(); } else { avStack.push(before); push(); } } } catch (e) {}
+      return r;
+    };
+    nfAdminView._bk = 1;
+    if (typeof scDrillIn === 'function' && !scDrillIn._bk) {
+      var d = scDrillIn;
+      scDrillIn = async function () { var before = typeof _nfOv !== 'undefined' ? _nfOv.view : null; var r = await d.apply(this, arguments);
+        try { if (!avRestoring && before && before !== 'drill' && _nfOv.view === 'drill') { avStack.push(before); push(); } } catch (e) {} return r; };
+      scDrillIn._bk = 1;
+    }
+  };
+  window.nfBackSteps.push(function () {
+    if (!document.body.classList.contains('nf-admin') || !avStack.length) return false;
+    var to = avStack.pop(); avRestoring = true;
+    try { if (_nfOv.view === 'drill' && typeof scDrillBack === 'function') { scDrillBack(); if (_nfOv.view !== to) nfAdminView(to); } else nfAdminView(to); } finally { avRestoring = false; }
+    return true;
+  });
+
+  var hook = function () { hookNd(); hookAv(); };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hook); else setTimeout(hook, 0);
+  window.addEventListener('load', function () { setTimeout(hook, 0); });
 })();
 </script>
 <script id="nf-day-score">// ══════════════════════════════════════════════════════════════

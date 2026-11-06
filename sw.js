@@ -1,12 +1,12 @@
 // NQAS | FAST service worker — made by app/build.js (do not edit site/sw.js; edit app/pwa/sw.js).
-// • The page (index.html): network first, so everyone gets the latest app when online; the last copy
-//   is used only when the network fails or takes longer than 6 s (offline: the app opens and says it cannot reach the server).
+// • The page (index.html): the latest when the network answers within 1.5 s; otherwise the saved copy opens at once and
+//   the latest is saved in the background for next time (offline: the app opens and says it cannot reach the server).
 // • assets/… (name carries a content hash, never changes): cache first; a new build only downloads changed blocks.
 // • Fixed-version libraries from gstatic (Firebase SDK) and cdnjs / jsdelivr / unpkg (jsPDF …): cache first.
 // • Nothing else is touched: Firebase database / sign-in / functions, App Check, Razorpay, WhatsApp, the card page.
 // Emergency switch: open the app with ?nosw=reset (removes this worker and its caches on that phone), or publish a sw.js
 // that only unregisters itself.
-const BUILD = "068f293a5a11";
+const BUILD = "fb4ab73b4d75";
 const ASSETS = [
  "assets/data-sc-days.7e53b2ebc0.js",
  "assets/dept-admin.ee8d5ffab0.js",
@@ -21,8 +21,8 @@ const ASSETS = [
  "assets/dept-perf.0e9d00156f.js",
  "assets/dept-plan.e35a7f99c9.js",
  "assets/dept-review.28e080f175.js",
- "assets/dept-screens.9d0ed672cb.js",
- "assets/dept-screens.f9291d80a9.css",
+ "assets/dept-screens.2c800245d3.css",
+ "assets/dept-screens.c039877d6b.js",
  "assets/dept-summary.5fb8e55baf.js",
  "assets/dept-unlock.25dd4b4eb1.js",
  "assets/sc-baseline-review.9bd6ffb924.js",
@@ -41,8 +41,8 @@ const ASSETS = [
  "assets/sc-cross-cutting.74584f8128.js",
  "assets/sc-day-placement.9f84827e93.js",
  "assets/sc-district.94320f56ac.js",
- "assets/sc-fadm.1fb01e6ce7.css",
- "assets/sc-fadm.3f3b4d2d74.js",
+ "assets/sc-fadm.5bedb6f3f4.css",
+ "assets/sc-fadm.dfad8a8bb9.js",
  "assets/sc-gaps.aa25210c70.js",
  "assets/sc-graduation.5fcd31094e.js",
  "assets/sc-healsol-view.fdd1503355.js",
@@ -70,6 +70,7 @@ const ASSETS = [
  "assets/sc-v2-core.e09d3220f7.js",
  "assets/sc-v2.bfc3486435.css",
  "assets/sc-week-plan.126d067680.js",
+ "assets/shared-back-steps.e2d664b3e4.js",
  "assets/shared-bankpay.9b74de7822.css",
  "assets/shared-bankpay.dfa3d0f99e.js",
  "assets/shared-base.296e41553e.css",
@@ -86,7 +87,7 @@ const ASSETS = [
  "assets/shared-dashboards.6389b2bdbd.js",
  "assets/shared-dashboards.9030b996af.css",
  "assets/shared-demo.2ebfee440a.js",
- "assets/shared-enquiries.801c56c149.js",
+ "assets/shared-enquiries.8184b70b23.js",
  "assets/shared-fac-page.7d7df7d9b9.css",
  "assets/shared-fac-page.f6d63b3ce5.js",
  "assets/shared-fac-ready.3755ce3545.js",
@@ -101,7 +102,7 @@ const ASSETS = [
  "assets/shared-hs-people.9db514dd1d.js",
  "assets/shared-hs-roles.d381b3e930.js",
  "assets/shared-hs-settings.f1365f98fb.js",
- "assets/shared-impact.9f7d5ac345.js",
+ "assets/shared-impact.9630f61fd5.js",
  "assets/shared-impact.b1cba457b4.css",
  "assets/shared-invoices.bf3a936b13.js",
  "assets/shared-join.48f0f1fcac.js",
@@ -116,8 +117,8 @@ const ASSETS = [
  "assets/shared-pdf-reports.1da837fa8c.js",
  "assets/shared-pdf.da58c8e364.js",
  "assets/shared-play.cf7261e0ef.js",
- "assets/shared-profile.87e044af3e.js",
- "assets/shared-profile.90ba9c48fc.css",
+ "assets/shared-profile.b3028524ba.js",
+ "assets/shared-profile.be420dea99.css",
  "assets/shared-promos.27b119ebbb.js",
  "assets/shared-push.827fb3f07d.js",
  "assets/shared-registration.6833f0a40c.js",
@@ -127,10 +128,10 @@ const ASSETS = [
  "assets/shared-sc-content.057fe71840.js",
  "assets/shared-sc-content.4dd2befa79.css",
  "assets/shared-sc-draft.672ef4231a.js",
- "assets/shared-secure.9df1755565.js",
+ "assets/shared-secure.597f375f6f.js",
  "assets/shared-startdate.643905932c.js",
  "assets/shared-vocab.22993a26fc.js",
- "assets/shared-whatsapp.f90576a405.js",
+ "assets/shared-whatsapp.a1352a77c3.js",
  "assets/types-settings.a8ca60dd52.js",
  "assets/vendor-poppins-font.0ea9314335.css",
  "assets/vendor-qrcode.fabb956c75.js",
@@ -185,17 +186,16 @@ self.addEventListener('activate', e => {
   })());
 });
 
-async function networkFirstPage(req) {
+async function networkFirstPage(req, ev) {
+  // The newest page if the network answers within 1.5 s; otherwise the saved copy opens at once and the new page
+  // is saved in the background for the next opening (6 Nov 2026 — was: wait up to 6 s on a weak signal).
   const c = await caches.open(PAGES), key = scopeUrl('./');
-  try {
-    const res = await Promise.race([fetch(req), new Promise((_, rej) => setTimeout(() => rej(new Error('slow')), 6000))]);
-    if (res && res.ok && res.type === 'basic') c.put(key, res.clone());
-    return res;
-  } catch (err) {
-    const hit = await c.match(key);
-    if (hit) return hit;
-    return fetch(req);                                  // slow but not offline: keep waiting for the network
-  }
+  const net = fetch(req).then(res => { if (res && res.ok && res.type === 'basic') c.put(key, res.clone()); return res; });
+  const hit = await c.match(key);
+  if (!hit) return net;                                   // first opening on this phone: wait for the network
+  if (ev) ev.waitUntil(net.catch(() => {}));              // keep the background update alive
+  try { return await Promise.race([net, new Promise((_, rej) => setTimeout(() => rej(new Error('slow')), 1500))]); }
+  catch (err) { return hit; }
 }
 async function cacheFirst(name, req) {
   const c = await caches.open(name), hit = await c.match(req);
@@ -209,7 +209,7 @@ self.addEventListener('fetch', e => {
   const url = new URL(req.url), scope = new URL(self.registration.scope);
   if (url.origin === scope.origin && url.pathname.startsWith(scope.pathname)) {
     const rel = url.pathname.slice(scope.pathname.length);
-    if (rel === '' || rel === 'index.html') { if (url.searchParams.has('cert') || url.searchParams.has('impact')) return; e.respondWith(networkFirstPage(req)); return; }   // the app page (Verify links: plain network)
+    if (rel === '' || rel === 'index.html') { if (url.searchParams.has('cert') || url.searchParams.has('impact')) return; e.respondWith(networkFirstPage(req, e)); return; }   // the app page (Verify links: plain network)
     if (rel.startsWith('assets/')) { e.respondWith(cacheFirst(STATIC, req)); return; }
     return;                                             // manifest, icons, app-inline.html …: normal network
   }
