@@ -16158,6 +16158,11 @@ function nfLoginSwitched(other){
   document.getElementById('nf-switch-go').onclick=function(){ location.reload(); };
   try{ if(typeof db!=='undefined'&&db) db.goOffline(); }catch(e){}   // nothing more is sent from this window
 }
+// After someone signs out the app restarts fresh (6 Nov 2026): on a shared phone nothing of the previous person —
+// their screens, names or data — stays loaded behind the login for the next person. Optional message shown after the restart.
+function nfRestartAfterSignOut(msg){ try{ if(msg) sessionStorage.setItem('nf_out_msg',msg); }catch(e){}
+  Promise.resolve(_nfSignOutP).catch(function(){}).then(function(){ try{ location.replace(location.pathname); }catch(e){} }); }
+(function(){ try{ var m=sessionStorage.getItem('nf_out_msg'); if(m){ sessionStorage.removeItem('nf_out_msg'); window.addEventListener('load',function(){ setTimeout(function(){ try{ showToast(m,''); }catch(e){} },1200); }); } }catch(e){} })();
 function nfSecureSignOut(){ _nfAuth=null; try{ nfSetLevel(NF_LEVEL_DEFAULT); }catch(e){}
   ['nf-id','nf-pwd'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; }); nfError(''); _nfSignOutP=(async function(){ try{ await firebase.auth().signOut(); }catch(e){} })(); return _nfSignOutP; }
 // change my own password (re-confirms the current one)
@@ -16228,7 +16233,7 @@ function nfShowTempPassword(name,identifier,pw,title,waText){
   });
   // sign out of Firebase whenever someone logs out
   ['logoutCHO','logoutAdmin','scqLogout','scChoLogout'].forEach(function(fn){ var o=window[fn]; if(typeof o!=='function') return;
-    window[fn]=function(){ var r=o.apply(this,arguments); Promise.resolve(r).then(function(){ var ls=document.getElementById('login-screen'); if(!ls||ls.style.display!=='none') nfSecureSignOut(); }); return r; }; });
+    window[fn]=function(){ var r=o.apply(this,arguments); Promise.resolve(r).then(function(){ var ls=document.getElementById('login-screen'); if(!ls||ls.style.display!=='none'){ nfSecureSignOut(); nfRestartAfterSignOut(); } }); return r; }; });
   // CHO roster
   scSaveNewStaff=async function(){
     var roleId=(document.getElementById('sc-add-role-id')||{}).value||'', name=((document.getElementById('sc-add-name')||{}).value||'').trim(), mob=((document.getElementById('sc-add-mob')||{}).value||'').trim(), errEl=document.getElementById('sc-add-err');
@@ -16370,8 +16375,7 @@ function nfShowTempPassword(name,identifier,pw,title,waText){
   // inactivity sign-out on dashboards
   var last=Date.now(); ['click','keydown','mousemove','touchstart','scroll'].forEach(function(ev){ window.addEventListener(ev,function(){ last=Date.now(); },{passive:true}); });
   setInterval(function(){ if(['sc-admin','sc-supervisor','sc-champion'].indexOf(appMode)<0) return; if(Date.now()-last<NF_IDLE_MIN*60000) return; last=Date.now();
-    showToast('Signed out after '+NF_IDLE_MIN+' minutes without activity.','');
-    try{ if(appMode==='sc-champion') scqLogout(true); else logoutAdmin(); }catch(e){} nfSecureSignOut(); },60000);
+    nfSecureSignOut(); nfRestartAfterSignOut('Signed out after '+NF_IDLE_MIN+' minutes without activity.'); },60000);
 })();
 
 // ── HealSol Security panel (Setup): HealSol Admins + go-live migration ──
@@ -21968,7 +21972,7 @@ async function nfDOpenViewer(acc){
   var w=acc.rec||await fbGet('sc_viewers/'+acc.id)||{}; _nfD.who={id:acc.id,name:w.name||acc.id,kind:w.kind,portName:''}; _nfD.mode='viewer'; _nfD.lvl='all'; _nfD.type=''; _nfD.st=_nfD.di=_nfD.bl='';
   _nfD.v=null; try{ _nfD.v=await fbGet('sc_views/'+w.portfolio); }catch(e){} nfDShow(); return true; }
 function nfDClose(){ var app=document.getElementById('nf-dash-app'); if(app) app.style.display='none'; document.body.classList.remove('nfd-on'); _nfD.mode=''; }
-async function nfDLogout(){ nfDClose(); _nfD.v=null; var ls=document.getElementById('login-screen'); if(ls) ls.style.display=''; try{ await nfSecureSignOut(); }catch(e){} try{ nfBack(); }catch(e){} }
+async function nfDLogout(){ nfDClose(); _nfD.v=null; var ls=document.getElementById('login-screen'); if(ls) ls.style.display=''; try{ await nfSecureSignOut(); }catch(e){} if(typeof nfRestartAfterSignOut==='function') nfRestartAfterSignOut(); else try{ nfBack(); }catch(e){} }
 // ── downloads ──
 function nfDFile(){ return 'NQAS-FAST-'+String((_nfD.v&&_nfD.v.name)||'dashboard').replace(/[^A-Za-z0-9]+/g,'-')+'-'+scTodayStr(); }
 async function nfDXlsx(btn){ var v=_nfD.v; if(!v) return; var old=btn&&btn.innerHTML; if(btn){ btn.disabled=true; btn.textContent='Preparing…'; }
@@ -22888,7 +22892,7 @@ function ndShow() {
 function ndClose() { var app = document.getElementById('nf-dept-app'); if (app) app.style.display = 'none'; document.body.classList.remove('nd-on'); }
 async function ndLogout() {
   ndClose(); _nd = null; var ls = document.getElementById('login-screen'); if (ls) ls.style.display = '';
-  try { await nfSecureSignOut(); } catch (e) {} try { nfBack(); } catch (e) {}
+  try { await nfSecureSignOut(); } catch (e) {} if (typeof nfRestartAfterSignOut === 'function') nfRestartAfterSignOut(); else try { nfBack(); } catch (e) {}
 }
 async function ndReload() { if (!_nd) return; _nd.fac = (await fbGet(scFacilityPath(_nd.code))) || _nd.fac; _nd.cards = (await fbGet(ndPath())) || {}; try { _nd.actions = (await fbGet('sc_dactions/' + _nd.code)) || {}; } catch (e) {} try { _nd.pcards = (await fbGet('sc_pcards/' + _nd.code)) || {}; } catch (e) {} ndRender(); }
 
