@@ -6,7 +6,7 @@
 // • Nothing else is touched: Firebase database / sign-in / functions, App Check, Razorpay, WhatsApp, the card page.
 // Emergency switch: open the app with ?nosw=reset (removes this worker and its caches on that phone), or publish a sw.js
 // that only unregisters itself.
-const BUILD = "f4e18803f4c5";
+const BUILD = "8efba5e8186b";
 const ASSETS = [
  "assets/data-sc-days.7e53b2ebc0.js",
  "assets/dept-admin.ee8d5ffab0.js",
@@ -87,7 +87,7 @@ const ASSETS = [
  "assets/shared-dashboards.0f174fd82a.js",
  "assets/shared-dashboards.9030b996af.css",
  "assets/shared-demo.2ebfee440a.js",
- "assets/shared-enquiries.8184b70b23.js",
+ "assets/shared-enquiries.53bc759113.js",
  "assets/shared-fac-page.7d7df7d9b9.css",
  "assets/shared-fac-page.f6d63b3ce5.js",
  "assets/shared-fac-ready.3755ce3545.js",
@@ -113,14 +113,18 @@ const ASSETS = [
  "assets/shared-one-login.fb8d4c8dd4.js",
  "assets/shared-one-ui.1b4350b497.css",
  "assets/shared-one-ui.c255a0db58.js",
+ "assets/shared-otp.fd57b4781e.js",
  "assets/shared-payments.12fb4e5a71.js",
  "assets/shared-pdf-reports.1da837fa8c.js",
  "assets/shared-pdf.da58c8e364.js",
+ "assets/shared-play-brand.5ff1546d4a.js",
  "assets/shared-play.cf7261e0ef.js",
  "assets/shared-profile.b3028524ba.js",
  "assets/shared-profile.be420dea99.css",
- "assets/shared-promos.27b119ebbb.js",
+ "assets/shared-promos.85ce3034bc.js",
  "assets/shared-push.827fb3f07d.js",
+ "assets/shared-qi-start.0c0a500d2c.js",
+ "assets/shared-qi-start.2220ec1eff.css",
  "assets/shared-registration.6833f0a40c.js",
  "assets/shared-registry.0152bb4061.css",
  "assets/shared-registry.a1047f8ae0.js",
@@ -139,6 +143,11 @@ const ASSETS = [
  "icons/icon-192.png",
  "icons/icon-512.png",
  "icons/icon-maskable-512.png",
+ "icons/qi-apple-touch-icon.png",
+ "icons/qi-icon-192.png",
+ "icons/qi-icon-512.png",
+ "icons/qi-icon-maskable-512.png",
+ "icons/qi-logo.jpg",
  "manifest.webmanifest"
 ];
 const KEEP = [
