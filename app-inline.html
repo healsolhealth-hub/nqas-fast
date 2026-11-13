@@ -23668,19 +23668,41 @@ function ndRuleTxt(n) {
   var half = Math.ceil(n / 2), lo = half - 1;
   return n + ' things: all ' + n + ' = Met · ' + (half === n - 1 ? half : half + '–' + (n - 1)) + ' = Partial · ' + (lo ? '0–' + lo : '0') + ' = Not met';
 }
-// ── best filled by ──
-function ndCpFor(dept, id) {   // the fillers a checkpoint goes to
+// ── best filled by · shared checkpoints (13 Nov 2026) ──
+// Baseline and end-line (and catch-up) are the heavy weeks: every checkpoint of the department in 7 / 14 days. There each
+// checkpoint goes to ONE filler of the department, in turn, so the team shares the day (the checker spot-checks). In the
+// implementation weeks (light days) each checkpoint goes to TWO fillers, so the cards can still be compared. HealSol's
+// "best filled by" roles still decide who may get a checkpoint; the sharing happens among those people.
+function ndShareN(day) {
+  if (!day) return 2;
+  if (day > 100) return 1;   // catch-up cards (baseline / end-line missed)
+  var S = ndShape(); return (day >= S.b1 && day <= S.bN) || (day >= S.e1 && day <= S.eN) ? 1 : 2;
+}
+// who gets each checkpoint of a department's day: {id: [mobiles]} — the least-loaded filler first, in turn, so shares are even
+function ndShareMap(dept, day) {
+  var fl = ndFillers(dept).slice().sort(), ids = ndDayIds(dept, day), k = ndShareN(day);
+  var key = fl.join(',') + '|' + k + '|' + ids.join(',');
+  _nd._sh = _nd._sh || {}; var c = _nd._sh[dept + '|' + day]; if (c && c.key === key) return c.map;
+  var map = {}, cnt = {}, base = ndHash(_nd.code + '|' + dept + '|' + day); fl.forEach(function (m) { cnt[m] = 0; });
+  ids.forEach(function (id, i) {
+    var roles = ndCt(id).roles || [], pool = fl;
+    if (roles.length) { var by = fl.filter(function (m) { return roles.indexOf(ndRole(m)) >= 0; }); if (by.length) pool = by; }
+    if (pool.length <= k) { map[id] = pool.slice(); pool.forEach(function (m) { cnt[m]++; }); return; }
+    var st = (base + i) % pool.length, order = pool.map(function (m, j) { return pool[(st + j) % pool.length]; });
+    order.sort(function (a, b) { return cnt[a] - cnt[b]; });   // stable: ties keep the turn order
+    map[id] = order.slice(0, k); map[id].forEach(function (m) { cnt[m]++; });
+  });
+  _nd._sh[dept + '|' + day] = { key: key, map: map }; return map;
+}
+function ndCpFor(dept, id, day) {   // the fillers a checkpoint goes to (on that day; without a day: everyone it may go to)
+  if (day) { var m = ndShareMap(dept, day)[id]; if (m) return m; }
   var fl = ndFillers(dept), roles = ndCt(id).roles || [];
   if (!roles.length) return fl;
   var by = fl.filter(function (m) { return roles.indexOf(ndRole(m)) >= 0; });
   return by.length ? by : fl;
 }
-function ndCpForMe(dept, id, mob) { return ndCpFor(dept, id).indexOf(mob) >= 0; }
-function ndAnyRoles() {   // quick path: no checkpoint has "best filled by" roles
-  if (_nd.anyRoles == null) { var L = _nd.live || {}, has = false; [L.edits || {}, L.added || {}].forEach(function (o) { Object.keys(o).forEach(function (id) { var r = ndJ((o[id] || {}).roles, []); if (r && r.length) has = true; }); }); _nd.anyRoles = has; }
-  return _nd.anyRoles;
-}
-function ndMyIds(dept, day, mob) { var ids = ndDayIds(dept, day); if (!ndAnyRoles()) return ndFills(dept, mob) ? ids : []; return ids.filter(function (id) { return ndCpForMe(dept, id, mob); }); }
+function ndCpForMe(dept, id, mob, day) { return ndCpFor(dept, id, day).indexOf(mob) >= 0; }
+function ndMyIds(dept, day, mob) { if (!ndFills(dept, mob)) return []; var map = ndShareMap(dept, day); return ndDayIds(dept, day).filter(function (id) { return (map[id] || []).indexOf(mob) >= 0; }); }
 function ndForYouTag(dept, id) { var r = ndCt(id).roles || []; if (!r.length) return ''; var me = ndMob(), mine = r.indexOf(ndRole(me)) >= 0; return mine ? 'For you · ' + ndRoleLabel(ndRole(me)) : ''; }
 // ── ticks on my card ──
 function ndTick(id, k, v) {
@@ -23797,7 +23819,7 @@ function ndTodayHTML() {
   var my = R.overall === null ? 0 : R.overall, gain = day > S.bN && B.overall !== null && R.overall !== null ? R.overall - B.overall : null;
   var t = _nd.view ? null : ndTodo(me), fillToday = ndCardDepts(d0).filter(function (d) { return !_nd.view && ndFills(d.id, me); });
   var doneN = fillToday.filter(function (d) { var c = ndPc(d.id, day)[me] || {}; return c.done || c.absent; }).length;
-  var scored = 0, total = 0; fillToday.forEach(function (d) { var c = ndPc(d.id, day)[me] || {}, ids = ndDayIds(d.id, day); total += ids.length; scored += ids.filter(function (i) { return (c.s || {})[i] !== undefined; }).length; });
+  var scored = 0, total = 0; fillToday.forEach(function (d) { var c = ndPc(d.id, day)[me] || {}, ids = ndMyIds(d.id, day, me); total += ids.length; scored += ids.filter(function (i) { return (c.s || {})[i] !== undefined; }).length; });
   var cta = _nd.view || !fillToday.length ? '<button type="button" class="nx-cta" onclick="ndTab(\'cards\')">Open the cards ›</button>'
     : t.fill.length ? '<button type="button" class="nx-cta" onclick="ndGoCard(\'' + t.fill[0].id + '\',' + day + ')">Open today\'s card · ' + scored + ' of ' + total + ' done ›</button>'
     : '<button type="button" class="nx-cta" onclick="ndTab(\'cards\')">All done for today ✓</button>';
@@ -23869,7 +23891,7 @@ function nxTodoHTML(me, t) {
   if (t.late.length) rows.push(nxLi('ti-alert-triangle', 'r', 'Catch up missed cards', 'Open until checked · ' + t.late.map(function (x) { return ndDeptDef(x.dept).name + ' Day ' + x.day; }).slice(0, 3).join(', '), "ndGoCard('" + t.late[0].dept + "'," + t.late[0].day + ")", '<span class="nx-chip r">' + t.late.length + '</span>'));
   fill.forEach(function (d) {
     var c = ndPc(d.id, day)[me] || {}, s = c.s || {}, r = c.r || {}; if (!first) first = d.id;
-    ndDayIds(d.id, day).forEach(function (id) {
+    ndMyIds(d.id, day, me).forEach(function (id) {
       if (rows.length >= 5) { more++; return; }
       var row = _nd.byId[id] || [], v = s[id], rs = ndReason(r[id]);
       var icon = v === 2 ? 'ti-check' : v === 1 || v === 0 ? 'ti-alert-triangle' : 'ti-clipboard-list', cls = v === 2 ? 'g' : v === 1 ? 'a' : v === 0 ? 'r' : '';
@@ -23955,6 +23977,7 @@ function nxDeptListHTML() {
 function ndDeptStatus(dept, day) {
   var me = ndMob(), res = ndRes(dept, day), inn = ndCardsIn(dept, day), mine = ndPc(dept, day)[me] || {}, ids = ndDayIds(dept, day);
   if (!ids.length) return { k: 'new', t: 'No card' };
+  if (!_nd.view && ndFills(dept, me)) { var myIds = ndMyIds(dept, day, me); if (myIds.length) ids = myIds; }
   if (res.chk) { var e = Object.keys(res.esc || {}).length; return e ? { k: 'back', t: e + ' with the lead' } : { k: 'ok', t: 'Checked' }; }
   if (!_nd.view && ndFills(dept, me) && !mine.done) { var n = ids.filter(function (i) { return (mine.s || {})[i] !== undefined; }).length; return n ? { k: 'prog', t: n + ' of ' + ids.length + ' scored' } : { k: 'new', t: 'Fill your card' }; }
   if (inn.waiting.length) return { k: 'prog', t: inn.done.length + ' of ' + inn.fillers.length + ' cards in' };
@@ -24025,7 +24048,7 @@ function ndDayCardHTML(dept, day) {
   var lead = ndLead(dept), ck = ndChecker(dept), myRole = nxRoleOf(me);
   var h = '<div class="nx-dc"><div class="nx-dc-hd"><div class="nx-dn"><small>DAY</small><b>' + day + '</b></div><div><b>' + ndEsc(d.name) + '</b><small>' + ndEsc((nxWd(day) ? nxWd(day) + ', ' : '') + ndShortDate(nxDateOf(day))) + (lead ? ' · lead: ' + ndEsc(ndName(lead)) + ' (' + ndEsc(nxRoleOf(lead)) + ')' : '') + '</small></div></div>'
     + '<div class="nx-aoc"><b>Area of Concern</b>' + aocs.map(function (a) { return '<span>' + ndEsc(a + ' · ' + String(_nd.cl.aocs[a] || '').replace(/^[:\s]+/, '')) + '</span>'; }).join('') + '</div>';
-  var about = fills ? 'Today you check ' + ids.length + ' checkpoint' + (ids.length > 1 ? 's' : '') + ' of ' + d.name + (stds.length ? ' — ' + stds.map(function (k) { return _nd.cl.stds[k] ? k : k; }).join(', ') : '') + (ndSolo(dept) ? '. You are the only one filling this department, so your card counts as checked when you tap Done; ' + (ck && ck !== me ? nxFirst(ck) + ' (' + nxRoleOf(ck) + ')' : 'the lead') + ' spot-checks a few and assigns actions for the gaps.' : '. Fill your own card; ' + (ck && ck !== me ? nxFirst(ck) + ' (' + nxRoleOf(ck) + ')' : 'the checker') + ' compares the cards later.')
+  var about = fills ? 'Today you check ' + ids.length + ' checkpoint' + (ids.length > 1 ? 's' : '') + ' of ' + d.name + (stds.length ? ' — ' + stds.map(function (k) { return _nd.cl.stds[k] ? k : k; }).join(', ') : '') + (ndSolo(dept) ? '. You are the only one filling this department, so your card counts as checked when you tap Done; ' + (ck && ck !== me ? nxFirst(ck) + ' (' + nxRoleOf(ck) + ')' : 'the lead') + ' spot-checks a few and assigns actions for the gaps.' : '. Fill your own card; ' + (ck && ck !== me ? nxFirst(ck) + ' (' + nxRoleOf(ck) + ')' : 'the checker') + ' compares the cards later.') + (ndDayIds(dept, day).length > ids.length ? ' Your team shares this day: you have ' + ids.length + ' of its ' + ndDayIds(dept, day).length + ' checkpoints' + (ndShareN(day) === 1 ? ', the others check the rest.' : ', each one also goes to one colleague so the two cards can be compared.') : '')
     : 'Your team fills their own cards for ' + d.name + '. ' + (ndCanCheck(dept, me) && !_nd.view ? 'You compare them on one screen: agreed Met closes by itself.' : 'The checker compares them on one screen.');
   h += '<div class="nx-blk"><b>About this day</b><span>' + ndEsc(about) + '</span></div>';
   // status
@@ -24117,7 +24140,7 @@ function nxTlRow(m, fac) {
   var chips = depts.slice(0, 6).map(function (d) { var s = fac ? (ndRes(d.id, m.day).chk ? 'verified' : '') : ndMySt(d.id, m.day); return '<span class="' + (s === 'verified' ? 'g' : s === 'awaiting' ? 'a' : s === 'overdue' ? 'r' : 't') + '">' + ndEsc(d.id) + '</span>'; }).join('');
   var lab = m.st === 'verified' ? 'Checked' : m.st === 'awaiting' ? (fac ? 'Being checked' : 'With ' + (depts[0] ? nxCheckerLabel(depts[0].id) : 'checker')) : m.st === 'overdue' ? (fac ? 'Not checked' : 'Catch up') : m.st === 'today' ? 'Today' : m.st === 'upcoming' ? nxWd(m.day) : 'No card';
   if (m.st === 'verified') { var p = nxDayPct(m.day, depts.map(function (d) { return d.id; })); if (p !== null) lab += ' · ' + p + '%'; }
-  if (m.st === 'today' && !fac) { var sc = 0, tot = 0; depts.filter(function (d) { return ndFills(d.id, me); }).forEach(function (d) { var c = ndPc(d.id, m.day)[me] || {}, ids = ndDayIds(d.id, m.day); tot += ids.length; sc += ids.filter(function (i) { return (c.s || {})[i] !== undefined; }).length; }); if (tot) lab += ' · ' + sc + '/' + tot; }
+  if (m.st === 'today' && !fac) { var sc = 0, tot = 0; depts.filter(function (d) { return ndFills(d.id, me); }).forEach(function (d) { var c = ndPc(d.id, m.day)[me] || {}, ids = ndMyIds(d.id, m.day, me); tot += ids.length; sc += ids.filter(function (i) { return (c.s || {})[i] !== undefined; }).length; }); if (tot) lab += ' · ' + sc + '/' + tot; }
   return '<button type="button" class="nx-tr' + (m.day === today ? ' now' : '') + '"' + (m.day <= today ? ' onclick="ndOpenDay(' + m.day + ')"' : ' disabled') + '><span class="nx-tdn ' + m.st + '"><small>DAY</small>' + m.day + '</span><span><b' + (m.day > today ? ' style="color:#64748B"' : '') + '>' + ndEsc(title) + '</b><span class="nx-tg">' + chips + '</span></span><em class="' + m.st + '">' + ndEsc(lab) + '</em></button>';
 }
 function ndWeek(w) { _ndWkOpen[w] = !_ndWkOpen[w]; ndKeepScroll(); }
@@ -32832,7 +32855,7 @@ function ndMemoize(name, copy) {
 (function () {
   ['ndStaff', 'ndDeptDefs', 'ndLatestFinal', 'ndAnyRoles', 'ndShape'].forEach(function (n) { ndMemoize(n, false); });
   ['ndDayInfo', 'ndRecheckIds', 'ndDayIds', 'ndMyIds', 'ndFillers', 'ndCardsIn', 'ndChecksDue', 'ndUnassigned', 'ndEscItems', 'nxLeads'].forEach(function (n) { ndMemoize(n, true); });
-  ['nxJobCount', 'ndDaySt', 'ndMySt'].forEach(function (n) { ndMemoize(n, false); });
+  ['nxJobCount', 'ndDaySt', 'ndMySt', 'ndShareMap'].forEach(function (n) { ndMemoize(n, false); });
   // re-check ids per department, once per screen
   if (typeof ndRecheckIds === 'function') {
     var byDept = function () { var M = ndMemoBox(); if (M.__fx) return M.__fx; var A = (_nd && _nd.actions) || {}, o = {};
