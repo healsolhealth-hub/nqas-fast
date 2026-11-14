@@ -33558,7 +33558,7 @@ async function otAdminRender() {
     + '<div class="ot-subs">' + sw('reset', 'Forgot password', 'Staff reset their own password') + sw('first', 'First password', 'Before choosing a password after a temporary one') + sw('device', 'New phone', 'The first login on a phone') + sw('signup', 'Sign-up and join forms', 'The mobile in the form') + '</div>'
     + '<div class="ot-grid"><label>Phone number ID<input id="ot-pid" class="ot-in" inputmode="numeric" value="' + otE(c.phoneId || '') + '" placeholder="from Meta → WhatsApp → API setup"></label>'
     + '<label>Template name<input id="ot-tpl" class="ot-in" value="' + otE(c.template || 'nqas_fast_otp') + '"></label><label>Template language<input id="ot-lang" class="ot-in" value="' + otE(c.lang || 'en') + '"></label></div>'
-    + '<div class="ot-row" style="justify-content:flex-start"><button type="button" class="ot-btn sm" onclick="otAdminSave()">Save</button><button type="button" class="ot-link" onclick="otAdminTest()">Send a test code…</button></div>'
+    + '<div class="ot-row" style="justify-content:flex-start"><button type="button" class="ot-btn sm" onclick="otAdminSave()">Save</button><button type="button" class="ot-link" onclick="otAdminTest()">Send a test code…</button><button type="button" class="ot-link" onclick="otAdminWa()">Check number</button><button type="button" class="ot-link" onclick="otAdminWa(1)">Register number…</button></div>'
     + '<div class="ot-sub" id="ot-adm-msg" style="text-align:left"></div>';
 }
 async function otAdminSave() {
@@ -33574,6 +33574,21 @@ async function otAdminTest() {
   var msg = document.getElementById('ot-adm-msg'); if (msg) msg.textContent = 'Sending…';
   try { var r = await nfCall('otpTest', { mobile: v.m }); if (msg) msg.textContent = '✓ Sent to ••••' + r.to + ' — check WhatsApp on that phone.'; }
   catch (e) { if (msg) msg.textContent = '✗ ' + e.message; }
+}
+async function otAdminWa(reg) {
+  var msg = document.getElementById('ot-adm-msg'), d = { action: 'status' };
+  if (reg) {
+    var v = await scDialog({ title: 'Register the WhatsApp number', icon: '🔐', okLabel: 'Register', message: 'One time, after adding the number in WhatsApp Manager. Choose a 6-digit PIN and keep it safe: it becomes the number\'s two-step PIN, and Meta asks for it if the number is ever moved.', fields: [{ key: 'p', label: '6-digit PIN', type: 'password', required: true }] });
+    if (!v) return; d = { action: 'register', pin: String(v.p || '').replace(/\D/g, '') };
+    if (d.pin.length !== 6) { if (msg) msg.textContent = '✗ The PIN must be 6 digits.'; return; }
+  }
+  if (msg) msg.textContent = reg ? 'Registering…' : 'Checking…';
+  try {
+    var r = await nfCall('otpWaAdmin', d), n = r.number || {};
+    var t = { CONNECTED: 'Connected — ready to send', PENDING: 'Pending — not registered yet (use Register number…)', OFFLINE: 'Offline', FLAGGED: 'Flagged by Meta', RESTRICTED: 'Restricted by Meta', BANNED: 'Banned by Meta' };
+    if (msg) msg.textContent = (r.registered ? '✓ Registered. ' : '') + (n.display_phone_number || '') + ' · ' + (t[n.status] || n.status || 'status unknown')
+      + (n.code_verification_status ? ' · verification: ' + n.code_verification_status : '') + (n.name_status ? ' · name: ' + n.name_status : '') + (n.quality_rating ? ' · quality: ' + n.quality_rating : '');
+  } catch (e) { if (msg) msg.textContent = '✗ ' + e.message; }
 }
 (function () {
   var hook = function () {
