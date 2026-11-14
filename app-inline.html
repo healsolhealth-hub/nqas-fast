@@ -33558,7 +33558,7 @@ async function otAdminRender() {
     + '<div class="ot-subs">' + sw('reset', 'Forgot password', 'Staff reset their own password') + sw('first', 'First password', 'Before choosing a password after a temporary one') + sw('device', 'New phone', 'The first login on a phone') + sw('signup', 'Sign-up and join forms', 'The mobile in the form') + '</div>'
     + '<div class="ot-grid"><label>Phone number ID<input id="ot-pid" class="ot-in" inputmode="numeric" value="' + otE(c.phoneId || '') + '" placeholder="from Meta → WhatsApp → API setup"></label>'
     + '<label>Template name<input id="ot-tpl" class="ot-in" value="' + otE(c.template || 'nqas_fast_otp') + '"></label><label>Template language<input id="ot-lang" class="ot-in" value="' + otE(c.lang || 'en') + '"></label></div>'
-    + '<div class="ot-row" style="justify-content:flex-start"><button type="button" class="ot-btn sm" onclick="otAdminSave()">Save</button><button type="button" class="ot-link" onclick="otAdminTest()">Send a test code…</button><button type="button" class="ot-link" onclick="otAdminWa()">Check number</button><button type="button" class="ot-link" onclick="otAdminWa(1)">Register number…</button></div>'
+    + '<div class="ot-row" style="justify-content:flex-start"><button type="button" class="ot-btn sm" onclick="otAdminSave()">Save</button><button type="button" class="ot-link" onclick="otAdminTest()">Send a test code…</button><button type="button" class="ot-link" onclick="otAdminWa()">Check number</button><button type="button" class="ot-link" onclick="otAdminWa(1)">Register number…</button><button type="button" class="ot-link" onclick="otAdminDiag()">Check permissions</button></div>'
     + '<div class="ot-sub" id="ot-adm-msg" style="text-align:left"></div>';
 }
 async function otAdminSave() {
@@ -33589,6 +33589,19 @@ async function otAdminWa(reg) {
     if (msg) msg.textContent = (r.registered ? '✓ Registered. ' : '') + (n.display_phone_number || '') + ' · ' + (t[n.status] || n.status || 'status unknown')
       + (n.code_verification_status ? ' · verification: ' + n.code_verification_status : '') + (n.name_status ? ' · name: ' + n.name_status : '') + (n.quality_rating ? ' · quality: ' + n.quality_rating : '');
   } catch (e) { if (msg) msg.textContent = '✗ ' + e.message; }
+}
+async function otAdminDiag(connect) {
+  var msg = document.getElementById('ot-adm-msg'); if (!msg) return;
+  msg.textContent = connect ? 'Connecting…' : 'Checking…';
+  try {
+    var r = await nfCall('otpWaAdmin', { action: connect ? 'connect' : 'diag' }), ws = r.wabas || [], h = ws.find(function (w) { return w.hasPhone; });
+    var lines = (r.connected ? '✓ App connected to the WhatsApp account.<br>' : '') + 'Token: ' + otE(r.type || '?') + ' · app ' + otE(r.appId || '?') + ' · ' + otE((r.scopes || []).join(', ') || 'no WhatsApp permissions') + '<br>';
+    lines += ws.length ? ws.map(function (w) { return '• ' + otE(w.name || w.id) + ' (' + otE(w.id) + ')' + (w.hasPhone ? ' ← this number' : '') + ' · numbers: ' + otE((w.numbers || []).join(', ') || '—') + ' · send: ' + (w.send ? 'yes' : '<b>no</b>') + ' · manage: ' + (w.manage ? 'yes' : 'no') + ' · apps: ' + otE((w.apps || []).join(', ') || 'none') + (w.err ? ' · ' + otE(w.err) : ''); }).join('<br>') : 'The token cannot see any WhatsApp account.';
+    if (!h) lines += '<br><b>The token cannot see the account that holds this number.</b>';
+    else if (!h.send) lines += '<br><b>The token may not send for this account.</b>';
+    if (h && !r.connected) lines += '<br><button type="button" class="ot-link" onclick="otAdminDiag(1)">Connect our app to this account</button>';
+    msg.innerHTML = lines;
+  } catch (e) { msg.textContent = '✗ ' + e.message; }
 }
 (function () {
   var hook = function () {
