@@ -1601,7 +1601,7 @@ function nfReleaseLayers(){
 .nfs-card .scx-btn{align-self:flex-start;} td.pw{font-family:monospace;font-weight:700;color:var(--teal-dk);}
 html.nf-secure #sc-add-pwd{display:none!important;}
 .ti-database-export{--ti:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 stroke-width=%222%22 stroke=%22black%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath stroke=%22none%22 d=%22M0 0h24v24H0z%22 fill=%22none%22/%3E%3Cpath d=%22M4 6c0 1.657 3.582 3 8 3s8 -1.343 8 -3s-3.582 -3 -8 -3s-8 1.343 -8 3%22 /%3E%3Cpath d=%22M4 6v6c0 1.657 3.582 3 8 3c1.118 0 2.183 -.086 3.15 -.241%22 /%3E%3Cpath d=%22M20 12v-6%22 /%3E%3Cpath d=%22M4 12v6c0 1.657 3.582 3 8 3c.157 0 .312 -.002 .466 -.005%22 /%3E%3Cpath d=%22M16 19h6%22 /%3E%3Cpath d=%22M19 16l3 3l-3 3%22 /%3E%3C/svg%3E")}.ti-id{--ti:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 stroke-width=%222%22 stroke=%22black%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath stroke=%22none%22 d=%22M0 0h24v24H0z%22 fill=%22none%22/%3E%3Cpath d=%22M3 4m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v10a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z%22 /%3E%3Cpath d=%22M9 10m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0%22 /%3E%3Cpath d=%22M15 8l2 0%22 /%3E%3Cpath d=%22M15 12l2 0%22 /%3E%3Cpath d=%22M7 16l10 0%22 /%3E%3C/svg%3E")}</style>
-<script src="assets/shared-secure.c5eb0a0644.js" onerror="nfAssetFail(this)"></script>
+<script src="assets/shared-secure.81549c85b2.js" onerror="nfAssetFail(this)"></script>
 
 <script id="nf-registration" src="assets/shared-registration.6833f0a40c.js" onerror="nfAssetFail(this)"></script>
 <link id="nf-join-css" rel="stylesheet" href="assets/shared-join.6424dcd82f.css" onerror="nfAssetFail(this)">
@@ -2297,6 +2297,22 @@ body.nf-admin:not(.nfv-hsenq) .admin-main > [data-nfv="hsenq"],body.nf-admin:not
 <link id="nf-sp-css" rel="stylesheet" href="assets/shared-settings-panels.bdc5b8ccfb.css" onerror="nfAssetFail(this)">
 <script id="nf-sp" src="assets/shared-settings-panels.265369271f.js" onerror="nfAssetFail(this)"></script>
 <script id="nf-cert-design" src="assets/shared-cert-design.8bb45407bd.js" onerror="nfAssetFail(this)"></script>
+<style id="nf-acct-css">/* Accountant login: Payments only (15 Nov 2026) */
+#ac-app{display:none;position:fixed;inset:0;z-index:9000;background:#F3F6F5;overflow:auto;-webkit-overflow-scrolling:touch;color:#10302B;font-family:'Poppins','NF Poppins',system-ui,sans-serif;}
+body.ac-on{overflow:hidden;}
+.ac-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 24px;background:#fff;border-bottom:1px solid #DCE4E1;position:sticky;top:0;z-index:2;}
+.ac-brand{display:flex;align-items:center;gap:12px;min-width:0;} .ac-brand > .ti{width:40px;height:40px;flex:none;border-radius:12px;background:#E6F2EF;color:#1E6B5E;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.ac-brand div{display:flex;flex-direction:column;min-width:0;} .ac-brand b{font-size:17px;} .ac-brand small{font-size:12.5px;color:#476B64;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ac-hr{display:flex;align-items:center;gap:8px;}
+.ac-main{max-width:1100px;margin:0 auto;padding:16px 24px 40px;display:flex;flex-direction:column;gap:14px;}
+.ac-foot{margin:4px 0 0;font-size:12.5px;color:#5B6B66;line-height:1.5;}
+.ac-load{padding:60px 20px;text-align:center;color:#5B6B66;}
+/* proforma: cancelling and "keep open" stay with HealSol */
+#ac-app [onclick^="ivOfficeTime"],#ac-app [onclick^="ivCancel"]{display:none!important;}
+#ac-app .eq-hr{display:none;} #ac-app .ac-s{display:none;}
+@media(max-width:700px){ #ac-app .hsp-tabs button{padding:10px 10px 12px;} #ac-app .ac-l{display:none;} #ac-app .ac-s{display:inline;} .ac-top{padding:10px 16px;} .ac-main{padding:12px 16px 32px;} .ac-hr .hs-btn{padding:0 12px;} }
+</style>
+<script id="nf-acct" src="assets/shared-accountant.a3886b11ca.js" onerror="nfAssetFail(this)"></script>
 
 </body>
 </html>
