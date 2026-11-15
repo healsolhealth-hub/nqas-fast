@@ -30698,7 +30698,7 @@ function nfEqRowHTML(x) {
   if (k === 'signup') line2 = x.rid ? '<small class="eq-g">Found in the registry' + (x.nin ? ' · NIN ' + nfEqE(x.nin) : '') + '</small>' : '<small class="eq-a">Typed by the applicant' + (x.nin ? ' · NIN ' + nfEqE(x.nin) : '') + ' — Approve adds it to the registry too</small>';
   else if (k === 'champion') { var q = x.champ || {}, NQ = { certified: 'NQAS-certified facility', process: 'NQAS in process', no: 'Not yet certified' };
     line2 = '<small class="eq-g">' + nfEqE([x.ftype ? (NF_LEVELS[x.ftype] || {}).short || x.ftype.toUpperCase() : '', x.nin ? 'NIN ' + x.nin : '', q.years ? q.years + ' yrs in role' : '', NQ[q.nqas] || '', q.reach ? 'can support ' + q.reach + ' facilities' : '', q.langs ? 'guides in ' + q.langs : ''].filter(Boolean).join(' · ')) + '</small>'; }
-  else if (k === 'interest') { var iq = x.interest || {}; line2 = '<small class="eq-b">' + nfEqE(['Qi FAST', iq.program, iq.ftype, iq.setting === 'private' ? 'Private' : iq.setting === 'public' ? 'Public' : '', iq.beds ? iq.beds + ' beds' : ''].filter(Boolean).join(' · ')) + '</small>' + (x.message ? '<small class="eq-m">' + nfEqE(x.message) + '</small>' : ''); }
+  else if (k === 'interest') { var iq = x.interest || {}; line2 = '<small class="eq-b">' + nfEqE(['Qi FAST', iq.program, iq.ftype, iq.setting === 'private' ? 'Private' : iq.setting === 'public' ? 'Public' : '', iq.beds ? iq.beds + ' beds' : ''].filter(Boolean).join(' · ')) + '</small>'; }
   else if (k === 'delete') line2 = '<small class="eq-a">Close the login (People → remove) and delete the personal details within 30 days, then tell them on WhatsApp' + (x.message ? ' · reason: ' + nfEqE(x.message) : '') + '</small>';
   else if (cnt.length) line2 = '<small class="eq-b">' + nfEqE(cnt.join(' · ')) + ' = ' + nfEqE(x.facilityCount || '') + ' facilities</small>';
   else if (x.facilityCount) line2 = '<small class="eq-b">~' + nfEqE(x.facilityCount) + ' facilities</small>';
@@ -30716,11 +30716,11 @@ function nfEqRowHTML(x) {
   if (!open && x.status !== 'approved') acts += btn('', 'Reopen', "nfEqSet('" + id + "','new')");
   return '<div class="eq-r" data-k="' + nfEqE(x._k) + '"><div class="eq-c1"><span class="eq-kind ' + K[1] + '">' + nfEqE(K[0]) + (k === 'signup' && t ? ' · ' + nfEqE(t) : '') + '</span><small>' + nfEqE(nfEqWhen(x.submittedAt)) + '</small>' + (x.ref ? '<small>' + nfEqE(x.ref) + '</small>' : '') + '</div>'
     + '<div class="eq-c2"><b>' + nfEqE(x.orgName || '') + (k === 'join' ? ' <i>· from inside the app</i>' : x.orgType ? ' <i>· ' + nfEqE(x.orgType) + '</i>' : '') + '</b><small>' + nfEqE(who) + (where ? ' · ' + nfEqE(where) : '') + (k === 'signup' && x.progId ? ' · ' + nfEqE(nfEqPkg(x)) : '') + '</small>' + line2
-    + (x.message ? '<small class="eq-m">' + nfEqE(String(x.message).slice(0, 200)) + '</small>' : '') + '</div>'
+    + (x.message ? '<small class="eq-m">Message: ' + nfEqE(String(x.message).slice(0, 200)) + '</small>' : '') + '</div>'
     + '<div class="eq-c3">' + nfEqStatusHTML(x) + '</div><div class="eq-c4">' + acts + '</div></div>';
 }
 function nfEqHTML() {
-  var R = nfEqRows(), base = R.filter(nfEqStatusOk), kinds = { '': base.length, signup: 0, bulk: 0, join: 0, champion: 0 };
+  var R = nfEqRows(), base = R.filter(nfEqStatusOk), kinds = { '': base.length, signup: 0, bulk: 0, join: 0, champion: 0, interest: 0, delete: 0 };
   base.forEach(function (x) { kinds[nfEqKind(x)]++; });
   var inKind = base.filter(function (x) { return !_nfEq.kind || nfEqKind(x) === _nfEq.kind; });
   var T = { sc: [0, 0], uphc: [0, 0], phc: [0, 0], chc: [0, 0] };
@@ -35179,6 +35179,518 @@ function ndIcNav(cur) {
       document.body.classList.add('nd-ic-mine');
       var tab = _nd.tab, s = function (k, label, on) { return '<button type="button" class="' + ((on !== undefined ? on : tab === k) ? 'on' : '') + '" onclick="ndTab(\'' + k + '\')">' + label + '</button>'; };
       return '<div class="nx-icsub" role="tablist" aria-label="My cards">' + s('today', 'Today') + s('cards', 'Cards') + s('ready', 'Progress') + s('me', 'Me', tab === 'me' || tab === 'setup' || tab === 'dept') + '</div>' + ndIcNav('mine');
+    };
+  }
+})();
+</script>
+<style id="nf-hs-pages-css">/* HealSol Enquiries and Payments pages (15 Nov 2026) */
+body.nf-admin:not(.nfv-hsenq) .admin-main > [data-nfv="hsenq"],body.nf-admin:not(.nfv-hspay) .admin-main > [data-nfv="hspay"]{display:none!important;}
+#hs-enqv,#hs-payv{display:flex;flex-direction:column;gap:14px;}
+.hsp-tabs{display:flex;gap:4px;border-bottom:1px solid var(--br,#DCE4E1);overflow-x:auto;scrollbar-width:none;}
+.hsp-tabs button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:1px;padding:10px 16px 12px;border-bottom:3px solid transparent;flex:none;min-height:44px;}
+.hsp-tabs button b{font-size:14.5px;font-weight:600;color:#3C5A55;white-space:nowrap;} .hsp-tabs button small{font-size:12px;color:#5B6B66;white-space:nowrap;}
+.hsp-tabs button em{font-style:normal;font-size:12px;font-weight:700;border-radius:9px;padding:1px 7px;background:#E3EAE8;color:#3C5A55;}
+.hsp-tabs button em.hot{background:#F37321;color:#fff;}
+.hsp-tabs button.on{border-bottom-color:#1E6B5E;} .hsp-tabs button.on b{color:#14514A;}
+.hsp-tabs button:focus-visible{outline:2px solid #1E6B5E;outline-offset:-2px;}
+.hsp-k{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5B6B66;margin-top:2px;}
+.hsp-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;}
+.hsp-tile{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:2px;padding:12px 16px;border-radius:14px;border:1px solid var(--br,#DCE4E1);background:#fff;min-height:80px;}
+.hsp-tile small{font-size:13px;color:#476B64;} .hsp-tile b{font-size:24px;line-height:1.15;color:#10302B;} .hsp-tile span{font-size:12px;font-weight:600;color:#B45309;}
+.hsp-tile.zero b{color:#8AA39E;} .hsp-tile.on{border:2px solid #1E6B5E;background:#F1F8F5;}
+.hsp-tile:focus-visible{outline:2px solid #1E6B5E;outline-offset:2px;}
+.hsp-set{display:flex;flex-direction:column;justify-content:center;gap:6px;} .hsp-set small{font-size:12.5px;color:#476B64;} .hsp-set > div{display:flex;gap:6px;flex-wrap:wrap;}
+.hsp-chip{height:36px;padding:0 14px;border-radius:18px;border:1px solid var(--br,#DCE4E1);background:#fff;font:inherit;font-size:13px;cursor:pointer;color:#10302B;}
+.hsp-chip.on{background:#1E6B5E;border-color:#1E6B5E;color:#fff;}
+.hsp-eq[data-g="soon"] .eq-kinds,.hsp-eq[data-g="soon"] .eq-types,.hsp-eq[data-g="other"] .eq-kinds,.hsp-eq[data-g="other"] .eq-types{display:none;}
+.hsp-eq .eq-head b{display:none;} .hsp-eq .eq-head{justify-content:flex-end;}
+.hsp-note{margin:0;font-size:13.5px;color:#476B64;}
+.hsp-body{display:flex;flex-direction:column;gap:12px;}
+.hsp-body > .nfo-card:first-of-type{margin-top:0;}
+.hsp-dl{white-space:nowrap;} .hsp-dl .eq-btn{margin-left:6px;}
+.hsp-strip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:4px 0 6px;}
+.hsp-strip button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;border:1px solid var(--br,#DCE4E1);background:#fff;min-height:60px;}
+.hsp-strip button > .ti{width:38px;height:38px;flex:none;border-radius:12px;background:#E6F2EF;color:#1E6B5E;display:flex;align-items:center;justify-content:center;font-size:19px;}
+.hsp-strip button span{display:flex;flex-direction:column;flex:1;min-width:0;} .hsp-strip b{font-size:14.5px;} .hsp-strip small{font-size:12.5px;color:#476B64;}
+.hsp-strip em{font-style:normal;font-weight:600;font-size:13px;color:#1E6B5E;}
+.hsp-strip button:focus-visible{outline:2px solid #1E6B5E;outline-offset:2px;}
+@media(max-width:899px){
+  body.hs-admin .nfs-nav button[data-v=hspay],body.hs-admin .nfs-nav button[data-v=hsenq]{display:none!important;}
+}
+@media(max-width:700px){
+  .hsp-tiles{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .hsp-strip{grid-template-columns:1fr;}
+}
+</style>
+<script id="nf-hs-pages">// ═══ HealSol: Enquiries and Payments pages (15 Nov 2026) ═══
+// Enquiries: Our programmes · Coming soon (Qi FAST interest, by programme) · Other requests (account deletion).
+// Payments: To confirm · Proforma invoices · Money to collect · Payments received · Invoices & receipts.
+// Business keeps the totals and charts, with a strip at the top that opens these pages.
+var _hsp = { eg: 'ours', prog: '', set: '', pt: 'confirm', loaded: 0 };
+var HSP_SOON = [['nabh', 'NABH'], ['nabl', 'NABL'], ['jci', 'JCI'], ['other', 'Other']], HSP_NQ = [['mch', 'MCH wing'], ['dh', 'District Hospital'], ['mc', 'Medical College']];
+function hspOn() { return typeof hsOn === 'function' && hsOn(); }
+function hspE(s) { return typeof scEsc === 'function' ? scEsc(s == null ? '' : s) : String(s == null ? '' : s); }
+function hspBox(id, v) {
+  var main = document.querySelector('#admin-app .admin-main'); if (!main) return null;
+  var b = document.getElementById(id); if (!b) { b = document.createElement('div'); b.id = id; b.dataset.nfv = v; main.insertBefore(b, main.firstChild); }
+  return b;
+}
+function hspEqGroup(x) { var k = nfEqKind(x); return k === 'interest' ? 'soon' : k === 'delete' ? 'other' : 'ours'; }
+function hspIntKey(x) {
+  var iq = x.interest || {}, p = String(iq.program || ''), t = String(iq.ftype || '');
+  if (/^nqas/i.test(p)) return /mch/i.test(t) ? 'mch' : /district/i.test(t) ? 'dh' : /medical/i.test(t) ? 'mc' : 'other';
+  return /nabh/i.test(p) ? 'nabh' : /nabl/i.test(p) ? 'nabl' : /jci/i.test(p) ? 'jci' : 'other';
+}
+function hspAllLeads() { var g = window._hspEqG; window._hspEqG = ''; var R = []; try { R = nfEqRows(); } catch (e) {} window._hspEqG = g; return R; }
+(function () {
+  if (typeof nfEqRows !== 'function') return;
+  var o = nfEqRows;
+  nfEqRows = function () {
+    var R = o.apply(this, arguments), g = window._hspEqG; if (!g) return R;
+    return R.filter(function (x) {
+      if (hspEqGroup(x) !== g) return false;
+      if (g === 'soon') { if (_hsp.prog && hspIntKey(x) !== _hsp.prog) return false; if (_hsp.set && (x.interest || {}).setting !== _hsp.set) return false; }
+      return true;
+    });
+  };
+})();
+
+// ── Enquiries page ──
+async function hspEnqRender() {
+  if (!hspOn()) return; var b = hspBox('hs-enqv', 'hsenq'); if (!b) return;
+  if (!_nfBiz.at) { b.innerHTML = '<div class="nfbd-empty">Loading…</div>'; try { await nfBizLoad(); } catch (e) {} }
+  window._hspEqG = _hsp.eg;
+  var all = hspAllLeads(), ok = all.filter(nfEqStatusOk), n = { ours: 0, soon: 0, other: 0 }, nw = { ours: 0, soon: 0, other: 0 };
+  ok.forEach(function (x) { var g = hspEqGroup(x); n[g]++; if ((x.status || 'new') === 'new' || (nfEqKind(x) === 'signup' && nfEqOpen(x))) nw[g]++; });
+  var tab = function (id, l, sub) { var on = _hsp.eg === id;
+    return '<button type="button" role="tab" aria-selected="' + on + '" class="' + (on ? 'on' : '') + '" onclick="_hsp.eg=\'' + id + '\';hspEnqRender()"><b>' + l + ' <em class="' + (nw[id] ? 'hot' : '') + '">' + n[id] + '</em></b><small>' + sub + '</small></button>'; };
+  var h = '<div class="nfo-top"><div><h1>Enquiries</h1><small>Everyone who has asked to join, or to be told when a programme is ready</small></div></div>'
+    + '<div class="hsp-tabs" role="tablist" aria-label="Enquiry groups">' + tab('ours', 'Our programmes', 'NQAS · SC, UPHC, PHC, CHC') + tab('soon', 'Coming soon', 'Qi FAST interest') + tab('other', 'Other requests', 'Account deletion') + '</div>';
+  if (_hsp.eg === 'soon') {
+    var I = ok.filter(function (x) { return hspEqGroup(x) === 'soon'; }), cnt = {}, cnew = {};
+    I.forEach(function (x) { var k = hspIntKey(x); cnt[k] = (cnt[k] || 0) + 1; if ((x.status || 'new') === 'new') cnew[k] = (cnew[k] || 0) + 1; });
+    var tile = function (k, l) { var on = _hsp.prog === k, c = cnt[k] || 0;
+      return '<button type="button" class="hsp-tile' + (on ? ' on' : '') + (c ? '' : ' zero') + '" aria-pressed="' + on + '" onclick="_hsp.prog=_hsp.prog===\'' + k + '\'?\'\':\'' + k + '\';hspEnqRender()"><small>' + l + '</small><b>' + c + '</b>' + (cnew[k] ? '<span>' + cnew[k] + ' new</span>' : '') + '</button>'; };
+    var sb = function (v, l) { return '<button type="button" class="hsp-chip' + (_hsp.set === v ? ' on' : '') + '" aria-pressed="' + (_hsp.set === v) + '" onclick="_hsp.set=\'' + v + '\';hspEnqRender()">' + l + '</button>'; };
+    h += '<div class="hsp-k">Other accreditations</div><div class="hsp-tiles">' + HSP_SOON.map(function (x) { return tile(x[0], x[1]); }).join('') + '</div>'
+      + '<div class="hsp-k">NQAS · new facility types</div><div class="hsp-tiles">' + HSP_NQ.map(function (x) { return tile(x[0], x[1]); }).join('')
+      + '<div class="hsp-set"><small>Setting</small><div>' + sb('', 'All') + sb('public', 'Public') + sb('private', 'Private') + '</div></div></div>';
+  }
+  b.innerHTML = h + '<div class="hsp-eq" data-g="' + _hsp.eg + '">' + nfEqHTML() + '</div>';
+}
+(function () {
+  if (typeof nfEqPaint === 'function') { var oP = nfEqPaint; nfEqPaint = function () { if (_nfOv.view === 'hsenq' && hspOn()) return hspEnqRender(); return oP.apply(this, arguments); }; }
+  if (typeof nfEqOpenList === 'function') { nfEqOpenList = function (kind) { _nfEq.kind = kind || ''; _nfEq.st = 'open'; _hsp.eg = kind === 'interest' ? 'soon' : kind === 'delete' ? 'other' : 'ours'; nfAdminView('hsenq'); }; }
+})();
+
+// ── Payments page ──
+function hspPayCounts() {
+  var c = { confirm: 0, proforma: 0 };
+  try { c.confirm = bpPending().length; } catch (e) {}
+  try { c.proforma = ivRows().filter(function (x) { return x.status === 'issued'; }).length; } catch (e) {}
+  return c;
+}
+function hspTable(C, rows, empty) {
+  if (!rows.length) return '<div class="nfbd-empty">' + empty + '</div>';
+  return '<div class="nfo-tw"><table class="nfo-t bz-lt"><thead><tr>' + C.head.map(function (x) { return '<th>' + hspE(x) + '</th>'; }).join('') + '</tr></thead><tbody>'
+    + rows.slice(0, 200).map(function (r) { var code = r.code, cls = C.cls ? C.cls(r) : ''; return '<tr class="' + cls + (C.go && code && (scMasterFacilities || {})[code] ? ' go" onclick="scDrillIn(\'' + scJs(code) + '\')"' : '"') + '>' + C.cell(r).map(function (v, i) { return '<td data-l="' + hspE((C.lab || [])[i] || '') + '">' + v + '</td>'; }).join('') + '</tr>'; }).join('')
+    + '</tbody></table></div>';
+}
+function hspInvRows() {
+  var P = (_nfBd && _nfBd.pays) || {}, out = [];
+  Object.keys(P).forEach(function (c) { Object.keys(P[c] || {}).forEach(function (id) { var r = P[c][id]; if (r && typeof r === 'object' && (r.receiptNo || r.invoice)) out.push(Object.assign({ code: r.code || c, _id: id }, r)); }); });
+  return out.sort(function (a, b) { return String(b.paidAt || '').localeCompare(String(a.paidAt || '')); });
+}
+function hspDoc(i, kind, btn) {
+  var r = hspInvRows()[i]; if (!r) return;
+  if (kind === 'tax' && typeof ivDownload === 'function') return ivDownload(ivDoc('tax', r), btn);
+  if (typeof nfDownloadReceiptPdf === 'function') return nfDownloadReceiptPdf(r, btn);
+}
+async function hspPayRender(force) {
+  if (!hspOn()) return; var b = hspBox('hs-payv', 'hspay'); if (!b) return;
+  if (force || !_hsp.loaded) {
+    if (!b.innerHTML) b.innerHTML = '<div class="nfbd-empty">Loading…</div>';
+    try { await Promise.all([typeof bpLoad === 'function' ? bpLoad(true) : 0, typeof ivLoad === 'function' ? ivLoad() : 0, nfBizLoad(force ? 'force' : false)]); } catch (e) {}
+    _hsp.loaded = Date.now();
+  }
+  var c = hspPayCounts(), D = null; try { D = nfBizData(); _nfBd._D = _nfBd._D || D; } catch (e) {}
+  var T = [['confirm', 'To confirm', c.confirm, 1], ['proforma', 'Proforma invoices', c.proforma, 1], ['collect', 'Money to collect', D ? D.collectList.length : 0], ['received', 'Payments received', D ? D.pays.length : 0], ['invoices', 'Invoices & receipts', hspInvRows().length]];
+  var t = _hsp.pt;
+  var h = '<div class="nfo-top"><div><h1>Payments</h1><small>Everything about money coming in: confirm, follow up, download</small></div>'
+    + '<button type="button" class="nfo-ic" title="Refresh" aria-label="Refresh" onclick="hspPayRender(true)"><i class="ti ti-refresh"></i></button>'
+    + '<button type="button" class="nfbd-dl" onclick="nfBizPreview()"><i class="ti ti-download"></i> Download (Excel / PDF)</button></div>'
+    + '<div class="hsp-tabs" role="tablist" aria-label="Payments">' + T.map(function (x) { var on = t === x[0]; return '<button type="button" role="tab" aria-selected="' + on + '" class="' + (on ? 'on' : '') + '" onclick="_hsp.pt=\'' + x[0] + '\';hspPayRender()"><b>' + x[1] + ' <em class="' + (x[3] && x[2] ? 'hot' : '') + '">' + x[2] + '</em></b></button>'; }).join('') + '</div>';
+  var body = '';
+  if (t === 'confirm') body = '<p class="hsp-note">Bank transfer / UPI payments a facility says it has made. Check the amount and UTR in the bank account, then confirm: this unlocks the facility and makes the tax invoice.</p>' + (typeof bpHTML === 'function' ? bpHTML() : '');
+  else if (t === 'proforma') body = '<p class="hsp-note">Proforma invoices for offices that pay by bank transfer. The tax invoice is made automatically once the payment is confirmed.</p>' + (typeof ivAdminHTML === 'function' ? ivAdminHTML() : '');
+  else if (t === 'collect' && D) body = '<p class="hsp-note">Trials that have ended unpaid, or end in the next 7 days.</p><div class="nfo-card">' + hspTable(nfBizListDefs(D).collect, D.collectList, 'Nothing to collect — no trial has ended unpaid or ends in the next 7 days.') + '</div>';
+  else if (t === 'received' && D) body = '<p class="hsp-note">' + hspE(D.rg.label) + ' · ' + hspE(D.rg.text) + ' · change the period on Business</p><div class="nfo-card">' + hspTable(nfBizListDefs(D).pays, D.pays.slice().reverse(), 'No payments in this period.') + '</div>';
+  else if (t === 'invoices') {
+    var R = hspInvRows();
+    body = '<p class="hsp-note">Every receipt and tax invoice, newest first.</p><div class="nfo-card">' + (R.length ? '<div class="nfo-tw"><table class="nfo-t bz-lt"><thead><tr><th>Paid on</th><th>Facility</th><th>Receipt</th><th>Tax invoice</th><th>Total</th><th></th></tr></thead><tbody>'
+      + R.map(function (r, i) { return '<tr><td data-l="Paid on">' + hspE(typeof nfDateTxt === 'function' ? nfDateTxt(nfIsoLocal(r.paidAt)) : String(r.paidAt || '').slice(0, 10)) + '</td><td data-l=""><b>' + hspE(r.facilityName || r.code) + '</b><small>' + hspE(r.code) + '</small></td><td data-l="Receipt">' + hspE(r.receiptNo || '—') + '</td><td data-l="Tax invoice">' + hspE((r.invoice || {}).no || '—') + '</td><td data-l="Total"><b>' + hspE(typeof nfMoney === 'function' ? nfMoney(r.total) : r.total) + '</b></td>'
+        + '<td data-l="" class="hsp-dl">' + ((r.invoice || {}).no ? '<button type="button" class="eq-btn" onclick="hspDoc(' + i + ',\'tax\',this)">Tax invoice</button>' : '') + (r.receiptNo ? '<button type="button" class="eq-btn" onclick="hspDoc(' + i + ',\'rcpt\',this)">Receipt</button>' : '') + '</td></tr>'; }).join('')
+      + '</tbody></table></div>' : '<div class="nfbd-empty">No receipts or tax invoices yet.</div>') + '</div>';
+  }
+  b.innerHTML = h + '<div class="hsp-body">' + body + '</div>';
+}
+// bank / proforma refreshes repaint the page when it is open
+(function () {
+  ['bpRefresh', 'ivRefresh'].forEach(function (fn) { if (typeof window[fn] !== 'function') return; var o = window[fn]; window[fn] = async function () { var r = await o.apply(this, arguments); if (_nfOv.view === 'hspay' && hspOn()) { _hsp.loaded = Date.now(); hspPayRender(); } return r; }; });
+  if (typeof bpReview === 'function') { var oR = bpReview; bpReview = async function () { var r = await oR.apply(this, arguments); if (_nfOv.view === 'hspay' && hspOn()) { try { await bpLoad(true); } catch (e) {} hspPayRender(); } return r; }; }
+})();
+
+// ── Business: the lists move out; a strip opens them ──
+function hspStripHTML() {
+  var c = hspPayCounts(), all = hspAllLeads(), nE = all.filter(function (x) { return (x.status || 'new') === 'new' || (nfEqKind(x) === 'signup' && nfEqOpen(x)); }).length;
+  return '<div class="hsp-strip" id="hsp-strip"><button type="button" onclick="nfAdminView(\'hspay\')"><i class="ti ti-currency-rupee"></i><span><b>Payments</b><small>' + (c.confirm ? c.confirm + ' to confirm' : 'nothing to confirm') + ' · ' + (c.proforma ? c.proforma + ' proforma waiting' : 'no proforma waiting') + '</small></span><em>Open</em></button>'
+    + '<button type="button" onclick="nfAdminView(\'hsenq\')"><i class="ti ti-inbox"></i><span><b>Enquiries</b><small>' + (nE ? nE + ' new' : 'nothing new') + '</small></span><em>Open</em></button></div>';
+}
+(function () {
+  if (typeof nfRenderBizDash !== 'function') return;
+  var o = nfRenderBizDash;
+  nfRenderBizDash = async function () {
+    var r = await o.apply(this, arguments);
+    try { if (!hspOn()) return r; var box = document.getElementById('nf-biz'); if (!box) return r;
+      ['nf-eq', 'bp-list', 'iv-list'].forEach(function (id) { var el = document.getElementById(id); if (el && box.contains(el)) el.remove(); });
+      var old = document.getElementById('hsp-strip'); if (old) old.remove();
+      var top = box.querySelector('.nfo-top'), w = document.createElement('div'); w.innerHTML = hspStripHTML();
+      if (top) top.insertAdjacentElement('afterend', w.firstChild); else box.insertBefore(w.firstChild, box.firstChild);
+    } catch (e) { console.warn('[hs pages] business', e); }
+    return r;
+  };
+})();
+
+// ── menu, views, phone More, Today links ──
+(function () {
+  if (typeof nfAdminItems === 'function') {
+    var oI = nfAdminItems;
+    nfAdminItems = function () {
+      var L = oI.apply(this, arguments); if (!hspOn()) return L;
+      var i = -1; L.forEach(function (x, k) { if (x.v === 'business') i = k; });
+      var c = { confirm: 0 }; try { c = hspPayCounts(); } catch (e) {}
+      var nE = 0; try { nE = hspAllLeads().filter(function (x) { return (x.status || 'new') === 'new' || (nfEqKind(x) === 'signup' && nfEqOpen(x)); }).length; } catch (e) {}
+      L.splice(i + 1, 0, { v: 'hspay', l: 'Payments', icon: 'ti-currency-rupee', onclick: "nfAdminView('hspay')", badge: c.confirm || '' }, { v: 'hsenq', l: 'Enquiries', icon: 'ti-inbox', onclick: "nfAdminView('hsenq')", badge: nE || '' });
+      return L;
+    };
+  }
+  if (typeof nfAdminApply === 'function') {
+    var oA = nfAdminApply;
+    nfAdminApply = function () {
+      var r = oA.apply(this, arguments); var v = _nfOv.view;
+      document.body.classList.toggle('nfv-hsenq', v === 'hsenq'); document.body.classList.toggle('nfv-hspay', v === 'hspay');
+      if (v !== 'hsenq') window._hspEqG = '';
+      try { var side = document.getElementById('nfs-side'); if (side && (v === 'hsenq' || v === 'hspay')) side.querySelectorAll('.nfs-nav button').forEach(function (b) { var d = b.getAttribute('data-v'); b.classList.toggle('on', d === v || (d === 'more' && window.innerWidth < 900)); }); } catch (e) {}
+      return r;
+    };
+  }
+  if (typeof nfAdminView === 'function') {
+    var oV = nfAdminView;
+    nfAdminView = function (v) { var r = oV.apply(this, arguments); if (hspOn()) { if (v === 'hsenq') hspEnqRender(); else if (v === 'hspay') hspPayRender(); } return r; };
+  }
+  if (typeof HS_MORE !== 'undefined') { HS_MORE.push('hspay', 'hsenq'); }
+  if (typeof hsMoreOpen === 'function') {
+    var oM = hsMoreOpen;
+    hsMoreOpen = function () {
+      var r = oM.apply(this, arguments);
+      try { var sh = document.querySelector('#hs-more .hs-more-sh'), k = sh && sh.querySelector('.hs-more-k'); if (sh && k && hspOn() && !sh.querySelector('[data-hsp]')) {
+        var c = hspPayCounts(), it = function (v, icon, l, s) { return '<button type="button" data-hsp="1" onclick="hsMoreClose();nfAdminView(\'' + v + '\')"><span class="hs-more-i"><i class="ti ' + icon + '"></i></span><span><b>' + l + '</b><small>' + s + '</small></span><i class="ti ti-chevron-right"></i></button>'; };
+        k.insertAdjacentHTML('afterend', it('hspay', 'ti-currency-rupee', 'Payments', c.confirm ? c.confirm + ' to confirm' : 'Confirm, follow up, download') + it('hsenq', 'ti-inbox', 'Enquiries', 'Sign-ups and Qi FAST interest')); } } catch (e) {}
+      return r;
+    };
+  }
+  if (typeof hsTodo === 'function') {
+    var oT = hsTodo;
+    hsTodo = function () { var out = oT.apply(this, arguments);
+      try { out.forEach(function (x) { if (x && x.btn && /bp-list|iv-list/.test(x.btn.js || '')) { x.btn.js = "_hsp.pt='" + (/iv-list/.test(x.btn.js) ? 'proforma' : 'confirm') + "';nfAdminView('hspay')"; x.sub = String(x.sub || '').replace(/Business → /, 'Payments → '); } }); } catch (e) {}
+      return out; };
+  }
+})();
+</script>
+<style id="nf-sp-css">/* ═══ Settings in the page + the new form style (15 Nov 2026) ═══ */
+.sp-card > b{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:600;}
+.sp-card > p{margin:6px 0 4px;font-size:13.5px;color:#476B64;line-height:1.5;}
+.sp-types{display:flex;gap:6px;flex-wrap:wrap;padding:12px 0 2px;}
+.sp-types button{height:38px;padding:0 16px;border-radius:19px;border:1px solid var(--br,#DCE4E1);background:#fff;font:inherit;font-size:13.5px;cursor:pointer;color:#10302B;}
+.sp-types button.on{background:#1E6B5E;border-color:#1E6B5E;color:#fff;font-weight:600;}
+.sp-sec{display:flex;flex-direction:column;gap:12px;padding:16px 0;border-top:1px solid #EEF2F1;margin-top:12px;}
+.sp-sec h3{margin:0;font-size:15px;font-weight:600;}
+.sp-grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;}
+.sp-grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
+.sp-grid1{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding-top:10px;}
+.sp-fld{display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:500;color:#10302B;min-width:0;}
+.sp-fld small{font-size:12px;font-weight:400;color:#5B6B66;}
+.sp-num{display:flex;align-items:center;gap:8px;font-weight:400;color:#3C5A55;}
+.sp-num input{width:96px;height:44px;border:1px solid #C9D6D2;border-radius:10px;padding:0 12px;font:inherit;font-size:15px;color:#10302B;background:#fff;}
+.sp-num input:disabled{background:#F3F6F5;color:#5B6B66;}
+.sp-fld > input[type=text],.sp-fld > textarea{height:44px;border:1px solid #C9D6D2;border-radius:10px;padding:0 12px;font:inherit;font-size:14px;background:#fff;color:#10302B;}
+.sp-fld > textarea{height:auto;padding:10px 12px;resize:vertical;}
+.sp-num input:focus,.sp-fld > input:focus,.sp-fld > textarea:focus{outline:2px solid #1E6B5E;outline-offset:1px;border-color:#1E6B5E;}
+.sp-hint{font-size:12px;color:#5B6B66;margin-top:-4px;}
+.tl-bar{display:flex;height:30px;border-radius:8px;overflow:hidden;font-size:12px;font-weight:600;}
+.tl-bar span{display:flex;align-items:center;padding-left:10px;white-space:nowrap;overflow:hidden;}
+.tl-bar .b{background:#FBE3D6;color:#9A3412;} .tl-bar .s{background:#FBEFD5;color:#7A4B0B;} .tl-bar .o{background:#DDEFE8;color:#14514A;}
+.sp-save{display:flex;align-items:center;gap:10px;padding:14px 0 4px;border-top:1px solid #EEF2F1;margin-top:4px;position:sticky;bottom:0;background:#fff;}
+.sp-save small{font-size:12.5px;color:#5B6B66;margin-right:auto;}
+.sp-save > .hs-btn:first-child:not(.p){margin-left:auto;}
+.sp-more{flex-basis:100%;margin-top:4px;} .sp-more summary{cursor:pointer;font-size:13px;font-weight:600;color:#1E6B5E;min-height:32px;display:flex;align-items:center;}
+#hs-joinann .nl-set{border:0;padding:0;margin:0;background:none;}
+#sp-cc{margin-bottom:14px;}
+@media(max-width:700px){ .sp-grid3,.sp-grid2{grid-template-columns:minmax(0,1fr);} .sp-save{flex-wrap:wrap;} }
+
+/* new form style for every pop-up form */
+.scx-field{margin-bottom:14px;}
+.scx-field label.scx-lbl{font-size:13.5px;font-weight:500;color:var(--t1,#10302B);text-transform:none;letter-spacing:0;margin-bottom:6px;}
+.scx-in{border:1px solid #C9D6D2;border-radius:10px;padding:10px 12px;font-size:14px;background:#fff;min-height:44px;}
+.scx-in:focus{border-color:#1E6B5E;outline:2px solid rgba(30,107,94,.25);outline-offset:0;}
+input[type=number].scx-in{max-width:180px;}
+.scx-hint{font-size:12px;color:#5B6B66;margin-top:4px;}
+
+/* certificate design upload */
+.ncd{border-top:1px solid #EEF2F1;margin-top:16px;padding-top:14px;display:flex;flex-direction:column;gap:8px;}
+.ncd h4{margin:0;font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.ncd p{margin:0;font-size:13px;color:#476B64;line-height:1.5;}
+.ncd-row{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;}
+.ncd-prev{width:282px;aspect-ratio:297/210;object-fit:fill;border:1px solid #DCE4E1;border-radius:8px;background:#F7FAF9;}
+.ncd-none{display:flex;align-items:center;justify-content:center;font-size:13px;color:#5B6B66;text-align:center;padding:10px;box-sizing:border-box;}
+.ncd-act{display:flex;flex-direction:column;gap:8px;align-items:flex-start;} .ncd-act small{font-size:12px;color:#5B6B66;max-width:300px;}
+.ncd-up{cursor:pointer;display:inline-flex;align-items:center;}
+.nfcd.ncd-own{background-size:100% 100%;background-repeat:no-repeat;background-color:#fff;}
+.nfcd.ncd-own .b1,.nfcd.ncd-own .b2{display:none;} .nfcd.ncd-own .lg{visibility:hidden;}
+.nf-cs-grid{grid-template-columns:110px minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr);} .nf-cs-grid input{width:100%;box-sizing:border-box;min-width:0;}
+</style>
+<script id="nf-sp">// ═══ Settings in the page instead of pop-ups (15 Nov 2026) ═══
+//  Programme rules → Timeline (was the "Programme timeline settings" pop-up), Verification sampling (was a pop-up in
+//  Review & actions), Join screen announcement (was inside Self sign-up), NQAS criteria with the Sub-Centre row editable
+//  in place (the Content → Checkpoints pop-up now opens here). Content → Checkpoints → Areas… opens in the page.
+function spE(s) { return typeof hsE === 'function' ? hsE(s) : (typeof scEsc === 'function' ? scEsc(s) : String(s == null ? '' : s)); }
+function spField(id, label, val, unit, hint, attrs) {
+  return '<label class="sp-fld" for="' + id + '"><span>' + label + '</span><span class="sp-num">' + (unit && unit.pre ? unit.pre + ' ' : '') + '<input type="number" inputmode="numeric" id="' + id + '" value="' + spE(val) + '"' + (attrs || '') + '>' + (unit && unit.post ? ' ' + unit.post : (typeof unit === 'string' ? ' ' + unit : '')) + '</span>' + (hint ? '<small id="' + id + '-h">' + hint + '</small>' : '') + '</label>';
+}
+
+// ── Timeline ──
+var _tl = { t: 'sc', buf: null, dirty: false };
+function tlTypes() { return Object.keys(NF_LEVELS); }
+function tlDays(t) { return t === 'sc' ? 60 : ((NF_LEVELS[t] || {}).days || 60); }
+async function tlLoad() { try { _nfgRaw = (await fbGet('shared/sc_grad_config')) || {}; } catch (e) { _nfgRaw = _nfgRaw || {}; } _tl.buf = {}; tlTypes().forEach(function (t) { _tl.buf[t] = nfgCfgFor(t); }); _tl.dirty = false; }
+function tlBar(x) { var a = Math.max(0, Math.min(100, x.amber)), g = Math.max(a, Math.min(100, x.green));
+  return '<div class="tl-bar" aria-hidden="true"><span class="b" style="width:' + a + '%">Behind · below ' + a + '%</span><span class="s" style="width:' + (g - a) + '%">Slipping</span><span class="o" style="width:' + (100 - g) + '%">On track · ' + g + '%+</span></div>'; }
+function tlHTML() {
+  var t = _tl.t, x = _tl.buf[t], d = tlDays(t), sc = t === 'sc', P = (NF_LEVELS[t] || {}).plural || t;
+  return '<b><i class="ti ti-calendar"></i> Timeline</b><p>When a programme closes, how catch-up works, and when a facility counts as on track. Each facility type has its own settings.</p>'
+    + '<div class="sp-types" role="tablist" aria-label="Facility type">' + tlTypes().map(function (k) { return '<button type="button" role="tab" aria-selected="' + (k === t) + '" class="' + (k === t ? 'on' : '') + '" onclick="tlType(\'' + k + '\')">' + spE((NF_LEVELS[k] || {}).plural || k) + '</button>'; }).join('') + '</div>'
+    + '<div class="sp-sec"><h3>Closing and catch-up</h3><div class="sp-grid3">'
+    + spField('tl-grace', 'Grace days after Day ' + d, x.grace, 'days', 'The programme closes on Day ' + (d + x.grace))
+    + spField('tl-catchDays', 'Catch-up length', x.catchDays, 'days', sc ? 'For facilities that miss the mark' : 'Fixed for ' + spE(P) + ': 3 weeks on the weakest departments, then 1 week of end-line', sc ? '' : ' disabled')
+    + spField('tl-maxCatch', 'Catch-ups allowed', x.maxCatch, 'per facility', sc ? '' : 'Fixed at one for ' + spE(P), sc ? '' : ' disabled') + '</div></div>'
+    + '<div class="sp-sec"><h3>On track, slipping or behind</h3><div id="tl-bar">' + tlBar(x) + '</div><small class="sp-hint">Share of cards finished on time.</small><div class="sp-grid2">'
+    + spField('tl-green', 'On track from', x.green, '% on time') + spField('tl-amber', 'Slipping from', x.amber, '% on time', 'Below this is Behind')
+    + spField('tl-missDays', 'On track only if no card is missing for more than', x.missDays, 'days') + spField('tl-blLate', 'Behind if the baseline is not finished by', x.blLate, { pre: 'Day' }) + '</div></div>'
+    + '<div class="sp-sec"><h3>Certificate</h3><div class="sp-grid3">' + spField('tl-certYears', 'NHSRC certificate valid for', x.certYears, 'years') + '</div></div>'
+    + '<div class="sp-save"><small>Applies to every facility of this type.</small><button type="button" class="hs-btn" onclick="tlUndo()">Undo changes</button><button type="button" class="hs-btn p" onclick="tlSave()">Save timeline</button></div>';
+}
+function tlBind() {
+  NFG_KEYS.forEach(function (k) { var el = document.getElementById('tl-' + k); if (!el) return;
+    el.oninput = function () { _tl.buf[_tl.t][k] = el.value === '' ? NaN : +el.value; _tl.dirty = true;
+      if (k === 'green' || k === 'amber') { var b = document.getElementById('tl-bar'); if (b) b.innerHTML = tlBar(_tl.buf[_tl.t]); }
+      if (k === 'grace') { var h = document.getElementById('tl-grace-h'); if (h) h.textContent = 'The programme closes on Day ' + (tlDays(_tl.t) + (+el.value || 0)); } }; });
+}
+async function tlRender() {
+  var el = document.getElementById('hs-rules'); if (!el) return;
+  el.setAttribute('data-tl', '1'); el.classList.add('sp-card');
+  if (!_tl.buf) { el.innerHTML = '<b><i class="ti ti-calendar"></i> Timeline</b><p>Loading…</p>'; await tlLoad(); }
+  el.innerHTML = tlHTML(); tlBind();
+}
+function tlType(t) { _tl.t = t; tlRender(); }
+async function tlUndo() { await tlLoad(); tlRender(); }
+async function tlSave() {
+  var types = tlTypes(), buf = _tl.buf;
+  for (var i = 0; i < types.length; i++) { var t = types[i], x = buf[t];
+    if (NFG_KEYS.some(function (k) { return !(x[k] >= 0 && x[k] <= 1000); })) { showToast((NF_LEVELS[t] || {}).plural + ': use numbers between 0 and 1000.', 'err'); return; }
+    if (x.amber > x.green) { showToast((NF_LEVELS[t] || {}).plural + ': Slipping must start below On track.', 'err'); return; } }
+  var up = { updatedAt: scNowIso() }; NFG_KEYS.forEach(function (k) { up[k] = buf.sc[k]; });
+  types.forEach(function (t) { if (t === 'sc') return; var o = {}; NFG_KEYS.forEach(function (k) { if (k !== 'catchDays' && k !== 'maxCatch') o[k] = buf[t][k]; }); up['byType/' + t] = o; });
+  var ok = false; try { await db.ref('shared/sc_grad_config').update(up); ok = true; } catch (e) {}
+  if (ok) { NFG_KEYS.forEach(function (k) { NF_GRAD[k] = buf.sc[k]; }); _nfgRaw = Object.assign({}, _nfgRaw, up, { byType: Object.assign({}, (_nfgRaw || {}).byType) }); types.forEach(function (t) { if (t !== 'sc') _nfgRaw.byType[t] = up['byType/' + t]; }); try { NF_BL.autoEnd = NF_GRAD.days + NF_GRAD.grace; } catch (e) {} _tl.dirty = false; }
+  showToast(ok ? 'Timeline saved for every facility type.' : 'Could not save — check the connection.', ok ? 'ok' : 'err');
+}
+nfgSettings = function () { if (typeof _hs !== 'undefined') { _hs.stab = 'rules'; _hs.rk = 'time'; _hs.rkUser = 1; } nfAdminView('setup'); };
+
+// ── Verification sampling ──
+function spSampRender() {
+  var main = document.querySelector('#admin-app .admin-main'); if (!main) return;
+  var el = document.getElementById('hs-sampling');
+  if (!el) { el = document.createElement('div'); el.id = 'hs-sampling'; el.dataset.nfv = 'setup'; el.className = 'nfo-card sp-card'; el.setAttribute('data-hsg', 'rules'); var c = document.getElementById('hs-crit') || document.getElementById('hs-rules'); if (c && c.parentNode === main) c.insertAdjacentElement('afterend', el); else main.appendChild(el); }
+  var v = (typeof _scVCfg !== 'undefined' && _scVCfg) || { pct: 20, min: 3 };
+  el.innerHTML = '<b><i class="ti ti-target"></i> Verification sampling</b><p>For CHO and MO cards, the verifier always checks every Half, Zero and re-attempted checkpoint, plus a random share of the Full scores. The rest are accepted on completion. Set 100% to check every checkpoint.</p>'
+    + '<div class="sp-grid2">' + spField('sp-pct', 'Share of Full scores to check', v.pct, '%', '1 to 100') + spField('sp-min', 'At least this many Full scores per card', v.min, 'checkpoints', '0 to 50') + '</div>'
+    + '<div class="sp-save"><button type="button" class="hs-btn p" onclick="spSampSave()">Save sampling</button></div>';
+}
+async function spSampSave() {
+  var p = Math.round(+document.getElementById('sp-pct').value), m = Math.round(+document.getElementById('sp-min').value);
+  if (!(p >= 1 && p <= 100) || !(m >= 0 && m <= 50)) { showToast('Enter a share between 1 and 100% and a minimum between 0 and 50.', 'err'); return; }
+  var ok = await fbSet('shared/sc_verify_config', { pct: p, min: m, updatedAt: scNowIso(), updatedBy: 'HealSol Admin' });
+  if (ok) { _scVCfg = { pct: p, min: m }; showToast('Sampling saved.', 'ok'); try { scAdmVRender(); } catch (e) {} } else showToast('Could not save.', 'err');
+}
+scAdmVerifySettings = function () { if (typeof _hs !== 'undefined') { _hs.stab = 'rules'; _hs.rk = 'samp'; _hs.rkUser = 1; } nfAdminView('setup'); };
+
+// ── Join screen announcement: its own tab under Communication ──
+function spJoinMove() {
+  var su = document.getElementById('hs-signup'), set = su && su.querySelector('.nl-set'); if (!set) return;
+  var main = document.querySelector('#admin-app .admin-main'); if (!main) return;
+  var el = document.getElementById('hs-joinann');
+  if (!el) { el = document.createElement('div'); el.id = 'hs-joinann'; el.dataset.nfv = 'setup'; el.className = 'nfo-card sp-card'; el.setAttribute('data-hsg', 'rules'); su.insertAdjacentElement('afterend', el); }
+  el.innerHTML = ''; el.appendChild(set);
+  var ic = set.querySelector('b .ti'); if (ic) ic.className = 'ti ti-broadcast';
+}
+(function () { if (typeof hspSignupRender !== 'function') return; var o = hspSignupRender;
+  hspSignupRender = async function () { var r = await o.apply(this, arguments); try { spJoinMove(); if (typeof hsRkApply === 'function') hsRkApply(); } catch (e) { console.warn('[sp] join', e); } return r; }; })();
+
+// ── NQAS criteria: the Sub-Centre row is edited in place, one Save for every type ──
+function spCritSc() {
+  var row = document.querySelector('#hs-crit .hsc-rows .hsc-r'); if (!row || row.getAttribute('data-sp')) return;
+  var c = (typeof _scCrit !== 'undefined' && _scCrit) || {}; if (c.overall == null) return;
+  var std = Object.keys(c.std || {}).sort().map(function (s) { return s + ' ' + c.std[s]; }).join(', ');
+  var cats = function (n) { return Object.keys(typeof SC_CPM_AOC !== 'undefined' ? SC_CPM_AOC : {}).filter(function (a) { return typeof scAocCat === 'function' && scAocCat(a) === n; }).join(', '); };
+  var inp = function (k, v, lab) { return '<label class="hsc-in"><span>' + lab + '</span><input type="number" min="0" max="100" inputmode="numeric" id="hsc-sc-' + k + '" value="' + spE(v) + '" aria-label="Sub-Centre ' + lab + '">%</label>'; };
+  row.setAttribute('data-sp', '1');
+  row.innerHTML = '<span class="hsc-t"><b>Sub-Centre</b><small>overall · every Area of Concern · every Standard</small></span><span class="hsc-f">' + inp('overall', c.overall, 'Overall') + inp('aoc', c.aoc != null ? c.aoc : 70, 'Area of Concern') + inp('stdDefault', c.stdDefault, 'Standard') + '</span>'
+    + '<details class="sp-more"><summary>Standards with their own minimum, and Structure · Process · Outcome</summary><div class="sp-grid1">'
+    + '<label class="sp-fld"><span>Standards with a different minimum</span><input type="text" id="hsc-sc-std" value="' + spE(std) + '" placeholder="A1 60, D3 60"><small>Write each like "A1 60"</small></label>'
+    + '<label class="sp-fld"><span>Structure: Areas of Concern</span><input type="text" id="hsc-sc-cS" value="' + spE(cats('Structure')) + '"></label>'
+    + '<label class="sp-fld"><span>Process: Areas of Concern</span><input type="text" id="hsc-sc-cP" value="' + spE(cats('Process')) + '"></label>'
+    + '<label class="sp-fld"><span>Outcome: Areas of Concern</span><input type="text" id="hsc-sc-cO" value="' + spE(cats('Outcome')) + '"></label></div></details>';
+  var b = document.querySelector('#hs-crit .hsc-act .hs-btn.p'); if (b) b.textContent = 'Save criteria';
+}
+async function spCritScSave() {
+  var g = function (k) { var e = document.getElementById('hsc-sc-' + k); return e ? e.value : null; };
+  if (g('overall') == null) return true;
+  var o = Math.round(+g('overall')), ao = Math.round(+g('aoc')), d = Math.round(+g('stdDefault'));
+  if (!(o > 0 && o <= 100) || !(ao > 0 && ao <= 100) || !(d > 0 && d <= 100)) { showToast('Sub-Centre: percentages must be between 1 and 100.', 'err'); return false; }
+  var bad = String(g('std') || '').split(/[,;\n]+/).map(function (x) { return x.trim(); }).filter(Boolean).filter(function (x) { return !/^[A-H]\d+\s*[:=]?\s*\d{1,3}$/i.test(x); });
+  if (bad.length) { showToast('Write each Standard minimum like "A1 60" — check: ' + bad.join(', '), 'err'); return false; }
+  var std = {}; String(g('std') || '').split(/[,;\n]+/).map(function (x) { return x.trim(); }).filter(Boolean).forEach(function (x) { var m = /^([A-H]\d+)\s*[:=]?\s*(\d{1,3})$/i.exec(x); std[m[1].toUpperCase()] = +m[2]; });
+  var cat = {}, seen = {}, err = null;
+  [['cS', 'Structure'], ['cP', 'Process'], ['cO', 'Outcome']].forEach(function (p) { String(g(p[0]) || '').toUpperCase().split(/[,\s]+/).filter(Boolean).forEach(function (a) { if (typeof SC_CPM_AOC !== 'undefined' && !SC_CPM_AOC[a]) err = 'Unknown Area of Concern "' + a + '".'; if (seen[a]) err = 'Area of Concern ' + a + ' is in two categories.'; seen[a] = 1; cat[a] = p[1]; }); });
+  if (!err && typeof SC_CPM_AOC !== 'undefined') { var miss = Object.keys(SC_CPM_AOC).filter(function (a) { return !seen[a]; }); if (miss.length) err = 'Put every Area of Concern in a category — missing: ' + miss.join(', '); }
+  if (err) { showToast(err, 'err'); return false; }
+  var rec = { overall: o, aoc: ao, stdDefault: d, std: std, aocCat: cat, updatedAt: scNowIso(), updatedBy: 'HealSol Admin' };
+  if (!await fbSet('shared/nqas_criteria', rec)) { showToast('Could not save — check the connection.', 'err'); return false; }
+  _scCrit = rec; try { scCpmRender(); } catch (e) {} return true;
+}
+(function () {
+  if (typeof hspCritRender === 'function') { var oR = hspCritRender; hspCritRender = async function () { var r = await oR.apply(this, arguments); try { spCritSc(); } catch (e) { console.warn('[sp] crit', e); } return r; }; }
+  if (typeof hspCritSave === 'function') { var oS = hspCritSave; hspCritSave = async function () { if (!(await spCritScSave())) return; return oS.apply(this, arguments); }; }
+  // Content → Checkpoints → "Edit criteria" opens Programme rules → NQAS criteria
+  if (typeof scCritEdit === 'function') scCritEdit = function () { if (typeof _hs !== 'undefined') { _hs.stab = 'rules'; _hs.rk = 'crit'; _hs.rkUser = 1; } nfAdminView('setup'); };
+})();
+
+// ── Cross-cutting areas: edited in the page ──
+async function nfCcManage() {
+  if (typeof scCpmCanEdit === 'function' && !scCpmCanEdit()) return;
+  var L = await nfCcLoad(), host = document.getElementById('scm-panel'); if (!host) return;
+  var old = document.getElementById('sp-cc'); if (old) { old.remove(); return; }
+  var el = document.createElement('div'); el.id = 'sp-cc'; el.className = 'nfo-card sp-card';
+  el.innerHTML = '<b><i class="ti ti-list-details"></i> Cross-cutting areas</b><p>One area per line. These are the areas you can tick for any checkpoint. Removing an area here does not untick it on checkpoints that already have it — edit those checkpoints to move them.</p>'
+    + '<label class="sp-fld"><span>Areas</span><textarea id="sp-cc-t" rows="10">' + spE(L.join('\n')) + '</textarea></label>'
+    + '<div class="sp-save"><button type="button" class="hs-btn" onclick="document.getElementById(\'sp-cc\').remove()">Close</button><button type="button" class="hs-btn p" onclick="spCcSave()">Save list</button></div>';
+  host.insertBefore(el, host.firstChild); try { el.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) {}
+}
+async function spCcSave() { var t = document.getElementById('sp-cc-t'); if (!t) return; var ok = await nfCcSave(String(t.value || '').split('\n'));
+  showToast(ok ? 'Cross-cutting areas saved.' : 'Could not save — check the connection.', ok ? 'ok' : 'err'); if (ok) { var e = document.getElementById('sp-cc'); if (e) e.remove(); try { scCpmRender(); } catch (x) {} } }
+
+// ── tabs: Sampling under Assessment, Join screen announcement under Communication ──
+(function () {
+  if (typeof HS_RTABS !== 'undefined') {
+    HS_RTABS.forEach(function (g) {
+      if (g[0] === 'Assessment' && !g[1].some(function (x) { return x[0] === 'samp'; })) g[1].push(['samp', 'hs-sampling', 'Verification sampling', 'How many Full scores are re-checked']);
+      if (g[0] === 'Communication' && !g[1].some(function (x) { return x[0] === 'join'; })) g[1].push(['join', 'hs-joinann', 'Join screen announcement', 'Launch text and early-bird places']);
+    });
+  }
+  if (typeof hsSetupGroup === 'function') { var oG = hsSetupGroup; hsSetupGroup = function (el) { if (el && (el.id === 'hs-sampling' || el.id === 'hs-joinann')) return 'rules'; return oG.apply(this, arguments); }; }
+  if (typeof hsRkApply === 'function') {
+    var oK = hsRkApply;
+    hsRkApply = function () {
+      try { if (typeof hsOn === 'function' && hsOn() && _nfOv.view === 'setup') {
+        if (document.getElementById('hs-rules') && !document.getElementById('hs-rules').getAttribute('data-tl')) tlRender();
+        if (!document.getElementById('hs-sampling')) spSampRender();
+        spJoinMove(); spCritSc(); } } catch (e) { console.warn('[sp] panels', e); }
+      return oK.apply(this, arguments);
+    };
+  }
+})();
+</script>
+<script id="nf-cert-design">// ═══ Your own certificate design (15 Nov 2026) ═══
+// Settings → Programme rules → Certificate signatory → Certificate design: HealSol uploads a blank A4 landscape
+// background (border, logos, artwork; no names or scores). Certificates on screen and in the PDF are drawn on it:
+// the app's own border and logos are left out, everything else (title, name, facility, scores, signatures, QR) is printed on top.
+// Stored at shared/sc_cert_design {img: JPEG data URL, w, h, at} (HealSol writes, signed-in apps read).
+var _ncd = { at: 0, img: null, busy: false };
+async function ncdLoad(force) {
+  if (!force && _ncd.at && Date.now() - _ncd.at < 5 * 60e3) return _ncd.img;
+  try { var d = await fbGet('shared/sc_cert_design'); _ncd.img = d && d.img ? d.img : null; _ncd.meta = d || null; } catch (e) {}
+  _ncd.at = Date.now(); return _ncd.img;
+}
+function ncdShrink(file) {
+  return new Promise(function (res, rej) {
+    var fr = new FileReader(); fr.onerror = rej;
+    fr.onload = function () { var im = new Image(); im.onerror = rej; im.onload = function () {
+      var W = Math.min(2480, im.naturalWidth), H = Math.round(W * im.naturalHeight / im.naturalWidth), c = document.createElement('canvas'); c.width = W; c.height = H;
+      var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H); x.drawImage(im, 0, 0, W, H);
+      var q = 0.88, out = c.toDataURL('image/jpeg', q); while (out.length > 1.4e6 && q > 0.5) { q -= 0.08; out = c.toDataURL('image/jpeg', q); }
+      res({ img: out, w: im.naturalWidth, h: im.naturalHeight }); }; im.src = fr.result; };
+    fr.readAsDataURL(file);
+  });
+}
+function ncdSetHTML() {
+  var m = _ncd.meta, has = !!_ncd.img;
+  return '<div class="ncd" id="ncd"><h4><i class="ti ti-certificate"></i> Certificate design</h4>'
+    + '<p>Use your own design for every new and existing certificate: a <b>blank A4 landscape</b> image (297 × 210 mm, for example 3508 × 2480 pixels) with your border, logos and artwork, and <b>no names, scores or signatures</b>. The app prints the title, name, facility, scores, signatures and QR code on top, in the middle of the page, so keep that area light and plain.</p>'
+    + '<div class="ncd-row">' + (has ? '<img class="ncd-prev" src="' + _ncd.img + '" alt="Your certificate design">' : '<div class="ncd-prev ncd-none">The app\'s own design is used</div>')
+    + '<div class="ncd-act"><label class="hs-btn p ncd-up">' + (has ? 'Replace design' : 'Upload design') + '<input type="file" accept="image/jpeg,image/png" onchange="ncdPick(this)" hidden></label>'
+    + (has ? '<button type="button" class="hs-btn" onclick="ncdPreview()">Preview a certificate</button><button type="button" class="hs-btn" onclick="ncdRemove()">Use the app\'s design</button>' : '')
+    + (m && m.at ? '<small>Uploaded ' + (typeof scFmtDate === 'function' ? scFmtDate(String(m.at).slice(0, 10)) : String(m.at).slice(0, 10)) + (m.w ? ' · ' + m.w + ' × ' + m.h + ' px' : '') + '</small>' : '<small>JPG or PNG. Made in Canva: choose "A4 landscape", remove the text, download as PNG.</small>') + '</div></div></div>';
+}
+async function ncdPaint() { var c = document.getElementById('nf-certset'); if (!c) return; await ncdLoad(); var old = document.getElementById('ncd'); var w = document.createElement('div'); w.innerHTML = ncdSetHTML(); if (old) old.replaceWith(w.firstChild); else { var how = c.querySelector('.nf-cs-how'); if (how) how.insertAdjacentElement('beforebegin', w.firstChild); else c.appendChild(w.firstChild); } }
+async function ncdPick(inp) {
+  var f = inp.files && inp.files[0]; inp.value = ''; if (!f) return;
+  if (!/^image\/(jpeg|png)$/.test(f.type)) { showToast('Choose a JPG or PNG image.', 'err'); return; }
+  if (f.size > 15e6) { showToast('That file is very large — export it under 15 MB.', 'err'); return; }
+  try {
+    var r = await ncdShrink(f), ratio = r.w / r.h;
+    if (ratio < 1.3 || ratio > 1.52) { var go = true; try { go = await showConfirm('This image is ' + r.w + ' × ' + r.h + ' px, not A4 landscape (about 1.41 : 1). It will be stretched to fit the page. Use it anyway?', '📐', 'Use it', 'Cancel', 'var(--teal)'); } catch (e) {} if (!go) return; }
+    var rec = { img: r.img, w: r.w, h: r.h, at: scNowIso(), by: 'HealSol Admin' };
+    var ok = await fbSet('shared/sc_cert_design', rec); if (ok === false) { showToast('Could not save — check the connection.', 'err'); return; }
+    _ncd.img = rec.img; _ncd.meta = rec; _ncd.at = Date.now(); showToast('Certificate design saved. Every certificate now uses it.', 'ok'); ncdPaint();
+  } catch (e) { console.warn('[cert design]', e); showToast('Could not read that image.', 'err'); }
+}
+async function ncdRemove() {
+  var go = true; try { go = await showConfirm('Go back to the app\'s own certificate design? Your uploaded design is removed.', '🎨', 'Use the app\'s design', 'Cancel', 'var(--teal)'); } catch (e) {} if (!go) return;
+  var ok = await fbSet('shared/sc_cert_design', null); if (ok === false) { showToast('Could not save — check the connection.', 'err'); return; }
+  _ncd.img = null; _ncd.meta = null; _ncd.at = Date.now(); showToast('The app\'s own design is used again.', 'ok'); ncdPaint();
+}
+function ncdSample() { return { certId: 'NQF-SAMPLE-0001', grade: 'Merit', name: 'Sunita Devi', role: 'CHO', facilityName: 'Sample Sub-Centre', code: 'XX-XXX-SC-0001', district: 'District', state: 'State', tier: '12A', facPct: 74, facBase: 52, staffPct: 76, staffBase: 50, issuedAt: new Date().toISOString(), startDate: '2026-11-20', endDate: '2027-01-18', baselineDays: 7, daysDone: 58, totalDays: 60, daysVerified: 52, packageLabel: '12A — 12 Services', verifyUrl: 'https://app.thehealsol.com/verify', signers: [{ name: 'Name One', role: 'HealSol Academy', title: 'Programme Coordinator' }, { name: 'Name Two', role: 'Quality Mentor' }] }; }
+function ncdPreview() { try { nfShowCert(Object.assign(ncdSample(), (typeof _nfCertOpen === 'object' && _nfCertOpen) ? {} : {})); } catch (e) { console.warn('[cert design] preview', e); showToast('Could not show the preview.', 'err'); } }
+(function () {
+  if (typeof nfEnsureCertSetup === 'function') { var oS = nfEnsureCertSetup; nfEnsureCertSetup = async function () { var r = await oS.apply(this, arguments); try { await ncdPaint(); } catch (e) {} return r; }; }
+  if (typeof nfCertHTML === 'function') {
+    var oH = nfCertHTML;
+    nfCertHTML = function () { var h = oH.apply(this, arguments); if (!_ncd.img) return h;
+      return h.replace('<div class="nfcd" id="nfcd">', '<div class="nfcd ncd-own" id="nfcd" style="background-image:url(\'' + _ncd.img + '\')">'); };
+  }
+  if (typeof nfShowCert === 'function') {
+    var oV = nfShowCert;
+    nfShowCert = function (r) { var self = this, a = arguments; if (_ncd.at) return oV.apply(self, a); return ncdLoad().then(function () { return oV.apply(self, a); }, function () { return oV.apply(self, a); }); };
+  }
+  if (typeof nfCertPdf === 'function') {
+    var oP = nfCertPdf;
+    nfCertPdf = async function () {
+      await ncdLoad(); if (!_ncd.img) return oP.apply(this, arguments);
+      var oNew = nfPdfNew, oImg = nfPdfImg, img = _ncd.img;
+      nfPdfNew = function () { var doc = oNew.apply(this, arguments); try { doc.addImage(img, 'JPEG', 0, 0, 297, 210); } catch (e) { console.warn('[cert design] pdf', e); }
+        var oR = doc.roundedRect; doc.roundedRect = function (x, y) { if ((x === 8 && y === 8) || (x === 11 && y === 11)) return doc; return oR.apply(doc, arguments); }; return doc; };
+      nfPdfImg = function (doc, src) { if (src === SC_BRAND.logoNqas || src === SC_BRAND.logoHealsol) return; return oImg.apply(this, arguments); };
+      try { return await oP.apply(this, arguments); } finally { nfPdfNew = oNew; nfPdfImg = oImg; }
     };
   }
 })();
