@@ -28,6 +28,7 @@ ul{padding-left:20px}
 .box{background:#F7FAF9;border-left:4px solid var(--teal);padding:10px 14px;border-radius:8px;margin:12px 0}
 footer{text-align:center;font-size:12.5px;color:var(--t3);padding:0 16px 30px}
 a{color:var(--teal)}
+.play-only{display:none}.play .play-only{display:block}.play .web-only{display:none}
 </style>
 </head>
 <body>
@@ -41,6 +42,7 @@ a{color:var(--teal)}
 <section id="about">
   <h2>About NQAS | FAST &amp; Pricing</h2>
   <p><b>NQAS | FAST</b> is an online quality-improvement programme by HealSol Academy (HEALSOL HEALTHCARE PRIVATE LIMITED). It helps Sub-Centres / Ayushman Arogya Mandirs, UPHCs, PHCs and CHCs prepare for National Quality Assurance Standards (NQAS) assessment through daily task cards, checklists, evidence upload, review by supervisors, progress reports and certificates, in English and Hindi, on phone and computer.</p>
+  <div class="web-only">
   <h3>Packages (per facility)</h3>
   <ul>
     <li><b>No-cost baseline assessment</b> — for every newly registered facility: 7 days for Sub-Centres, UPHCs and PHCs; 14 days for CHCs. ₹0.</li>
@@ -51,6 +53,8 @@ a{color:var(--teal)}
   </ul>
   <p>Prices are in Indian Rupees. GST, where applicable, is shown separately at checkout before you pay. Launch offers, when running, are announced in the app and apply only as stated.</p>
   <p>To start: open <a href="./">app.thehealsol.com</a> → <b>Join NQAS FAST</b>.</p>
+  </div>
+  <p class="play-only">Your facility's package and price are given in its quotation or order from HealSol Academy.</p>
 </section>
 
 <section id="terms">
@@ -164,5 +168,10 @@ a{color:var(--teal)}
 
 </main>
 <footer>© 2026 HEALSOL HEALTHCARE PRIVATE LIMITED · <a href="./">NQAS | FAST</a></footer>
+<script>
+// Opened from the Google Play app (?src=play): no price list (Google Play Payments policy)
+(function(){ var play=/[?&]src=play\b/.test(location.search); document.documentElement.className+=play?' play':'';
+  if(play){ var n=document.querySelector('nav a[href="#about"]'); if(n) n.textContent='About'; var h=document.querySelector('#about h2'); if(h) h.textContent='About NQAS | FAST'; var t=document.querySelector('header h1'); if(t) t.textContent='NQAS | FAST · About & Policies'; } })();
+</script>
 </body>
 </html>
