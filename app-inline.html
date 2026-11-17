@@ -35923,6 +35923,7 @@ small.ax-warn{font-size:12.5px;}
 .ax-chipb.pr{background:#FBEFD5;color:#7A4B0B;} .ax-chipb.cf{background:#DDEFE8;color:#14514A;} .ax-chipb.set{background:#fff;color:#14514A;border:1px dashed #9DBDB4;}
 /* admin: upcoming assessments and HealSol's lists */
 body.nf-admin:not(.nfv-axup) .admin-main > [data-nfv="axup"]{display:none!important;}
+@media(max-width:899px){ body.hs-admin .nfs-nav button[data-v=axup]{display:none!important;} }   /* HealSol phone: in the More sheet */
 .ax-up{display:flex;flex-direction:column;gap:16px;}
 .ax-uph{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;} .ax-uph small{font-size:13px;color:#476B64;} .ax-uph h2{margin:2px 0 0;font-size:22px;}
 .ax-upt{display:flex;gap:6px;flex-wrap:wrap;}
@@ -36293,6 +36294,10 @@ async function axUpRender() {
     try { var side = document.getElementById('nfs-side'); if (side && _nfOv.view === 'axup') side.querySelectorAll('.nfs-nav button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-v') === 'axup'); }); } catch (e) {} return r; }; }
   if (typeof nfAdminView === 'function') { var oV = nfAdminView; nfAdminView = function (v) { var r = oV.apply(this, arguments); if (v === 'axup') axUpRender(); return r; }; }
   if (typeof HS_MORE !== 'undefined') HS_MORE.push('axup');
+  if (typeof hsMoreOpen === 'function') { var oM = hsMoreOpen; hsMoreOpen = function () { var r = oM.apply(this, arguments);
+    try { var sh = document.querySelector('#hs-more .hs-more-sh'), k = sh && (sh.querySelector('[data-hsp]') || sh.querySelector('.hs-more-k')); if (sh && k && !sh.querySelector('[data-axm]')) {
+      k.insertAdjacentHTML(k.hasAttribute('data-hsp') ? 'beforebegin' : 'afterend', '<button type="button" data-axm="1" onclick="hsMoreClose();nfAdminView(\'axup\')"><span class="hs-more-i"><i class="ti ti-calendar-event"></i></span><span><b>Assessments</b><small>Facilities with an assessment date, nearest first</small></span><i class="ti ti-chevron-right"></i></button>'); } } catch (e) {}
+    return r; }; }
 })();
 
 // ══ HealSol: Settings → Programme rules → Assessment documents (one list per facility type) ══
