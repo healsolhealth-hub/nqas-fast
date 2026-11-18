@@ -17,6 +17,13 @@
   function typeName() { return (TYPES.filter(function (x) { return x[0] === S.type; })[0] || TYPES[0])[1]; }
   var PLAY = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>';
   var PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>';
+  // 18 Nov 2026: on an Android phone (in a browser) the button opens the Qi FAST app, or Google Play when it is not installed
+  function openApp() {
+    var and = /Android/i.test(navigator.userAgent || ''), sa = false;
+    try { sa = window.matchMedia && (window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: fullscreen)').matches); } catch (e) {}
+    if (and && !sa) return '<a class="btn dark sm" href="intent://app.thehealsol.com/#Intent;scheme=https;package=com.thehealsol.qifast;S.browser_fallback_url=' + encodeURIComponent('https://play.google.com/store/apps/details?id=com.thehealsol.qifast') + ';end">Open Qi FAST</a>';
+    return '<a class="btn dark sm" href="https://app.thehealsol.com">Open the app</a>';
+  }
   function mark() { return '<a class="mark" href="#">NQAS <i>|</i> FAST <span>Tour</span></a>'; }
   function foot() {
     return '<footer class="foot"><p>Screens show sample data. Based on the National Quality Assurance Standards. NQAS | FAST is an independent programme by HealSol Academy; it is not a government app and does not certify facilities. Questions: info@thehealsol.com · WhatsApp +91 83840 63112</p>'
@@ -43,7 +50,7 @@
     document.title = 'NQAS | FAST · App tour';
     var pub = ['how', 'join', 'staff', 'incharge'].map(tour).filter(Boolean), first = steps(tour('staff') || { steps: [] })[0];
     var hero = first ? vr(first).img : '';
-    root.innerHTML = '<header class="bar">' + mark() + '<a class="btn dark sm" href="https://app.thehealsol.com">Open the app</a></header>'
+    root.innerHTML = '<header class="bar">' + mark() + '' + openApp() + '</header>'
       + '<main class="wrap"><section class="hero"><div class="t"><p class="eyebrow">App tour</p><h1 class="disp">See how NQAS | FAST works, screen by screen</h1>'
       + '<p class="lead">Pick where you want to start. Each step shows a real screen with sample data, what each part is for, and a tip for using it well.</p>'
       + '<div class="acts"><button type="button" class="btn" id="h-play">' + PLAY + 'Auto-play the whole tour</button><button type="button" class="btn ghost" id="h-start">Start with how it works</button></div></div>'
@@ -149,7 +156,7 @@
   // ── what makes it different ──
   function diffView() {
     document.title = 'What makes NQAS | FAST different · NQAS | FAST tour';
-    root.innerHTML = '<header class="bar">' + mark() + '<a class="btn dark sm" href="https://app.thehealsol.com">Open the app</a></header><main class="wrap"><section class="hero" style="padding-bottom:20px"><div class="t"><p class="eyebrow">Summary</p><h1 class="disp">What makes NQAS | FAST different</h1><p class="lead">Tap any one to see it in the app.</p></div></section>'
+    root.innerHTML = '<header class="bar">' + mark() + '' + openApp() + '</header><main class="wrap"><section class="hero" style="padding-bottom:20px"><div class="t"><p class="eyebrow">Summary</p><h1 class="disp">What makes NQAS | FAST different</h1><p class="lead">Tap any one to see it in the app.</p></div></section>'
       + '<section class="sec"><div class="dgrid">' + (D.diff || []).map(function (d, k) { return '<button type="button" class="dcard" data-k="' + k + '"><span class="k">' + (k + 1) + '</span><span><b>' + E(d[0]) + '</b><span>' + E(d[1]) + '</span></span></button>'; }).join('') + '</div>'
       + '<div class="acts"><a class="btn ghost" href="#">← All chapters</a></div></section></main>' + foot();
     [].forEach.call(root.querySelectorAll('.dcard'), function (b) { b.onclick = function () { var d = D.diff[+b.dataset.k], T = tour(d[2]); if (!T) return; var want = T.steps[d[3]], L = steps(T), n = Math.max(0, L.indexOf(want)); S.p = 0; S.list = []; go('#t/' + d[2] + '/' + (n + 1)); }; });

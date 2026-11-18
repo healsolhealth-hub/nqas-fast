@@ -27,7 +27,9 @@ function ivWords(n) {
 function ivDoc(kind, r) {
   if (kind === 'proforma') return { kind: kind, title: 'PROFORMA INVOICE', no: r.no, date: r.issuedAt, validTill: r.validTill, seller: r.seller, buyer: r.billTo, sac: r.sac, item: r.item, base: r.base, gst: r.gst, cgst: r.cgst, sgst: r.sgst, igst: r.igst, total: r.total,
     facility: r.facilityName + ' (' + r.code + ')' + (r.nin ? ' · NIN ' + r.nin : ''), place: [r.block ? r.block + ' block' : '', r.district, r.state].filter(Boolean).join(', '), note: 'This is a proforma invoice for approval and payment — it is not a tax invoice. The tax invoice is issued when the payment is received.' };
-  var v = r.invoice || {};
+  var v = r.invoice || {}, G = v.group;
+  if (G) return { kind: 'tax', title: 'TAX INVOICE', no: v.no, date: v.date || r.paidAt, seller: v.seller, buyer: v.buyer, sac: v.sac, lines: G.lines, base: G.base, gst: G.gst, cgst: v.cgst, sgst: v.sgst, igst: v.igst, total: G.total,
+    facility: G.n + ' facilities (listed below)', place: '', paid: { method: r.method, ref: r.paymentId || r.reference || '', receiptNo: r.receiptNo, proformaNo: v.proformaNo }, note: 'Payment received in full for all the facilities listed. This is a computer-generated invoice and does not need a signature.' };   // 18 Nov 2026: one invoice for several facilities
   return { kind: 'tax', title: 'TAX INVOICE', no: v.no, date: v.date || r.paidAt, seller: v.seller, buyer: v.buyer, sac: v.sac, item: 'NQAS | FAST programme — ' + (r.packageLabel || r.package || ''), base: r.base, gst: r.gst, cgst: v.cgst, sgst: v.sgst, igst: v.igst, total: r.total,
     facility: (r.facilityName || '') + ' (' + (r.code || '') + ')', place: [r.district, r.state].filter(Boolean).join(', '), paid: { method: r.method, ref: r.paymentId || r.reference || '', receiptNo: r.receiptNo, proformaNo: v.proformaNo }, note: 'Payment received in full. This is a computer-generated invoice and does not need a signature.' };
 }
@@ -37,7 +39,7 @@ function ivHTML(d) {
   var B0 = typeof SC_BRAND !== 'undefined' ? SC_BRAND : {};
   return '<div class="nf-rcpt iv-doc"><div class="iv-brand">' + (B0.logoNqas ? '<img src="' + B0.logoNqas + '" alt="NQAS.QI" class="iv-nq">' : '') + '<span class="iv-fast"><b>NQAS<i>|</i>FAST</b><small>Make your facility NQAS-ready</small></span><span class="iv-by">by ' + (B0.logoHealsol ? '<img src="' + B0.logoHealsol + '" alt="HealSol Academy">' : 'HealSol Academy') + '</span></div><div class="nf-rcpt-top"><div><b>' + ivE(S.name) + '</b><small>' + ivE(S.address) + '<br>GSTIN ' + ivE(S.gstin) + ' · ' + ivE(S.email) + ' · ' + ivE(S.phone) + '</small></div><div class="nf-rcpt-t">' + ivE(d.title) + '<small>' + ivE(d.no) + '</small></div></div>'
     + '<table class="nf-rcpt-kv">' + kv('Date', ivDate(d.date)) + (d.validTill ? kv('Valid till', ivDate(d.validTill)) : '') + kv('Bill to', [B.name, B.address].filter(Boolean).join(', ')) + kv('Buyer GSTIN', B.gstin || 'Unregistered') + kv('Place of supply', (B.state || '') + (B.stateCode ? ' (' + B.stateCode + ')' : '')) + kv('Facility', d.facility) + kv('Location', d.place) + '</table>'
-    + '<table class="nf-rcpt-amt"><tr><th>Description · SAC ' + ivE(d.sac) + '</th><th>Amount</th></tr><tr><td>' + ivE(d.item) + '</td><td>' + ivM(d.base) + '</td></tr>' + tax
+    + '<table class="nf-rcpt-amt"><tr><th>Description · SAC ' + ivE(d.sac) + '</th><th>Amount</th></tr>' + (d.lines && d.lines.length ? d.lines.map(function (x) { return '<tr><td>' + ivE(x.item) + '</td><td>' + (x.base != null ? ivM(x.base) : '') + '</td></tr>'; }).join('') : '<tr><td>' + ivE(d.item) + '</td><td>' + ivM(d.base) + '</td></tr>') + tax
     + '<tr class="tot"><td>' + (d.kind === 'tax' ? 'Total paid' : 'Total payable') + '</td><td>' + ivM(d.total) + '</td></tr></table>'
     + '<div class="iv-words">' + ivE(ivWords(d.total)) + '</div>'
     + (d.paid ? '<table class="nf-rcpt-kv">' + kv('Paid by', d.paid.method) + kv('Payment reference', d.paid.ref) + kv('Receipt', d.paid.receiptNo) + kv('Against proforma', d.paid.proformaNo) + '</table>' : '')
@@ -68,7 +70,7 @@ async function ivPdf(d) {
   doc.setFont(F, 'bold'); doc.setFontSize(9); doc.setTextColor.apply(doc, TEAL); doc.text('BILL TO', L, y); y += 5.5;
   kv('Name', B.name); kv('Address', B.address); kv('GSTIN', B.gstin || 'Unregistered'); kv('Place of supply', (B.state || '') + (B.stateCode ? ' (' + B.stateCode + ')' : '')); kv('For facility', d.facility); kv('Location', d.place);
   y += 2;
-  var body = [[T(d.item), String(d.sac || ''), M(d.base)]];
+  var body = d.lines && d.lines.length ? d.lines.map(function (x) { return [T(x.item), String(d.sac || ''), x.base != null ? M(x.base) : '']; }) : [[T(d.item), String(d.sac || ''), M(d.base)]];
   if (d.igst) body.push(['IGST @ 18%', '', M(d.igst)]); else { body.push(['CGST @ 9%', '', M(d.cgst)]); body.push(['SGST @ 9%', '', M(d.sgst)]); }
   doc.autoTable({ startY: y, margin: { left: L, right: 210 - R }, theme: 'plain', head: [['Description', 'SAC', 'Amount']], body: body, foot: [[d.kind === 'tax' ? 'Total paid' : 'Total payable', '', M(d.total)]],
     styles: { font: F, fontSize: 9.5, textColor: INK, cellPadding: { top: 2.4, bottom: 2.4, left: 0, right: 0 } },

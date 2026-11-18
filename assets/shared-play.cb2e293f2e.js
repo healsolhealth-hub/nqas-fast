@@ -9,7 +9,7 @@
 //     HealSol as an enquiry (source 'delete', ref DEL-…) and the person is told what is deleted and what is kept.
 //     The same request can be made without the app at delete-account.html (Google Play needs both).
 // ══════════════════════════════════════════════════════════════
-var NF_PLAY_PKG = 'com.thehealsol.nqasfast';
+var NF_PLAY_PKG = 'com.thehealsol.qifast';   // 18 Nov 2026: the live Play app (Qi FAST)
 function plHi() { return typeof _appLang !== 'undefined' && _appLang === 'hi'; }
 function plT(en, hi) { return plHi() && hi ? hi : en; }
 function plE(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -18,7 +18,7 @@ function plOn() { return typeof nfIsPlay === 'function' && nfIsPlay(); }
 // ── the note shown instead of a price / pay button ──
 function plAccessHTML() {
   return '<div class="upgrade-card pl-note"><div class="upgrade-hd"><div style="font-size:30px;margin-bottom:6px;">🔒</div>'
-    + '<div style="font-size:16px;font-weight:800;">' + plE(plT('Day 8 onwards is part of the full programme', 'दिन 8 से आगे पूरा कार्यक्रम है')) + '</div></div>'
+    + '<div style="font-size:16px;font-weight:800;">' + plE(plT('The next days are part of the full programme', 'आगे के दिन पूरे कार्यक्रम का हिस्सा हैं')) + '</div></div>'
     + '<div class="upgrade-body"><p class="pl-p">' + plE(plT('Your facility\'s access to the full programme is arranged by HealSol Academy with your facility in-charge or district. Once it is active, the next days open here automatically.',
       'पूरे कार्यक्रम की सुविधा HealSol Academy आपके केंद्र प्रभारी या ज़िले के साथ तय करती है। सक्रिय होते ही अगले दिन यहाँ अपने-आप खुल जाएँगे।')) + '</p>'
     + '<p class="pl-p pl-sm">' + plE(plT('Your baseline work is saved.', 'आपका बेसलाइन काम सहेजा हुआ है।')) + '</p></div></div>';
@@ -94,7 +94,8 @@ function plViewer(html) {
   ov.innerHTML = '<div class="pl-vbar"><button type="button" class="pl-vx" aria-label="Close">✕ ' + plE(plT('Close', 'बंद करें')) + '</button>'
     + '<button type="button" class="pl-vp"><i class="ti ti-printer"></i> ' + plE(plT('Print / Save as PDF', 'प्रिंट / PDF सहेजें')) + '</button></div><iframe class="pl-vf" title="Report"></iframe>';
   document.body.appendChild(ov);
-  var f = ov.querySelector('iframe'), shut = function () { if (ov.parentNode) ov.remove(); };
+  var f = ov.querySelector('iframe'), shut = function () { if (ov.parentNode) ov.remove(); window._nfAllowPrint = false; };
+  window._nfAllowPrint = true;   // printing a report the user opened is allowed (the content protection blanks other prints)
   ov.querySelector('.pl-vx').onclick = shut;
   ov.querySelector('.pl-vp').onclick = function () { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { } };
   f.addEventListener('load', function () { try { f.contentWindow.close = shut; } catch (e) { } });   // the report's own "Close" button
@@ -174,4 +175,16 @@ async function plCardAct(kind, rec, f) {
     }
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hook); else setTimeout(hook, 0);
+})();
+
+// ── 17 Nov 2026: the last prices in the Play app (Google Play Payments policy) ──
+//   · login screen: the launch line only, without the "Early-bird pricing" line
+//   · Terms / Privacy / Refunds open with ?src=play, so legal.html leaves out the price list
+(function () {
+  if (!plOn()) return;
+  if (typeof nlPaint === 'function' && !nlPaint._pl) { var o = nlPaint; nlPaint = async function () { var r = await o.apply(this, arguments); try { var b = document.querySelector('#nl-banner b'); if (b) b.remove(); } catch (e) {} return r; }; nlPaint._pl = 1; }
+  document.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('a[href^="legal.html"]') : null; if (!a || /[?&]src=play/.test(a.getAttribute('href'))) return;
+    var h = a.getAttribute('href'), i = h.indexOf('#'); a.setAttribute('href', (i < 0 ? h : h.slice(0, i)) + '?src=play' + (i < 0 ? '' : h.slice(i)));
+  }, true);
 })();
