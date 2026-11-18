@@ -3,183 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="A role-by-role tour of NQAS | FAST for Sub-Centres, UPHCs, PHCs and CHCs, by HealSol Academy.">
-<meta property="og:title" content="NQAS | FAST Tour">
-<meta property="og:description" content="See how facility teams get NQAS-ready with NQAS | FAST, role by role.">
+<title>NQAS | FAST · App tour</title>
+<meta name="description" content="See how NQAS | FAST works, screen by screen: how it works, joining, facility staff and the facility in-charge.">
 <meta name="theme-color" content="#135C52">
+<meta property="og:title" content="NQAS | FAST · App tour">
+<meta property="og:description" content="See how NQAS | FAST works, screen by screen: how it works, joining, facility staff and the facility in-charge.">
 <link rel="icon" href="../icons/icon-192.png">
-<title>NQAS | FAST Tour</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Hind:wght@400;500;600&display=swap">
-<style>
-/* Layout: a field guide — role tabs over a device on the left and the numbered walkthrough on the right; the programme rulers under the title. */
-:root{
-  --bg:#F3F6F4; --surface:#FFFFFF; --ink:#13231F; --muted:#56675F; --line:#D9E3DF;
-  --teal:#135C52; --teal-soft:#E2EFEB; --saffron:#C96F1C; --saffron-soft:#FBEBDB;
-  --device:#1B2A26; --ph1:#2B7A6D; --ph2:#135C52; --ph3:#5B5BA8; --ph4:#B8651A;
-  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --body:"Hind", "Noto Sans Devanagari", "Segoe UI", system-ui, sans-serif;
-}
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#0F1715; --surface:#17221F; --ink:#E6EFEC; --muted:#9DB0AA; --line:#2A3A36;
-  --teal:#5FC2B0; --teal-soft:#1D332E; --saffron:#F0A25A; --saffron-soft:#3A2A1A; --device:#05090A;
-  --ph1:#3E9C8C; --ph2:#2F7F72; --ph3:#7C7CC8; --ph4:#C4741F; color-scheme:dark } }
-:root[data-theme="dark"]{
-  --bg:#0F1715; --surface:#17221F; --ink:#E6EFEC; --muted:#9DB0AA; --line:#2A3A36;
-  --teal:#5FC2B0; --teal-soft:#1D332E; --saffron:#F0A25A; --saffron-soft:#3A2A1A; --device:#05090A;
-  --ph1:#3E9C8C; --ph2:#2F7F72; --ph3:#7C7CC8; --ph4:#C4741F; color-scheme:dark }
-*{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
-.wrap{max-width:1180px;margin:0 auto}
-header{padding-block:36px 8px;display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
-.brand{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
-h1{font-family:var(--display);font-weight:700;font-size:clamp(34px,6vw,58px);line-height:1.02;margin:0;letter-spacing:-.01em;text-wrap:balance}
-h1 i{font-style:normal;color:var(--saffron);font-weight:500}
-.lede{font-size:clamp(17px,2.2vw,20px);max-width:66ch;margin:0;color:var(--ink)}
-.note{font-size:13.5px;color:var(--muted);margin:0}
-.types{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 0;padding:0;list-style:none}
-.types li{font-size:14px;font-weight:600;padding:4px 12px 2px;border-radius:999px;background:var(--teal-soft);color:var(--teal)}
-.rulers{margin-top:20px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
-.ruler{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;min-width:0}
-.ruler > b{font-size:14px}
-.bars{display:flex;gap:3px;height:38px}
-.bars div{border-radius:6px;color:#fff;font-size:12.5px;font-weight:600;display:flex;align-items:center;padding:0 8px;min-width:0;overflow:hidden;white-space:nowrap}
-.b1{background:var(--ph1)} .b2{background:var(--ph2)} .b3{background:var(--ph3)} .b4{background:var(--ph4);justify-content:center;padding:0!important}
-.ticks{display:flex;gap:3px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
-.ticks span{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.rulers small{grid-column:1/-1;font-size:12.5px;color:var(--muted)}
-nav.roles{margin-top:30px;display:flex;flex-wrap:wrap;gap:8px}
-nav.roles button{font:inherit;font-size:15px;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 16px 6px;cursor:pointer;display:flex;gap:8px;align-items:baseline}
-nav.roles button small{font-size:13px;color:var(--muted)}
-nav.roles button[aria-selected="true"]{background:var(--teal);border-color:var(--teal);color:var(--surface)}
-nav.roles button[aria-selected="true"] small{color:var(--surface);opacity:.85}
-nav.roles button:focus-visible,.steps button:focus-visible,.pager button:focus-visible,.hs:focus-visible{outline:3px solid var(--saffron);outline-offset:2px}
-.roleintro{margin:18px 0 0;max-width:72ch;color:var(--muted)}
-.stage{margin-top:20px;display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:40px;align-items:start}
-.stage.wide{grid-template-columns:minmax(0,1fr)}
-.device{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
-.phone{background:var(--device);border-radius:42px;padding:12px;max-width:360px;margin:0 auto;box-shadow:0 24px 50px -28px rgba(10,30,25,.55)}
-.phone .screen{border-radius:30px;overflow:hidden}
-.laptop{background:var(--device);border-radius:14px;padding:10px 10px 14px;max-width:100%}
-.laptop .screen{border-radius:6px;overflow:hidden}
-.screen{position:relative;background:#fff}
-.screen img{display:block;width:100%;height:auto}
-.hs{position:absolute;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;border:2px solid #fff;background:var(--saffron);color:#fff;font:700 13px/24px var(--body);text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.35);padding:0}
-.hs.on{background:var(--teal);transform:translate(-50%,-50%) scale(1.15)}
-@media (prefers-reduced-motion:no-preference){ .hs{transition:transform .15s} .hs:not(.on){animation:pulse 2.4s ease-in-out infinite} @keyframes pulse{50%{box-shadow:0 0 0 7px rgba(201,111,28,.25)}} }
-.ring{position:absolute;border:3px solid var(--saffron);border-radius:10px;box-shadow:0 0 0 4px rgba(201,111,28,.18);pointer-events:none;display:none}
-.ring.on{display:block}
-.caption{font-size:13px;color:var(--muted);text-align:center;margin-top:10px}
-.panel{min-width:0;display:grid;grid-template-columns:minmax(0,1fr);gap:22px}
-.steps{list-style:none;margin:0;padding:0;display:grid;gap:4px;border-left:2px solid var(--line)}
-.steps button{font:inherit;text-align:left;width:100%;background:none;border:0;color:var(--muted);padding:6px 12px;margin-left:-2px;border-left:2px solid transparent;cursor:pointer;display:flex;gap:10px;align-items:baseline}
-.steps button b{font-family:var(--display);font-weight:500;font-size:13px;min-width:1.6em;font-variant-numeric:tabular-nums}
-.steps button[aria-current="step"]{color:var(--ink);border-left-color:var(--teal);font-weight:600}
-.detail h2{font-family:var(--display);font-weight:700;font-size:clamp(24px,3vw,32px);line-height:1.15;margin:0 0 8px;text-wrap:balance}
-.detail p{margin:0;max-width:62ch}
-.legend{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:10px}
-.legend li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px;align-items:start;padding:10px 12px;border-radius:10px;background:var(--surface);border:1px solid var(--line);cursor:default}
-.legend li.on{border-color:var(--saffron);background:var(--saffron-soft)}
-.legend .n{width:26px;height:26px;border-radius:50%;background:var(--saffron);color:#fff;font:700 13px/26px var(--body);text-align:center}
-.legend b{display:block;font-weight:600}
-.legend span{color:var(--muted);font-size:15px}
-.pager{display:flex;gap:10px;flex-wrap:wrap}
-.pager button{font:inherit;font-weight:600;border-radius:10px;padding:10px 18px 8px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
-.pager button.next{background:var(--teal);border-color:var(--teal);color:var(--surface)}
-.pager button:disabled{opacity:.4;cursor:default}
-.wide .panel{grid-template-columns:minmax(0,240px) minmax(0,1fr);align-items:start}
-.wide .panel .steps{grid-row:span 2}
-.cta{margin-top:56px;background:var(--teal);color:var(--surface);border-radius:20px;padding:28px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:center}
-.cta h2{font-family:var(--display);font-size:clamp(24px,3vw,32px);margin:0 0 6px}
-.cta p{margin:0;opacity:.9}
-.cta dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;font-size:15px}
-.cta dt{opacity:.8} .cta dd{margin:0;font-weight:600;user-select:all}
-footer{margin-top:28px;border-top:1px solid var(--line);padding-top:18px;display:grid;gap:6px;font-size:14px;color:var(--muted)}
-@media (max-width:820px){
-  .rulers{grid-template-columns:minmax(0,1fr)}
-  .stage{grid-template-columns:minmax(0,1fr);gap:24px}
-  .device{position:static}
-  .wide .panel{grid-template-columns:minmax(0,1fr)}
-  .steps{display:flex;overflow-x:auto;border-left:0;border-bottom:2px solid var(--line);gap:0}
-  .steps button{border-left:0;border-bottom:2px solid transparent;margin:0 0 -2px;white-space:nowrap;padding:8px 10px}
-  .steps button[aria-current="step"]{border-bottom-color:var(--teal)}
-  .bars div{font-size:11px;padding:0 5px}
-  .cta{grid-template-columns:minmax(0,1fr)}
-}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Hind:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tour.css?v=20261118">
 </head>
 <body>
-
-
-<div class="wrap">
-<header>
-  <div class="brand">HealSol Academy · Product tour</div>
-  <h1>NQAS <i>|</i> FAST</h1>
-  <p class="lede">Health facility teams get ready for their NQAS assessment a little every day, on the phones they already use, in English or Hindi. Every score is checked, every gap gets an owner, and supervisors see progress as it happens.</p>
-  <ul class="types" aria-label="Facility types"><li>AAM Sub-Centres</li><li>UPHCs</li><li>PHCs</li><li>CHCs</li></ul>
-  <p class="note">Every screen below is the real app, filled with sample names and numbers. Tap the orange dots to see what each part does.</p>
-  <div class="rulers">
-    <div class="ruler" aria-label="The 60-day programme"><b>Sub-Centre · UPHC · PHC: 60 days</b>
-      <div class="bars"><div class="b1" style="flex:7">Baseline</div><div class="b2" style="flex:42">Implementation · 6 weekly themes</div><div class="b3" style="flex:7">End-line</div><div class="b4" style="flex:4">60</div></div>
-      <div class="ticks"><span style="flex:7">1–7</span><span style="flex:42">8–49</span><span style="flex:7">50–56</span><span style="flex:4">57–60</span></div></div>
-    <div class="ruler" aria-label="The 90-day CHC programme"><b>CHC: 90 days</b>
-      <div class="bars"><div class="b1" style="flex:14">Baseline</div><div class="b2" style="flex:56">Implementation · 8 weekly themes</div><div class="b3" style="flex:14">End-line</div><div class="b4" style="flex:6">90</div></div>
-      <div class="ticks"><span style="flex:14">1–14</span><span style="flex:56">15–70</span><span style="flex:14">71–84</span><span style="flex:6">85–90</span></div></div>
-    <small>The baseline is free. Graduation on the last day: overall, every department and every Area of Concern at 70% or more means NQAS Ready; otherwise a 30-day catch-up on the weakest areas.</small>
-  </div>
-</header>
-
-<nav class="roles" role="tablist" aria-label="Choose a role" id="roles"></nav>
-<p class="roleintro" id="roleintro"></p>
-
-<section class="stage" id="stage">
-  <div class="device" id="device"></div>
-  <div class="panel">
-    <ol class="steps" id="steps"></ol>
-    <div class="detail" id="detail" aria-live="polite"></div>
-    <div class="pager"><button type="button" id="prev">Back</button><button type="button" class="next" id="next">Next</button></div>
-  </div>
-</section>
-
-<section class="cta" aria-label="Contact">
-  <div><h2>Bring NQAS | FAST to your facilities</h2><p>Register at app.thehealsol.com or get the app on Google Play (search "Qi FAST by HealSol"). For a block, district or state programme, talk to us.</p></div>
-  <dl><dt>Web</dt><dd>app.thehealsol.com</dd><dt>Email</dt><dd>info@thehealsol.com</dd><dt>WhatsApp</dt><dd>+91 83840 63112</dd></dl>
-</section>
-
-<footer>
-  <div>Based on the National Quality Assurance Standards. NQAS | FAST is an independent programme of HealSol Academy, not a government app, and does not certify facilities.</div>
-  <div>Partners see facility-level numbers only. Staff names and mobile numbers stay with the facility's own team.</div>
-  <div>NQAS | FAST · part of the Qi FAST family by HealSol Academy · sample data shown throughout · November 2026</div>
-</footer>
-</div>
-
-<script>
-const ROLES=[{"id": "start", "name": "Start", "hi": "शुरुआत", "intro": "One app for Sub-Centres, UPHCs, PHCs and CHCs. Everyone logs in on the same screen and lands in their own space.", "steps": [{"img": "out-login", "kind": "phone", "w": 780, "h": 1688, "t": "One login for every facility", "d": "Staff log in with their mobile number; Mentors, district teams, HealSol and partners with an ID. The app opens the right space by itself, in English or Hindi.", "hs": [[574, 82, "EN / हिं", "Switches the whole app between English and Hindi.", [584, 46, 670, 118]], [30, 702, "Mobile number or ID", "Staff use their mobile number; others use the ID HealSol gives them.", [38, 678, 742, 726]], [30, 1180, "Log in", "The password is checked on the server, then the right space opens.", [38, 1122, 742, 1238]], [284, 1369, "Join NQAS FAST", "A facility, a staff member, a district or a partner can apply here.", [294, 1342, 530, 1396]], [54, 1538, "Launch notice", "HealSol can change this line from Settings at any time.", [64, 1496, 716, 1580]]]}]}, {"id": "staff", "name": "Staff", "hi": "स्टाफ", "intro": "ANM, ASHA, MPW, nurses, pharmacists and lab staff: one short card a day for their own role, their own gaps with how to fix them, and recognition for real progress.", "steps": [{"img": "anm-sc-today", "kind": "phone", "w": 780, "h": 1688, "t": "Today: what to do now", "d": "The day of the programme, this week's theme, my readiness and the facility's, and how many days are left to the next assessment.", "hs": [[290, 170, "Assessment countdown", "Days to the next assessment, set by the in-charge. Tap to see the plan and the documents.", [300, 132, 612, 208]], [56, 704, "Open today's card", "Today's checkpoints for my role, where I left off.", [66, 652, 714, 756]], [30, 991, "Team status", "On track, Slipping or Behind, from cards done on their own day.", [30, 964, 408, 1018]]]}, {"img": "anm-sc-cards", "kind": "phone", "w": 780, "h": 1688, "t": "The daily card", "d": "Each checkpoint lists the things to check. Mark each one Met or Not met; the score updates as I go.", "hs": [[324, 312, "Day strip", "All the programme days: done, missed and the days ahead.", [334, 246, 446, 378]], [142, 849, "This week's theme", "The Area of Concern the whole team works on this week.", [152, 826, 722, 872]], [116, 1287, "A checkpoint", "The things to check, who it is for and how it is assessed.", [126, 1244, 634, 1330]], [70, 1132, "About this day", "What today is about, with guidance.", [80, 1086, 700, 1178]]]}, {"img": "anm-sc-progress", "kind": "phone", "w": 780, "h": 1688, "t": "My progress", "d": "Readiness at baseline, during implementation and at end-line, with scores for every Area of Concern.", "hs": [[586, 214, "My readiness", "Baseline, now, and the gain since Day 1.", [596, 188, 720, 240]], [34, 548, "Days on time", "A streak for cards done on their own day.", [44, 514, 254, 582]], [30, 678, "Areas / Service packages", "The two ways NQAS groups the checkpoints.", [38, 632, 392, 724]], [50, 810, "Area score", "Now against baseline, with the 70% line.", [60, 784, 508, 836]]]}, {"img": "anm-sc-me", "kind": "phone", "w": 780, "h": 1688, "t": "My impact", "d": "Levels and stars are worked out every night from verified scores, and are never taken away once earned.", "hs": [[294, 913, "How?", "How the next star is earned.", [304, 890, 374, 936]], [52, 1204, "People served", "From the population the in-charge enters for the facility.", [62, 1158, 718, 1250]], [52, 1384, "WhatsApp", "Shares my card with a picture preview.", [62, 1338, 270, 1430]], [118, 356, "Reminders", "Phone reminders for my card, in my language.", [128, 330, 722, 382]]]}]}, {"id": "incharge", "name": "Facility in-charge", "hi": "प्रभारी", "intro": "The CHO at a Sub-Centre, the Coordinator at a UPHC, the MOIC at a PHC or CHC: the same daily card, plus the facility profile, the team and the road to assessment.", "steps": [{"img": "cho-sc-profile", "kind": "phone", "w": 780, "h": 1688, "t": "Facility profile", "d": "The first page of the day: the facility, its NQAS journey from baseline to now, and the team with their levels.", "hs": [[40, 567, "About our facility", "Population, villages and team size, entered by the in-charge.", [50, 540, 730, 594]], [40, 843, "Our NQAS journey", "Baseline, now and the 70% target, updated every night.", [50, 816, 730, 870]], [40, 1273, "Our team", "Everyone with their level and stars.", [50, 1246, 730, 1300]]]}, {"img": "cho-sc-assess", "kind": "phone", "w": 780, "h": 1688, "t": "Assessment: the countdown", "d": "The next assessment (internal, district, state or national), Proposed or Confirmed, with readiness against the 70% target.", "hs": [[540, 238, "Proposed / Confirmed", "The in-charge marks the date confirmed once the letter or call comes.", [550, 206, 718, 270]], [52, 346, "Days to go", "Everyone on the team sees the same countdown.", [62, 282, 228, 410]], [52, 668, "Mark as confirmed", "One tap when the date is fixed.", [62, 618, 386, 718]], [380, 668, "Change", "Level, date, reference number and a note for the team.", [390, 618, 718, 718]], [512, 918, "Points to go", "How far readiness is from 70%.", [522, 892, 720, 944]], [582, 1174, "Documents", "The documents assessors ask for, and how many are ready.", [592, 1136, 720, 1212]]]}, {"img": "cho-sc-assess-docs", "kind": "phone", "w": 780, "h": 1688, "t": "Assessment: documents", "d": "HealSol's list of the documents for each facility type. The in-charge gives each one an owner and a due date; the owner ticks it ready.", "hs": [[142, 304, "Remaining", "Only the documents still to do.", [152, 262, 388, 346]], [378, 304, "Mine", "The documents assigned to me.", [388, 262, 536, 346]], [46, 644, "Owner and due date", "Set by the in-charge.", [56, 618, 524, 670]], [194, 907, "Overdue", "Shown in red until it is ready.", [204, 884, 402, 930]], [584, 536, "Status", "Not started, In progress or Ready. Nothing is uploaded.", [594, 504, 724, 568]]]}]}, {"id": "uphc", "name": "UPHC · PHC", "hi": "यूपीएचसी · पीएचसी", "intro": "UPHCs and PHCs work department by department: each person fills the cards of the departments they cover, and department leads check them. 60 days, with a 7-day baseline.", "steps": [{"img": "uphc-d-today", "kind": "phone", "w": 780, "h": 1688, "t": "Today at a UPHC", "d": "My cards across the departments I cover, the days left to graduation and the next assessment.", "hs": [[282, 76, "Assessment countdown", "Here a District (DQAC) assessment in 25 days.", [292, 38, 628, 114]], [52, 792, "Open today's card", "All of today's checkpoints for my departments.", [62, 738, 718, 846]], [46, 1151, "Graduation", "The day the end-line result is worked out.", [56, 1124, 724, 1178]]]}, {"img": "uphc-d-cards", "kind": "phone", "w": 780, "h": 1688, "t": "Department cards", "d": "One card per department per day. A department lead checks each day before it counts.", "hs": [[30, 708, "My department", "Laboratory: 0 of 9 done today.", [26, 668, 292, 748]], [46, 504, "Today's theme", "The departments and Areas of Concern for today.", [56, 478, 568, 530]], [30, 788, "Compare", "See the other departments' cards for the same day.", [26, 748, 432, 828]]]}, {"img": "uphc-d-fa-home", "kind": "phone", "w": 780, "h": 1688, "t": "Facility dashboard", "d": "For the in-charge: facility readiness against baseline, the NQAS criteria, and what needs attention.", "hs": [[52, 228, "Facility readiness", "Week, day and the score for the whole facility.", [62, 204, 518, 252]], [72, 551, "NQAS criteria", "Overall, every department and every Area of Concern against the minimum.", [82, 528, 284, 574]], [52, 728, "Open readiness", "Scores by department, area and standard.", [62, 674, 718, 782]], [450, 1614, "Readiness tab", "Reports and downloads.", [460, 1562, 622, 1666]]]}, {"img": "uphc-d-fa-staff", "kind": "phone", "w": 780, "h": 1688, "t": "The team", "d": "Everyone with their role, departments, cards done and readiness. The in-charge adds people and sets department leads.", "hs": [[412, 292, "Cards on time", "How many people are keeping up.", [422, 268, 750, 316]], [154, 393, "Coordinator", "The in-charge, with the departments they cover.", [164, 366, 668, 420]], [154, 697, "Medical Officer", "Leads several departments.", [164, 670, 668, 724]], [154, 1268, "Fills", "Which departments each person fills and leads.", [164, 1228, 668, 1308]]]}]}, {"id": "chc", "name": "CHC", "hi": "सीएचसी", "intro": "A CHC runs 14 departments over 90 days, with a 14-day baseline, including the LaQshya and MusQan areas.", "steps": [{"img": "chc-d-cards", "kind": "phone", "w": 780, "h": 1688, "t": "14 departments", "d": "Paediatric OPD and NBSU (MusQan), Labour Room and Maternity OT (LaQshya), OT, emergency, wards, lab, radiology, pharmacy and more.", "hs": [[30, 748, "Paediatric OPD (MusQan)", "Today's card for my department.", [26, 708, 484, 788]], [30, 1068, "Labour Room (LaQshya)", "LaQshya departments carry their own records.", [26, 1028, 524, 1108]], [30, 1148, "NBSU (MusQan)", "MusQan departments too.", [26, 1108, 422, 1188]], [46, 524, "Today's theme", "The departments in today's card.", [56, 478, 656, 570]]]}, {"img": "chc-d-fa-home", "kind": "phone", "w": 780, "h": 1688, "t": "CHC dashboard", "d": "For the MOIC: the whole CHC, plus a switch to the block view.", "hs": [[30, 224, "My block", "The block's PHCs and Sub-Centres in one view.", [26, 176, 754, 272]], [572, 404, "Readiness", "The facility's score now.", [582, 372, 666, 436]], [72, 687, "NQAS criteria", "Every department and area against the minimum.", [82, 664, 284, 710]], [52, 864, "Open readiness", "Department and standard detail.", [62, 810, 718, 918]]]}, {"img": "chc-d-assess", "kind": "phone", "w": 780, "h": 1688, "t": "The road to certification", "d": "Every assessment on one line: internal, district, state, then national (NHSRC), with dates and scores.", "hs": [[52, 334, "Days to go", "A national assessment in 64 days.", [62, 270, 234, 398]], [126, 1265, "State assessment", "Done, with its score.", [136, 1238, 432, 1292]], [126, 1363, "National (NHSRC)", "Confirmed, with the date.", [136, 1336, 582, 1390]], [50, 1582, "Record a result", "The in-charge adds each result as it comes.", [60, 1532, 720, 1632]]]}]}, {"id": "champion", "name": "Quality Champion", "hi": "क्वालिटी चैंपियन", "intro": "At Sub-Centres, an experienced CHO from a nearby facility checks the baseline and end-line, so every result is verified by a peer.", "steps": [{"img": "champ-c-home", "kind": "phone", "w": 780, "h": 1688, "t": "Champion overview", "d": "Each allotted facility shows which baseline days are reviewed, accepted or still to do.", "hs": [[52, 549, "Average readiness", "Across my facilities, with the gain since baseline.", [62, 526, 296, 572]], [50, 826, "Cards to verify", "CHO and MO cards waiting for my check.", [60, 802, 344, 850]], [30, 1311, "Baseline review", "Days 1 to 7, one review session a day.", [22, 1288, 758, 1334]]]}]}, {"id": "district", "name": "Mentor · Block · District", "hi": "मेंटर · ब्लॉक · ज़िला", "intro": "Mentors, block MOICs and district teams see every facility they support, of every type, and where help is needed first.", "steps": [{"img": "sup-l-home", "kind": "laptop", "w": 1600, "h": 1000, "t": "All my facilities", "d": "Average readiness, who needs attention, the most improved and every standard across facilities.", "hs": [[374, 224, "Average readiness", "Across my facilities, with the gain since baseline.", [384, 208, 535, 241]], [370, 398, "Needs attention", "Facilities behind schedule or with overdue actions.", [380, 378, 637, 418]], [1284, 412, "Most improved", "The biggest gains since baseline.", [1294, 378, 1550, 447]]]}, {"img": "sup-l-axup", "kind": "laptop", "w": 1600, "h": 1000, "t": "Upcoming assessments", "d": "Every facility with an assessment date, nearest first: level, Proposed or Confirmed, days to go, readiness and documents ready.", "hs": [[370, 152, "Next 30 days", "Facilities with an assessment this month.", [380, 133, 638, 170]], [978, 152, "Still Proposed", "Dates the facility has not confirmed yet.", [988, 133, 1246, 170]], [368, 328, "A facility", "Level, date, days to go, readiness and documents.", [378, 309, 560, 346]], [1286, 78, "All dates / No date yet", "Filters.", [1296, 49, 1424, 108]]]}, {"img": "dist-l-home", "kind": "laptop", "w": 1600, "h": 1000, "t": "District dashboard", "d": "The same view for a whole district; Reports give PDF and Excel at any level.", "hs": [[374, 224, "Average readiness", "All facilities in the district.", [384, 208, 535, 241]], [979, 398, "Most improved", "Gain since baseline.", [989, 378, 1550, 418]], [54, 212, "Facilities", "The full list, filtered by type.", [64, 193, 150, 230]]]}]}, {"id": "healsol", "name": "HealSol", "hi": "हेलसोल", "intro": "HealSol runs the programme from one control panel: enrolment, payments, content, settings and recognition.", "steps": [{"img": "hs-l-home", "kind": "laptop", "w": 1600, "h": 1000, "t": "HealSol today", "d": "What needs HealSol today: payments to confirm, sign-ups to approve, facilities falling behind.", "hs": [[370, 316, "To do", "The most urgent items first, each with Open.", [380, 296, 981, 337]], [1208, 324, "Peer reviews", "Review sessions across facilities.", [1218, 303, 1356, 346]], [54, 324, "Assessments", "Every facility's next assessment.", [64, 305, 188, 342]], [54, 436, "Payments", "Confirm bank transfers, proforma invoices and receipts. An Accountant login can do this too.", [64, 418, 161, 455]], [54, 492, "Enquiries", "Sign-ups and interest from private facilities (Qi FAST).", [64, 474, 154, 511]]]}]}];
-let role=0, step=0, hot=-1;
-const $=id=>document.getElementById(id);
-function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-function renderRoles(){ $('roles').innerHTML=ROLES.map((r,i)=>`<button type="button" role="tab" id="tab-${r.id}" aria-selected="${i===role}" onclick="go(${i},0)">${esc(r.name)} <small lang="hi">${r.hi}</small></button>`).join(''); }
-function render(){
-  const R=ROLES[role], S=R.steps[step];
-  renderRoles(); $('roleintro').textContent=R.intro;
-  $('stage').classList.toggle('wide',S.kind==='laptop');
-  $('device').innerHTML=`<div class="${S.kind}"><div class="screen"><img src="img/${S.img}.webp" width="${S.w}" height="${S.h}" alt="${esc(S.t)}, sample screen">${S.hs.map((h,i)=>`<div class="ring${i===hot?' on':''}" style="left:${(h[4][0]/S.w*100).toFixed(2)}%;top:${(h[4][1]/S.h*100).toFixed(2)}%;width:${((h[4][2]-h[4][0])/S.w*100).toFixed(2)}%;height:${((h[4][3]-h[4][1])/S.h*100).toFixed(2)}%"></div>`).join('')}${S.hs.map((h,i)=>`<button type="button" class="hs${i===hot?' on':''}" style="left:${(h[0]/S.w*100).toFixed(2)}%;top:${(h[1]/S.h*100).toFixed(2)}%" aria-label="${i+1}: ${esc(h[2])}" onmouseenter="mark(${i})" onfocus="mark(${i})" onclick="mark(${i})">${i+1}</button>`).join('')}</div></div><div class="caption">${esc(R.name)} · screen ${step+1} of ${R.steps.length} · sample data</div>`;
-  $('steps').innerHTML=R.steps.map((s,i)=>`<li><button type="button" ${i===step?'aria-current="step"':''} onclick="go(${role},${i})"><b>${String(i+1).padStart(2,'0')}</b>${esc(s.t)}</button></li>`).join('');
-  $('detail').innerHTML=`<h2>${esc(S.t)}</h2><p>${esc(S.d)}</p><ul class="legend">${S.hs.map((h,i)=>`<li class="${i===hot?'on':''}" onmouseenter="mark(${i})"><span class="n">${i+1}</span><div><b>${esc(h[2])}</b><span>${esc(h[3])}</span></div></li>`).join('')}</ul>`;
-  const last=role===ROLES.length-1&&step===R.steps.length-1;
-  $('prev').disabled=role===0&&step===0; $('next').disabled=last;
-  $('next').textContent=step===R.steps.length-1&&!last?'Next: '+ROLES[role+1].name:'Next';
-}
-function mark(i){ hot=i; document.querySelectorAll('.hs').forEach((b,k)=>b.classList.toggle('on',k===i)); document.querySelectorAll('.ring').forEach((b,k)=>b.classList.toggle('on',k===i)); document.querySelectorAll('.legend li').forEach((l,k)=>l.classList.toggle('on',k===i)); }
-function go(r,s){ role=r; step=s; hot=-1; render(); try{ history.replaceState(null,'','#'+ROLES[r].id); }catch(e){} }
-$('next').onclick=()=>{ const R=ROLES[role]; if(step<R.steps.length-1) go(role,step+1); else if(role<ROLES.length-1) go(role+1,0); };
-$('prev').onclick=()=>{ if(step>0) go(role,step-1); else if(role>0) go(role-1,ROLES[role-1].steps.length-1); };
-document.addEventListener('keydown',e=>{ if(e.target.closest&&e.target.closest('input,textarea')) return; if(e.key==='ArrowRight') $('next').click(); if(e.key==='ArrowLeft') $('prev').click(); });
-function fromHash(){ const h=(location.hash||'').slice(1), ri=ROLES.findIndex(r=>r.id===h); if(ri>=0){ role=ri; step=0; } render(); }
-window.addEventListener('hashchange',fromHash); fromHash();
-</script>
-
+<div id="app"><noscript>Please turn on JavaScript to see the tour.</noscript></div>
+<script src="data.js?v=20261118"></script>
+<script src="tour.js?v=20261118"></script>
 </body>
 </html>
