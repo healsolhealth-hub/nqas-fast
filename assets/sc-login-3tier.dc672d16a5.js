@@ -466,14 +466,11 @@ async function scEditFacility(code){
       {key:'district',label:'District',value:fac.district||''},
       {key:'block',label:'Block',value:fac.block||((fac.links||{}).chc||{}).block||'',hint:'Used for block and state dashboards. Filled from the CHC link when linked.'},
       {key:'state',label:'State',value:fac.state||''},
-      {key:'choName',label:'CHO name',value:fac.choName||''},
-      {key:'choPwd',label:'CHO password',placeholder:'Leave blank to keep current',hint:'Only fill this in to change the Facility dashboard password.'}
-    ],
-    validate:v=>v.choPwd&&v.choPwd.length<4?'CHO password must be at least 4 characters.':null});
+      {key:'choName',label:'CHO name',value:fac.choName||''}
+    ]});   // 18 Nov 2026: passwords are changed only on the server (Staff & cards → Reset password); the old CHO password box is gone
   if(!v) return;
   // only the fields on this form: staff, departments, start date and cards written since the list was loaded stay as they are
   const ch={name:v.name,district:v.district,block:(v.block||'').trim()||null,state:v.state,choName:v.choName};
-  if(v.choPwd) ch.choPassword=v.choPwd;
   try{ await db.ref(scFacilityPath(code)).update(ch); }catch(e){ showToast('Save failed — '+(e&&e.message||'check connection.'),'err'); return; }
   const updated={...fac,...ch}; if(updated.block===null) delete updated.block;
   scMasterFacilities[code]=updated;

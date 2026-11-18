@@ -139,7 +139,7 @@ function ppOneHTML() {
   return top + '<div class="pp-box"><span class="pp-k">Plan</span><b class="pp-big">' + ppE(f.price.label) + '</b>' + ppAmt(f.price.base, f.price.gst, f.price.total) + '</div>'
     + (f.checking ? '<p class="pp-info">A bank transfer you sent is being checked by HealSol. You can still pay online.</p>' : '')
     + ppMethods('pp-pm1') + ppBill(false)
-    + '<div class="pp-acts"><button type="button" class="pp-b1" id="pp-go" onclick="ppPay([\'' + ppE(f.code) + '\'])">Pay ' + ppM(f.price.total) + '</button><p class="pp-sm">Receipt and GST invoice right after payment. The facility unlocks on its own.</p>' + ppAskLink() + '</div>' + ppLinksHTML();
+    + '<div class="pp-acts"><button type="button" class="pp-b1" id="pp-go" onclick="ppPay([\'' + ppE(f.code) + '\'])">Pay ' + ppM(f.price.total) + '</button><p class="pp-err" id="pp-err" role="alert"></p><p class="pp-sm">Receipt and GST invoice right after payment. The facility unlocks on its own.</p>' + ppAskLink() + '</div>' + ppLinksHTML();
 }
 // District / Block / State / partner (board 7)
 function ppManyHTML() {
@@ -152,8 +152,8 @@ function ppManyHTML() {
     + rows.map(function (f) { var can = (f.status === 'due' || f.status === 'office') && f.price;
       return '<tr class="' + (can ? '' : 'pp-off') + '"><td class="pp-c">' + (can ? '<input type="checkbox" aria-label="' + ppE(f.name) + '"' + (_pp.sel[f.code] ? ' checked' : '') + ' onchange="ppTick(\'' + ppE(f.code) + '\',this.checked)">' : '') + '</td><td data-l="Facility"><b>' + ppE(f.name) + '</b><small>' + ppE([f.block ? f.block + ' block' : '', f.district].filter(Boolean).join(', ')) + '</small></td><td data-l="Type">' + ppE(f.typeLabel) + '</td><td data-l="Status">' + ppStatus(f) + '</td><td data-l="Price" class="pp-r">' + (f.price ? ppM(f.price.total) + '<small>incl. GST</small>' : (f.status === 'due' ? '<small>Ask for a link</small>' : '—')) + '</td></tr>'; }).join('')
     + '</tbody></table></div>' : '<div class="pp-empty">' + (_pp.filt === 'due' ? 'No facility is waiting for payment.' : 'No facilities on your list yet.') + '</div>';
-  var side = '<div class="pp-side"><b class="pp-big">' + sel.length + ' facilit' + (sel.length === 1 ? 'y' : 'ies') + ' selected</b>' + ppAmt(base, gst, tot, true) + ppMethods('pp-pmN') + ppBill(true)
-    + '<button type="button" class="pp-b1" id="pp-go"' + (sel.length ? '' : ' disabled') + ' onclick="ppPay(_pp.last.codes)">Pay ' + ppM(tot) + '</button>'
+  var side = '<div class="pp-side"><b class="pp-big">' + sel.length + ' facilit' + (sel.length === 1 ? 'y' : 'ies') + ' selected</b>' + ppAmt(base, gst, tot, true) + ppMethods('pp-pmN') + ppBill(false)
+    + '<button type="button" class="pp-b1" id="pp-go"' + (sel.length ? '' : ' disabled') + ' onclick="ppPay(_pp.last.codes)">Pay ' + ppM(tot) + '</button><p class="pp-err" id="pp-err" role="alert"></p>'
     + '<p class="pp-sm">One GST invoice for all. Each facility unlocks as soon as the payment is confirmed.</p>' + ppAskLink('Need a different plan or price? Ask for a payment link') + '</div>';
   return '<div class="pp-many"><div class="pp-main"><div class="pp-hd"><h2>Facilities on your list</h2><div class="pp-flt" role="group" aria-label="Show"><button type="button" class="' + (_pp.filt === 'due' ? 'on' : '') + '" aria-pressed="' + (_pp.filt === 'due') + '" onclick="_pp.filt=\'due\';ppRender()">Waiting for payment (' + due.length + ')</button><button type="button" class="' + (_pp.filt === 'all' ? 'on' : '') + '" aria-pressed="' + (_pp.filt === 'all') + '" onclick="_pp.filt=\'all\';ppRender()">All (' + all.length + ')</button></div></div>'
     + table + '<p class="pp-sm">' + ppE(ppScopeNote()) + '</p>' + ppLinksHTML() + '</div>' + side + '</div>';
@@ -163,16 +163,31 @@ function ppTick(code, on) { if (on) _pp.sel[code] = 1; else delete _pp.sel[code]
 function ppAll(on) { ppDue().forEach(function (f) { if (on && f.price) _pp.sel[f.code] = 1; else delete _pp.sel[f.code]; }); ppKeepBill(); ppRender(); }
 // bill-to (invoice in the name of): typed values survive a repaint
 var _ppBill = null;
-function ppDefaultBill() { var me = (_pp.data || {}).me || {}; return { name: me.org || '', address: '', gstin: '', state: '' }; }
-function ppKeepBill() { var g = function (id) { var e = document.getElementById(id); return e ? e.value : null; }; if (g('pp-bn') != null) _ppBill = { name: g('pp-bn'), address: g('pp-ba'), gstin: g('pp-bg'), state: (_ppBill || {}).state || '' }; }
+function ppDefaultBill() { return { name: '', address: '', gstin: '', state: '' }; }
+function ppKeepBill() { var g = function (id) { var e = document.getElementById(id); return e ? e.value : null; }; if (g('pp-bn') != null) _ppBill = { name: g('pp-bn'), address: g('pp-ba'), gstin: g('pp-bg'), state: g('pp-bs') || '' }; ppGstHint(); }
+// the states as on the GST invoice (functions/invoices.js STATE_CODES); the GSTIN's first two digits are the state code
+var PP_STATES = [['01', 'Jammu and Kashmir'], ['02', 'Himachal Pradesh'], ['03', 'Punjab'], ['04', 'Chandigarh'], ['05', 'Uttarakhand'], ['06', 'Haryana'], ['07', 'Delhi'], ['08', 'Rajasthan'], ['09', 'Uttar Pradesh'], ['10', 'Bihar'], ['11', 'Sikkim'], ['12', 'Arunachal Pradesh'], ['13', 'Nagaland'], ['14', 'Manipur'], ['15', 'Mizoram'], ['16', 'Tripura'], ['17', 'Meghalaya'], ['18', 'Assam'], ['19', 'West Bengal'], ['20', 'Jharkhand'], ['21', 'Odisha'], ['22', 'Chhattisgarh'], ['23', 'Madhya Pradesh'], ['24', 'Gujarat'], ['26', 'Dadra and Nagar Haveli and Daman and Diu'], ['27', 'Maharashtra'], ['29', 'Karnataka'], ['30', 'Goa'], ['31', 'Lakshadweep'], ['32', 'Kerala'], ['33', 'Tamil Nadu'], ['34', 'Puducherry'], ['35', 'Andaman and Nicobar Islands'], ['36', 'Telangana'], ['37', 'Andhra Pradesh'], ['38', 'Ladakh']];
+function ppGstState(g) { g = String(g || '').trim().toUpperCase(); if (!/^\d{2}/.test(g)) return ''; var x = PP_STATES.filter(function (s) { return s[0] === g.slice(0, 2); })[0]; return x ? x[1] : ''; }
+function ppGstHint() {
+  var h = document.getElementById('pp-bgh'), b = _ppBill || {}; if (!h) return; var gs = ppGstState(b.gstin);
+  h.textContent = gs ? 'GSTIN state: ' + gs + (b.state && b.state !== gs ? ' — it does not match the state chosen below' : '') : '';
+  h.className = 'pp-hint' + (gs && b.state && b.state !== gs ? ' err' : '');
+}
 function ppBill(open) {
-  var b = _ppBill || (open ? ppDefaultBill() : { name: '', address: '', gstin: '' });
+  var b = _ppBill || (open ? ppDefaultBill() : { name: '', address: '', gstin: '', state: '' });
   return '<details class="pp-bill"' + (open ? ' open' : '') + '><summary>Invoice in the name of' + (open ? '' : ' (optional)') + '</summary>'
+    + '<p class="pp-sm pp-l">Leave empty to bill the facility itself. Fill in only when an office or organisation pays and wants the invoice in its name.</p>'
     + '<label>Name of office or organisation<input type="text" id="pp-bn" maxlength="120" value="' + ppE(b.name) + '" oninput="ppKeepBill()"></label>'
     + '<label>Address<input type="text" id="pp-ba" maxlength="300" value="' + ppE(b.address) + '" oninput="ppKeepBill()"></label>'
-    + '<label>GSTIN (optional)<input type="text" id="pp-bg" maxlength="15" value="' + ppE(b.gstin) + '" oninput="ppKeepBill()"></label></details>';
+    + '<label>GSTIN (optional)<input type="text" id="pp-bg" maxlength="15" autocapitalize="characters" value="' + ppE(b.gstin) + '" oninput="ppKeepBill()"></label><small id="pp-bgh" class="pp-hint"></small>'
+    + '<label>State (optional)<select id="pp-bs" onchange="ppKeepBill()"><option value="">Automatic — from the GSTIN, your login or the facility</option>'
+    + PP_STATES.map(function (x) { return '<option value="' + ppE(x[1]) + '"' + (b.state === x[1] ? ' selected' : '') + '>' + ppE(x[1]) + '</option>'; }).join('') + '</select></label>'
+    + '<p class="pp-sm pp-l">The state decides the GST: Delhi = CGST 9% + SGST 9%, other states = IGST 18%.</p></details>';
 }
-function ppBillVal() { ppKeepBill(); var b = _ppBill || {}; return { name: (b.name || '').trim(), address: (b.address || '').trim(), gstin: (b.gstin || '').trim(), state: b.state || '' }; }
+function ppBillVal() { ppKeepBill(); var b = _ppBill || {}; return { name: (b.name || '').trim(), address: (b.address || '').trim(), gstin: (b.gstin || '').trim().toUpperCase(), state: b.state || '' }; }
+// a message under the Pay button (stays until the next try), and the toast
+function ppErr(m) { var e = document.getElementById('pp-err'); if (e) { e.textContent = m || ''; e.style.display = m ? 'block' : 'none'; } if (m) showToast(m, 'err'); }
+var PP_BLOCKED = 'The payment window could not open. A browser extension (ad blocker) or your network may be blocking Razorpay. Try an Incognito window, another browser, or your phone.';
 
 // a HealSol payment link
 function ppLinkHTML(k) {
@@ -182,22 +197,25 @@ function ppLinkHTML(k) {
   if (!k.open) return head + '<div class="pp-msg err"><b>This link is no longer open</b><p>' + (k.status === 'stopped' ? 'HealSol has stopped it.' : 'It has expired.') + ' Ask HealSol Academy for a new one.</p>' + ppAskLink('Ask for a new payment link') + '</div>';
   _pp.last = { link: k.id, total: k.total };
   var utr = k.utr && k.utr.status === 'pending' ? '<p class="pp-info">Your bank transfer (UTR ' + ppE(k.utr.utr) + ') is waiting for HealSol to confirm.</p>' : k.utr && k.utr.status === 'rejected' ? '<p class="pp-info err">HealSol could not match your bank transfer (UTR ' + ppE(k.utr.utr) + '): ' + ppE(k.utr.reason || '') + '</p>' : '';
-  return head + (k.until ? '<p class="pp-sm">Open until ' + ppE(k.until) + '</p>' : '') + utr + ppMethods('pp-pmL') + ppBill(k.facs.length > 1)
-    + '<div class="pp-acts"><button type="button" class="pp-b1" id="pp-go" onclick="ppPay(null,\'' + ppE(k.id) + '\')">Pay ' + ppM(k.total) + '</button><p class="pp-sm">Receipt and GST invoice right after payment.</p></div>';
+  return head + (k.until ? '<p class="pp-sm">Open until ' + ppE(k.until) + '</p>' : '') + utr + ppMethods('pp-pmL') + ppBill(false)
+    + '<div class="pp-acts"><button type="button" class="pp-b1" id="pp-go" onclick="ppPay(null,\'' + ppE(k.id) + '\')">Pay ' + ppM(k.total) + '</button><p class="pp-err" id="pp-err" role="alert"></p><p class="pp-sm">Receipt and GST invoice right after payment.</p></div>';
 }
 
 // ── paying ──
 async function ppPay(codes, link) {
   if (_pp.busy) return;
   if (ppMethod() === 'bank') return ppProforma(codes, link);
-  if (!link && (!codes || !codes.length)) { showToast('Tick at least one facility.', 'err'); return; }
-  var bill = ppBillVal(); if (bill.name && !bill.address) { showToast('Add the address for the invoice, or leave the name empty.', 'err'); return; }
+  ppErr('');
+  if (!link && (!codes || !codes.length)) { ppErr('Tick at least one facility.'); return; }
+  var bill = ppBillVal(), billOn = !!(bill.name || bill.address || bill.gstin);
+  if (billOn && (!bill.name || !bill.address)) { ppErr('For an invoice in another name, fill in both the name and the address — or leave all of it empty.'); return; }
+  var gs = ppGstState(bill.gstin); if (gs && bill.state && gs !== bill.state) { ppErr('This GSTIN is registered in ' + gs + ', but the state chosen is ' + bill.state + '. Choose ' + gs + ', or set the state to Automatic.'); return; }
   if (typeof Razorpay === 'undefined') { try { await nfLoadScriptAny(['https://checkout.razorpay.com/v1/checkout.js'], function () { return typeof Razorpay !== 'undefined'; }); } catch (e) {} }
-  if (typeof Razorpay === 'undefined') { showToast('The payment window could not load — check your internet connection.', 'err'); return; }
+  if (typeof Razorpay === 'undefined') { ppErr(PP_BLOCKED); return; }
   var btn = document.getElementById('pp-go'), label = btn ? btn.textContent : ''; _pp.busy = true; if (btn) { btn.disabled = true; btn.textContent = 'Preparing payment…'; }
   var o;
-  try { o = await nfCall('payOrder', link ? { link: link, billTo: bill.name ? bill : null } : { codes: codes, billTo: bill.name ? bill : null }); }
-  catch (e) { showToast(nfErrText(e), 'err'); _pp.busy = false; if (btn) { btn.disabled = false; btn.textContent = label; } return; }
+  try { o = await nfCall('payOrder', link ? { link: link, billTo: billOn ? bill : null } : { codes: codes, billTo: billOn ? bill : null }); }
+  catch (e) { ppErr(nfErrText(e)); _pp.busy = false; if (btn) { btn.disabled = false; btn.textContent = label; } return; }
   _pp.busy = false; if (btn) { btn.disabled = false; btn.textContent = label; }
   var rzp = new Razorpay({ key: o.keyId, order_id: o.orderId, amount: o.amount, currency: o.currency || 'INR', name: 'HealSol Academy', description: (o.label || 'NQAS | FAST programme') + ' (incl. 18% GST)',
     prefill: { name: (o.prefill || {}).name || '', contact: (o.prefill || {}).contact || '' }, notes: { facilities: String(o.n) }, theme: { color: '#1E6B5E' },
@@ -221,11 +239,12 @@ function ppDoneHTML() {
 // ── bank transfer: proforma, then the UTR ──
 async function ppProforma(codes, link) {
   var bill = ppBillVal();
-  if (!bill.name || !bill.address) { var d = document.querySelector('#pp-ov .pp-bill'); if (d) d.open = true; showToast('Fill in who the proforma invoice is addressed to: name and address.', 'err'); try { document.getElementById(bill.name ? 'pp-ba' : 'pp-bn').focus(); } catch (e) {} return; }
-  if (!link && (!codes || !codes.length)) { showToast('Tick at least one facility.', 'err'); return; }
+  if (!bill.name || !bill.address) { var d = document.querySelector('#pp-ov .pp-bill'); if (d) d.open = true; ppErr('Fill in who the proforma invoice is addressed to: name and address.'); try { document.getElementById(bill.name ? 'pp-ba' : 'pp-bn').focus(); } catch (e) {} return; }
+  if (!link && (!codes || !codes.length)) { ppErr('Tick at least one facility.'); return; }
+  var gs = ppGstState(bill.gstin); if (gs && bill.state && gs !== bill.state) { ppErr('This GSTIN is registered in ' + gs + ', but the state chosen is ' + bill.state + '. Choose ' + gs + ', or set the state to Automatic.'); return; }
   var btn = document.getElementById('pp-go'), label = btn ? btn.textContent : ''; _pp.busy = true; if (btn) { btn.disabled = true; btn.textContent = 'Making the proforma…'; }
   try { var r = await nfCall('payProforma', link ? { link: link, billTo: bill } : { codes: codes, billTo: bill }); _pp.pf = r; ppGo('bank'); }
-  catch (e) { showToast(nfErrText(e), 'err'); }
+  catch (e) { ppErr(nfErrText(e)); }
   finally { _pp.busy = false; if (btn && document.body.contains(btn)) { btn.disabled = false; btn.textContent = label; } }
   try { if (typeof bpCfg === 'function') { await bpCfg(); if (_pp.view === 'bank') ppRender(); } } catch (e) {}
 }

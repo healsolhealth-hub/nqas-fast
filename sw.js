@@ -6,7 +6,7 @@
 // • Nothing else is touched: Firebase database / sign-in / functions, App Check, Razorpay, WhatsApp, the card page.
 // Emergency switch: open the app with ?nosw=reset (removes this worker and its caches on that phone), or publish a sw.js
 // that only unregisters itself.
-const BUILD = "a8595cc38c6a";
+const BUILD = "474fb45911c2";
 const ASSETS = [
  "assets/data-sc-days.7e53b2ebc0.js",
  "assets/dept-admin.ee8d5ffab0.js",
@@ -54,7 +54,7 @@ const ASSETS = [
  "assets/sc-linked-checks.0eddd56dc9.js",
  "assets/sc-links.128b1d1d45.js",
  "assets/sc-links.e145d9c6bb.css",
- "assets/sc-login-3tier.d4bb479982.js",
+ "assets/sc-login-3tier.dc672d16a5.js",
  "assets/sc-looks-met.c2aaaff056.js",
  "assets/sc-perf.1a028d2c56.js",
  "assets/sc-phases.07a2a34a96.css",
@@ -110,7 +110,7 @@ const ASSETS = [
  "assets/shared-hs-settings.f1365f98fb.js",
  "assets/shared-impact.9630f61fd5.js",
  "assets/shared-impact.b1cba457b4.css",
- "assets/shared-invoices.03d755045e.js",
+ "assets/shared-invoices.02ba7a9c9b.js",
  "assets/shared-join.48f0f1fcac.js",
  "assets/shared-join.dc1f2976b7.css",
  "assets/shared-launch.574aa0fb2c.js",
@@ -120,10 +120,10 @@ const ASSETS = [
  "assets/shared-one-ui.1b4350b497.css",
  "assets/shared-one-ui.c255a0db58.js",
  "assets/shared-otp.dfe8af10c9.js",
- "assets/shared-paylinks-admin.0d32c049ac.js",
+ "assets/shared-paylinks-admin.91e860033b.js",
  "assets/shared-payments.12fb4e5a71.js",
- "assets/shared-paypage.836dab33f8.css",
- "assets/shared-paypage.dcaaf78205.js",
+ "assets/shared-paypage.068a3e5c83.css",
+ "assets/shared-paypage.d91d54afa1.js",
  "assets/shared-pdf-reports.1da837fa8c.js",
  "assets/shared-pdf.da58c8e364.js",
  "assets/shared-play-brand.5ff1546d4a.js",
@@ -144,7 +144,7 @@ const ASSETS = [
  "assets/shared-sc-content.057fe71840.js",
  "assets/shared-sc-content.4dd2befa79.css",
  "assets/shared-sc-draft.672ef4231a.js",
- "assets/shared-secure.81549c85b2.js",
+ "assets/shared-secure.613bbaaa24.js",
  "assets/shared-settings-panels.265369271f.js",
  "assets/shared-settings-panels.bdc5b8ccfb.css",
  "assets/shared-startdate.643905932c.js",

@@ -254,7 +254,12 @@ function nfShowTempPassword(name,identifier,pw,title,waText){
     var ftype0=(document.getElementById('sc-enroll-type')||{}).value||'sc', inLab=(NF_LEVELS[ftype0]||NF_LEVELS.sc).inChargeLabel;
     if(!/^\d{10}$/.test(choMob)){ showToast('Enter the '+inLab+'\'s 10-digit mobile number.','err'); return; }
     var access=(document.querySelector('input[name="enroll-access"]:checked')||{}).value||'contract';
+    // 18 Nov 2026: the same facility enrolled twice by mistake (double click / slow page) — ask first
+    var nk=function(x){ return String(x||'').trim().toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); }, M=scMasterFacilities||{};
+    var dup=Object.keys(M).filter(function(c){ var f=M[c]; if(!f||f.migratedTo||nk(f.name)!==nk(name)) return false; return nk(f.district)===nk(district)||!!(f.staff||{})[choMob]; });
+    if(dup.length&&!(await showConfirm('"'+name+'" is already enrolled as '+dup.join(', ')+(dup.some(function(c){ return !!(M[c].staff||{})[choMob]; })?' with the same in-charge mobile':' in '+district)+'. Enrol it again as a new facility?','⚠️','Enrol again','Enrol again','var(--red)'))) return;
     var btn=document.querySelector('[onclick="scEnrollFacility()"]'), old=btn?btn.innerHTML:'';
+    if(btn&&btn.disabled) return;
     if(btn){ btn.disabled=true; btn.innerHTML='Enrolling…'; }
     try{
       var ftype=(document.getElementById('sc-enroll-type')||{}).value||'sc';

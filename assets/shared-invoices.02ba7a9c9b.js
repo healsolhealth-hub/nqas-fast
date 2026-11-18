@@ -20,7 +20,7 @@ function ivWords(n) {
   var w = function (x) { if (!x) return 'Zero'; var out = [], cr = Math.floor(x / 1e7), l = Math.floor(x / 1e5) % 100, th = Math.floor(x / 1e3) % 100, r = x % 1000;
     if (cr) out.push(w(cr) + ' Crore'); if (l) out.push(two(l) + ' Lakh'); if (th) out.push(two(th) + ' Thousand'); if (r) out.push(three(r)); return out.join(' '); };
   var rs = Math.floor(n + 1e-9), p = Math.round((n - rs) * 100);
-  return w(rs) + ' Rupees' + (p ? ' and ' + two(p) + ' Paise' : '') + ' Only';
+  return w(rs) + (rs === 1 ? ' Rupee' : ' Rupees') + (p ? ' and ' + two(p) + ' Paise' : '') + ' Only';
 }
 
 // ── one document model for proforma and tax invoice ──
