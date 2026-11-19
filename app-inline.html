@@ -17303,6 +17303,7 @@ var NF_PDF_FONT_SIGN='AAEAAAARAQAABAAQR0RFRgabB6EAAMXIAAAAmkdQT1OG1G63AADGZAAADO
 .nf-cs-grid .nf-cs-t{font-size:13px;font-weight:700;} .nf-cs-grid small{font-size:11px;color:var(--t3,#64748B);}
 .nf-cs-how{margin-top:10px;font-size:12px;} .nf-cs-how summary{cursor:pointer;font-weight:700;color:var(--teal,#0F5C52);} .nf-cs-how p{margin:6px 0 0;}
 @media(max-width:720px){.nf-cs-grid{grid-template-columns:1fr 1fr;}.nf-cs-grid>b{display:none;}.nf-cs-grid .nf-cs-t{grid-column:1/-1;margin-top:6px;}.nf-cs-grid small{grid-column:1/-1;}}
+@media (max-width:964px){ .nfv-st{margin-left:12px;margin-right:12px;} }   /* 19 Nov: the result card kept a gap from the phone edges */
 </style>
 <script id="nf-cert">
 // ══════════════════════════════════════════════════════════════
@@ -37229,7 +37230,8 @@ function vlCheck() {
 }
 function vlAdd() {
   var pg = document.getElementById('nf-verify'); if (!pg || document.getElementById('vl-box')) return;
-  if (/Checking…/.test(pg.textContent || '') && pg.textContent.length < 40) return;   // wait for the result
+  var st = pg.querySelector('.nfv-st'); if (st && /^\s*Checking/.test(st.textContent || '')) return;   // wait for the result ("Checking…" / "Checking certificate NQF-…")
+  if (/Checking…/.test(pg.textContent || '') && pg.textContent.length < 40) return;
   var box = document.createElement('div'); box.id = 'vl-box'; box.className = 'vl-box';
   box.innerHTML = '<a class="vl-imp" id="vl-imp" href="' + vlE(NF_IMPACT_URL) + '" target="_blank" rel="noopener" onclick="return vlOpen(this.href)"><span><b>See NQAS | FAST impact</b><small id="vl-num">People, facilities and staff across India</small></span><i class="ti ti-arrow-right" aria-hidden="true"></i></a>'
     + '<div class="vl-chk"><label for="vl-n">Check another number</label><div class="vl-row"><input id="vl-n" type="text" maxlength="40" placeholder="NQF-… · FAC-… · IMP-…" autocapitalize="characters" onkeydown="if(event.key===\'Enter\')vlCheck()"><button type="button" onclick="vlCheck()">Check</button></div><small id="vl-err" class="vl-err" role="alert"></small></div>';
@@ -37238,7 +37240,7 @@ function vlAdd() {
 }
 (function () {
   // the check pages build #nf-verify a moment after loading: add the links once the result is there
-  try { if (/[?&]cert=/.test(location.search || '')) { var tries = 0, t = setInterval(function () { vlAdd(); if (document.getElementById('vl-box') || ++tries > 120) clearInterval(t); }, 250); } } catch (e) {}
+  try { if (/[?&]cert=/.test(location.search || '')) { var tries = 0, t = setInterval(function () { vlAdd(); if (++tries > 120) clearInterval(t); }, 250); } } catch (e) {}   // keeps checking for 30 s: the result can replace the page after the links were added
   // ?join=1 → the Join screen (only for someone not signed in)
   try {
     if (/[?&]join=1\b/.test(location.search || '')) {
