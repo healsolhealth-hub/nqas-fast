@@ -224,7 +224,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #F2AE
     var v = String(document.getElementById('cn').value || '').trim().toUpperCase().replace(/\s+/g, ''), er = document.getElementById('cerr');
     if (!/^(NQF|FAC|IMP)-[A-Z0-9-]{4,30}$/.test(v)) { er.textContent = t('badNo'); return; } er.textContent = '';
     var url = VERIFY + (VERIFY.indexOf('?') >= 0 ? '&' : '?') + 'cert=' + encodeURIComponent(v), w = null;
-    try { w = window.open(url, '_blank', 'noopener'); } catch (er2) {}
+    try { w = window.open(url, '_blank'); if (w) { try { w.opener = null; } catch (x) {} } } catch (er2) {}   // not 'noopener': the browser then answers null and this page would move too
     if (!w) { try { window.top.location.href = url; } catch (er3) { location.href = url; } }
   };
   ['join-top', 'join-bot'].forEach(function (id) { var a = document.getElementById(id); if (a) a.href = APP + '?join=1'; });

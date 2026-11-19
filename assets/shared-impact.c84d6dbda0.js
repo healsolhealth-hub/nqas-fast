@@ -231,7 +231,7 @@ function nfImpMyKey(){ if(appMode==='sc-champion'&&typeof _scq!=='undefined'&&_s
   return r; }; })();
 // ── public Verify page: <app>?impact=ID ──
 // open a link from inside the website's embedded page: new tab → whole page → ask the website page (Wix) to open it
-function nfOpenOut(url){ var w=null; try{ w=window.open(url,'_blank','noopener'); }catch(e){} if(w) return false;
+function nfOpenOut(url){ var w=null; try{ w=window.open(url,'_blank'); if(w){ try{ w.opener=null; }catch(x){} } }catch(e){} if(w) return false;   // 19 Nov 2026: with 'noopener' the browser always answers null, so the page behind also moved
   try{ window.top.location.href=url; return false; }catch(e){}
   try{ window.parent.postMessage({nfOpen:url},'*'); }catch(e){} return false; }
 async function nfImpVerifyBoot(){
