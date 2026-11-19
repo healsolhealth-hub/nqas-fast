@@ -210,7 +210,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #F2AE
     var st = d.staff || {}, tl = function (v, l, s, c) { return '<div class="tile ' + (c || '') + '"><b>' + e(v) + '</b><span>' + e(l) + '</span>' + (s ? '<small>' + e(s) + '</small>' : '') + '</div>'; };
     document.getElementById('tiles').innerHTML = tl(n(d.facilities), t('fac'), n(d.started) + t('facS')) + tl(n(d.ready), t('ready'), t('readyS'), 'gr') + tl(n(d.certified), t('cert'), t('certS'), 'gd')
       + tl(n(d.peopleReady), t('reached'), t('reachedS')) + tl(n(d.staffRecognised), t('staff'), t('staffS')) + tl(d.avgGain != null ? (d.avgGain >= 0 ? '+' : '') + d.avgGain : '—', t('gain'), t('gainS'));
-    document.getElementById('where-n').textContent = n(d.states) + t('states') + n(d.districts) + t('dists');
+    document.getElementById('where-n').textContent = S.lang === 'hi' ? n(d.states) + t('states') + n(d.districts) + t('dists') : n(d.states) + (d.states === 1 ? ' state · ' : ' states · ') + n(d.districts) + (d.districts === 1 ? ' district' : ' districts');
     var bs = d.byState || [], mx = Math.max.apply(null, [1].concat(bs.map(function (x) { return x.facilities || 0; })));
     document.getElementById('states').innerHTML = bs.length ? bs.map(function (x) {
       return '<tr><td data-l=""><b>' + e(x.name) + '</b></td><td data-l="' + e(t('thFac')) + '"><div class="bar"><i style="width:' + Math.max(4, Math.round(180 * (x.facilities || 0) / mx)) + 'px"></i>' + n(x.facilities) + '</div></td><td class="r" data-l="' + e(t('thDist')) + '">' + n(x.districts) + '</td><td class="r" data-l="' + e(t('thReady')) + '">' + n((x.ready || 0) + (x.certified || 0)) + '</td><td class="r" data-l="' + e(t('thPeople')) + '">' + n(x.pop) + '</td></tr>'; }).join('')
