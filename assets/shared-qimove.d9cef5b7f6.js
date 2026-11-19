@@ -16,7 +16,7 @@ function qmIntent() { return 'intent://' + location.host + '/#Intent;scheme=http
 function qmToday() { return new Date(Date.now() + 5.5 * 3600e3).toISOString().slice(0, 10); }
 function qmSeen() { try { return localStorage.getItem('qm_day') === qmToday(); } catch (e) { return false; } }
 function qmMark() { try { localStorage.setItem('qm_day', qmToday()); } catch (e) {} }
-function qmPaying() { try { return !!sessionStorage.getItem('nf_pay') || /^\/pay\b/.test(location.pathname) || /[?&](pay|l)=/.test(location.search || ''); } catch (e) { return false; } }
+function qmPaying() { try { return !!sessionStorage.getItem('nf_pay') || /^\/pay\b/.test(location.pathname) || /[?&](pay|l|cert|impact)=/.test(location.search || '') || window.top !== window.self; } catch (e) { return true; } }   // also: certificate / impact / poster check pages, and inside another site's frame
 function qmClose() { qmMark(); var o = document.getElementById('qm-ov'); if (o) o.remove(); try { document.documentElement.classList.remove('qm-lock'); } catch (e) {} }
 function qmShow(force) {
   if (!force && (!qmAndroidWeb() || qmSeen() || qmPaying())) return;
