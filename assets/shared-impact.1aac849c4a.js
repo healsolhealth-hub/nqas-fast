@@ -17,7 +17,7 @@ function nfImpNextHint(rec){ var hi=nfImpHi(), l=rec&&rec.level, c=rec&&rec.cham
   if(l==='achiever'&&rec.kind==='staff') return c?(hi?'अगला स्तर: 🤝 क्वालिटी चैंपियन — दूसरे केंद्रों के कार्ड जाँचते रहें (पिछले 90 दिनों में)।':'Next level: 🤝 Quality Champion — keep checking other facilities\' cards (in the last 90 days).')
     :(hi?'अगला स्तर: 🤝 क्वालिटी चैंपियन — HealSol / पर्यवेक्षक से क्वालिटी चैंपियन बनकर दूसरे केंद्रों की मदद करें।':'Next level: 🤝 Quality Champion — become a Quality Champion and help other facilities to be NQAS Ready.');
   return ''; }
-var NF_IMP_VERIFY=(typeof NF_CERT_VERIFY_BASE!=='undefined'&&NF_CERT_VERIFY_BASE)||'https://www.thehealsol.com/nqas-fast-sc-certificate';   // same Verify page as certificates (Wix page that shows this app)
+var NF_IMP_VERIFY=(typeof NF_CERT_VERIFY_BASE!=='undefined'&&NF_CERT_VERIFY_BASE)||'https://www.thehealsol.com/verify';   // same Verify page as certificates (Wix page that shows this app)
 var _nfImp={rec:null,key:'',at:0,cfg:null,partners:null};
 function nfImpHi(){ return typeof _appLang!=='undefined'&&_appLang==='hi'; }
 function nfImpLv(l){ var x=NF_LEVEL[l]; return x?(nfImpHi()?x.hi:x.en):''; }

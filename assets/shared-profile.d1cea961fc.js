@@ -258,7 +258,7 @@ function fpoStarsHTML(M) {
     return '<div class="fpo-lead"><span class="fpo-md v">⭐</span><span class="fpo-mn">' + fpoE(x.name) + (x.role ? ' · ' + fpoE(x.role) : '') + '<small>' + fpoE([x.fac, x.helped ? fpoT('helped ' + x.helped + ' facilities', x.helped + ' केंद्रों की मदद') : '', lv].filter(Boolean).join(' · ')) + '</small></span><span class="fpo-v st">' + nfImpStars(x.stars) + '</span></div>'; }).join('');
   if (!(d.improved || []).length && !(d.ready && d.ready.n) && !(d.staff || []).length) h += '<p class="fpo-dim">' + fpoE(fpoT('The first Quality Stars appear once facilities finish their baseline.', 'बेसलाइन पूरी होने के बाद पहले क्वालिटी स्टार्स दिखेंगे।')) + '</p>';
   var R = _fpo.prof.rank; if (R && R.n) h += '<div class="fpo-you">🎯 ' + fpoE(fpoT((f.name || 'Your facility') + ' is #' + R.n + ' most improved in ' + R.area + ' (+' + R.gain + ' points).', (f.name || 'आपका केंद्र') + ' ' + R.area + ' में सुधार में #' + R.n + ' है (+' + R.gain + ' अंक)।')) + '</div>';
-  if (M.mob) h += '<label class="fpo-opt"><input type="checkbox" ' + (_fpo.opt ? '' : 'checked') + ' onchange="fpoOptSet(!this.checked)"> ' + fpoE(fpoT('Show my name in Quality Stars', 'क्वालिटी स्टार्स में मेरा नाम दिखाएँ')) + '</label>';
+  if (M.mob) h += '<label class="fpo-opt"><input type="checkbox" ' + (_fpo.opt ? '' : 'checked') + ' onchange="fpoOptSet(!this.checked)"> ' + fpoE(fpoT('Show my name in Quality Stars and on the HealSol impact page', 'क्वालिटी स्टार्स और HealSol इम्पैक्ट पेज पर मेरा नाम दिखाएँ')) + '</label>';
   return h + '<p class="fpo-upd">' + fpoE(fpoT('Recognition only · first name and initial · updated every night', 'केवल सम्मान · नाम का पहला भाग · हर रात अपडेट')) + '</p></div>';
 }
 async function fpoOptSet(out) {

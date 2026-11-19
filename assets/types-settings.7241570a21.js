@@ -37,7 +37,7 @@ var NF_APP={
   // SC page on thehealsol.com (repository nqas-app, live SC pilot)
   appHome:(function(){ try{ var h=location.hostname; if(h==='app.thehealsol.com'||h==='staging.thehealsol.com') return 'https://'+h+'/'; }catch(e){} return 'https://www.thehealsol.com/nqas-fast-sc'; })(),
   // certificates: the Wix Verify page reads the live database; on staging the app's own Verify page (?cert=) is used
-  verifyBase:NF_STAGE?'https://staging.thehealsol.com/':'https://www.thehealsol.com/nqas-fast-sc-certificate'
+  verifyBase:NF_STAGE?'https://staging.thehealsol.com/':'https://www.thehealsol.com/verify'
 };
 if(NF_STAGE) NF_APP.appCheckKey='';   // staging runs without App Check (its functions do not enforce it)
 // 4 Nov 2026: App Check (reCAPTCHA Enterprise) is switched OFF on live. From ~11 AM today its script froze normal Chrome windows
