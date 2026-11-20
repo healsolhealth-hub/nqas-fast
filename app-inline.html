@@ -13936,6 +13936,10 @@ body.lang-hi .nf-l-sub,body.lang-hi .nf-l-tag{line-height:1.6;}
 .nf-l-legal{padding:0 22px 16px;text-align:center;font-size:10.5px;line-height:1.6;color:var(--t3);}
 .nf-l-legal a{color:var(--t3);text-decoration:underline;}
 .nf-l-foot{padding-bottom:8px;}
+
+/* 20 Nov 2026: Qi FAST logo on top; the NQAS.QI logo moves to the foot, beside HealSol Academy */
+.nf-l-logo{height:50px;border-radius:8px;}
+.nf-l-foot img.nf-l-nqas{height:28px;border-radius:6px;margin-right:4px;}
 </style>
 <script>
 // ══════════════════════════════════════════════════════════════
@@ -13947,7 +13951,7 @@ body.lang-hi .nf-l-sub,body.lang-hi .nf-l-tag{line-height:1.6;}
 //  sc_staff_index/{mobile}/{facilityCode} = true speeds up staff lookup; it repairs itself.
 // ══════════════════════════════════════════════════════════════
 Object.assign(HINDI_UI,{'Namaste':'नमस्ते','Log in with your mobile number or ID — we\'ll open the right space for you.':'अपने मोबाइल नंबर या ID से लॉग इन करें — हम आपके लिए सही जगह खोल देंगे।',
-  'Mobile number or ID':'मोबाइल नंबर या ID','Password':'पासवर्ड','Show':'दिखाएँ','Hide':'छिपाएँ','Remember me on this phone':'इस फ़ोन पर याद रखें','Forgot?':'भूल गए?','NQAS checklists: NHSRC, MoHFW, Govt. of India':'NQAS चेकलिस्ट: NHSRC, स्वास्थ्य एवं परिवार कल्याण मंत्रालय, भारत सरकार','Terms':'शर्तें','Privacy':'गोपनीयता','Refunds':'रिफ़ंड','Pricing':'मूल्य','Contact':'संपर्क','Log in':'लॉग इन',
+  'Mobile number or ID':'मोबाइल नंबर या ID','Password':'पासवर्ड','Show':'दिखाएँ','Hide':'छिपाएँ','Remember me on this phone':'इस फ़ोन पर याद रखें','Forgot?':'भूल गए?','Based on the NQAS standards of NHSRC, MoHFW, Government of India. An independent tool by HealSol Academy, not a government app.':'NHSRC, MoHFW, भारत सरकार के NQAS मानकों पर आधारित। यह HealSol Academy का स्वतंत्र टूल है, सरकारी ऐप नहीं।','Terms':'शर्तें','Privacy':'गोपनीयता','Refunds':'रिफ़ंड','Pricing':'मूल्य','Contact':'संपर्क','Log in':'लॉग इन',
   'Get your Sub-Centre NQAS-ready in 60 days':'60 दिनों में अपने उप-केंद्र को NQAS के लिए तैयार करें','New facility? Register — first 7 days (Baseline) free':'नया स्वास्थ्य केंद्र? पंजीकरण करें — पहले 7 दिन (बेसलाइन) मुफ़्त',
   'District / bulk enrolment? Contact us':'ज़िला / बल्क नामांकन? संपर्क करें','You have two roles. Where do you want to go?':'आपकी दो भूमिकाएँ हैं। आप कहाँ जाना चाहते हैं?',
   'Remember my choice on this phone':'इस फ़ोन पर मेरी पसंद याद रखें','Back':'वापस','Checking…':'जाँच हो रही है…','change':'बदलें',
@@ -14038,7 +14042,7 @@ nfRegisterCore('sc',{
 // ── UI ─────────────────────────────────────────────────────────
 function nfError(m){ var e=document.getElementById('nf-err'); if(e){ e.textContent=m||''; e.style.display=m?'block':'none'; } }
 function nfLoginHTML(){
-  return '<div class="nf-l-top"><img class="nf-l-logo" src="'+SC_BRAND.logoNqas+'" alt="NQAS.QI"><div class="nf-l-lang"><button type="button" data-lang="en" onclick="setLang(\'en\')">EN</button><button type="button" data-lang="hi" onclick="setLang(\'hi\')">हिं</button></div></div>'
+  return '<div class="nf-l-top"><img class="nf-l-logo" src="icons/qi-logo.jpg" alt="Qi FAST"><div class="nf-l-lang"><button type="button" data-lang="en" onclick="setLang(\'en\')">EN</button><button type="button" data-lang="hi" onclick="setLang(\'hi\')">हिं</button></div></div>'
     +'<div class="nf-l-hero"><div class="nf-l-name">NQAS<i>|</i>FAST</div><div class="nf-l-tag" data-nf="Get your Sub-Centre NQAS-ready in 60 days"></div></div>'
     +'<div class="nf-l-body" id="nf-l-form">'
       +'<div class="nf-l-hi"><span data-nf="Namaste"></span> <span class="nf-l-namaste" aria-hidden="true">🙏</span></div>'
@@ -14055,8 +14059,8 @@ function nfLoginHTML(){
       +'<button type="button" class="nf-l-plain" onclick="phcOpenLeadModal()"><i class="ti ti-building"></i> <span data-nf="District / bulk enrolment? Contact us"></span></button>'
     +'</div>'
     +'<div class="nf-l-body" id="nf-l-roles" style="display:none;"></div>'
-    +'<div class="nf-l-foot">by <img src="'+SC_BRAND.logoHealsol+'" alt="HealSol Academy"></div>'
-    +'<div class="nf-l-legal"><span data-nf="NQAS checklists: NHSRC, MoHFW, Govt. of India"></span><br><a href="legal.html#about" target="_blank" rel="noopener" data-nf="Pricing"></a> · <a href="legal.html#terms" target="_blank" rel="noopener" data-nf="Terms"></a> · <a href="legal.html#privacy" target="_blank" rel="noopener" data-nf="Privacy"></a> · <a href="legal.html#refund" target="_blank" rel="noopener" data-nf="Refunds"></a> · <a href="legal.html#contact" target="_blank" rel="noopener" data-nf="Contact"></a></div>';
+    +'<div class="nf-l-foot"><img class="nf-l-nqas" src="'+SC_BRAND.logoNqas+'" alt="NQAS.QI"><span>by</span><img src="'+SC_BRAND.logoHealsol+'" alt="HealSol Academy"></div>'
+    +'<div class="nf-l-legal"><span data-nf="Based on the NQAS standards of NHSRC, MoHFW, Government of India. An independent tool by HealSol Academy, not a government app."></span><br><a href="legal.html#about" target="_blank" rel="noopener" data-nf="Pricing"></a> · <a href="legal.html#terms" target="_blank" rel="noopener" data-nf="Terms"></a> · <a href="legal.html#privacy" target="_blank" rel="noopener" data-nf="Privacy"></a> · <a href="legal.html#refund" target="_blank" rel="noopener" data-nf="Refunds"></a> · <a href="legal.html#contact" target="_blank" rel="noopener" data-nf="Contact"></a></div>';
 }
 function nfPaint(){
   var root=document.getElementById('nf-login'); if(!root) return;
@@ -36724,6 +36728,16 @@ html.pp-lock,html.pp-lock body{overflow:hidden!important;}
 .pp-hint{display:block;font-size:12.5px;color:#1E6B5E;margin-top:4px;min-height:0;} .pp-hint.err{color:#8A1C1C;}
 .pp-l{text-align:left;margin-top:8px;}
 .pp-err{display:none;margin:4px 0 0;padding:10px 12px;border-radius:10px;background:#FDECEC;color:#8A1C1C;font-size:13.5px;line-height:1.45;text-align:left;}
+
+/* 20 Nov 2026: compact login pay card — one row (icon · text · Pay now) and a small link under it */
+.pp-card{margin:12px 0 4px;padding:10px 12px 4px;border-radius:14px;border:1px solid #C9D6D2;gap:2px;}
+.pp-card-r{gap:10px;}
+.pp-card-i{width:34px;height:34px;border-radius:10px;}
+.pp-card-t{flex:1 1 auto;}
+.pp-card-t b{font-size:14.5px;}
+.pp-card-t small{font-size:12px;line-height:1.35;}
+.pp-card-b{flex-shrink:0;min-height:40px;padding:0 16px;font-size:14px;background:#1E6B5E;color:#fff;}
+.pp-card-l{font-size:12.5px;min-height:36px;padding:4px 8px;}
 </style>
 <script id="nf-paypage">// ══════════════════════════════════════════════════════════════
 // Website payment page (18 Nov 2026) — app.thehealsol.com/pay/  (server: functions/paylinks.js)
@@ -36769,8 +36783,8 @@ function ppPaintLogin() {
     f.insertAdjacentHTML('afterbegin', '<div class="pp-note" id="pp-note" role="status"><b>' + (_pp.intent.link ? 'Log in to open your payment link' : _pp.intent.ask ? 'Log in to ask for a payment link' : 'Log in to pay for a facility')
       + '</b><span>Use the login of the person paying: facility in-charge, District / Block, State or partner.</span><button type="button" class="pp-note-x" onclick="ppSetIntent(null);ppPaintLogin()">Not now</button></div>');
   }
-  var h = '<div class="pp-card" id="pp-card"><div class="pp-card-r"><span class="pp-card-i">' + PP_ICON.card + '</span><span class="pp-card-t"><b>Pay for a facility</b><small>For facility in-charges, Block, District, State and partners</small></span></div>'
-    + '<button type="button" class="pp-card-b" onclick="ppStart({list:1})">Pay now</button>'
+  var h = '<div class="pp-card" id="pp-card"><div class="pp-card-r"><span class="pp-card-i">' + PP_ICON.card + '</span><span class="pp-card-t"><b>Pay for a facility</b><small>In-charges, Block, District, State and partners</small></span>'
+    + '<button type="button" class="pp-card-b" onclick="ppStart({list:1})">Pay now</button></div>'
     + '<button type="button" class="pp-card-l" onclick="ppStart({ask:1})">Need a different plan? Ask for a payment link</button></div>';
   var ga = document.getElementById('ga-card'), chk = document.getElementById('jn-chk');
   if (ga && ga.parentNode === f) ga.insertAdjacentHTML('afterend', h); else if (chk && chk.parentNode === f) chk.insertAdjacentHTML('beforebegin', h); else f.insertAdjacentHTML('beforeend', h);
