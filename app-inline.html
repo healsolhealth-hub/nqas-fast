@@ -31641,15 +31641,19 @@ var NF_LAUNCH_DEFAULT_HI = '🚀 आधिकारिक लॉन्च: 20 �
 var _nfLaunch = null;
 function nlE(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 async function nlCfg(force) {
-  if (_nfLaunch && !force) return _nfLaunch;
-  var c = {}; try { c = (await fbGet('shared/sc_signup_config')) || {}; } catch (e) {}
-  _nfLaunch = { banner: c.banner == null ? NF_LAUNCH_DEFAULT : String(c.banner), limit: parseInt(c.earlyLimit, 10) > 0 ? parseInt(c.earlyLimit, 10) : 500 };
+  if (_nfLaunch && !_nfLaunch.early && !force) return _nfLaunch;
+  // 20 Nov 2026: the login screen asked before the database was connected, got nothing and kept the built-in launch text for good.
+  // Until the database is ready the answer is only for now (early); the login screen asks again a moment later.
+  var ready = typeof db !== 'undefined' && !!db;
+  var c = {}; try { c = (ready && (await fbGet('shared/sc_signup_config'))) || {}; } catch (e) {}
+  _nfLaunch = { banner: c.banner == null ? NF_LAUNCH_DEFAULT : String(c.banner), limit: parseInt(c.earlyLimit, 10) > 0 ? parseInt(c.earlyLimit, 10) : 500, early: !ready };
   return _nfLaunch;
 }
 // ── login screen announcement ──
 async function nlPaint() {
   var f = document.getElementById('nf-l-form'), hint = document.getElementById('jn-join-s'); if (!f || !hint) return;
-  var c = await nlCfg(), box = document.getElementById('nl-banner'), txt = c.banner === NF_LAUNCH_DEFAULT && typeof _appLang !== 'undefined' && _appLang === 'hi' ? NF_LAUNCH_DEFAULT_HI : c.banner, parts = txt.split('|').map(function (s) { return s.trim(); }).filter(Boolean);
+  var c0 = await nlCfg(); if (c0.early) { if ((nlPaint._n = (nlPaint._n || 0) + 1) < 40) setTimeout(function () { try { nlPaint(); } catch (e) {} }, 500); return; }   // wait for the database, so the old text never flashes
+  var c = c0, box = document.getElementById('nl-banner'), txt = c.banner === NF_LAUNCH_DEFAULT && typeof _appLang !== 'undefined' && _appLang === 'hi' ? NF_LAUNCH_DEFAULT_HI : c.banner, parts = String(txt).replace(/ \| /g, '\u0001').split('|').map(function (s) { return s.replace(/\u0001/g, ' | ').trim(); }).filter(Boolean);   // " | " with spaces (NQAS | FAST) is part of the text; a bare | starts the second line
   if (!parts.length) { if (box) box.remove(); return; }
   if (!box) { box = document.createElement('div'); box.id = 'nl-banner'; box.className = 'nl-banner'; hint.insertAdjacentElement('afterend', box); }
   box.innerHTML = '<span>' + nlE(parts[0]) + '</span>' + (parts[1] ? '<b>' + nlE(parts[1]) + '</b>' : '');
@@ -31660,7 +31664,7 @@ try { if (document.readyState !== 'loading') setTimeout(function () { try { nlPa
 
 // ── Settings → Programme rules: the announcement and the early-bird number ──
 function nlSettingsHTML(c) {
-  return '<div class="nl-set"><b><i class="ti ti-speakerphone"></i> Join screen announcement</b><p>Shown on the login screen under "Join NQAS FAST". Put a | between the first line and the bold second line. Leave it empty to hide it.</p>'
+  return '<div class="nl-set"><b><i class="ti ti-speakerphone"></i> Join screen announcement</b><p>Shown on the login screen under "Join NQAS FAST". Put a | (no spaces around it) between the first line and the bold second line. Leave it empty to hide it.</p>'
     + '<input class="bp-i" id="nl-banner-i" value="' + nlE(c.banner) + '">'
     + '<label class="bp-l">Early-bird places (Business shows how many are taken)<input class="bp-i" id="nl-limit-i" type="number" min="1" value="' + c.limit + '" style="max-width:160px"></label>'
     + '<div class="iv-acts"><button type="button" class="hs-btn p" onclick="nlSave()">Save</button><button type="button" class="hs-btn" onclick="document.getElementById(\'nl-banner-i\').value=NF_LAUNCH_DEFAULT">Use the launch text</button></div></div>';
