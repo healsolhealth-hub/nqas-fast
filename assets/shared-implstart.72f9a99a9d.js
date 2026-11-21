@@ -23,7 +23,7 @@ function nfWait(f, startDate) {
   if (f.implPick) return { k: 'pick', since: f.implPick.since || null };
   var st = f.subscriptionStatus, b = isBase(f), d = isDayNo(s, today), op = f.officePay;
   var open = !st || st === 'paid' || st === 'contract' || isCommit(f) || !!(op && op.until && op.until >= today);
-  if (d > b && !f.implFrom && !open) return { k: 'wait', d: d - b - 1, since: isAdd(s, b) };
+  if (d > b && !f.implFrom && !open) { var since = f.blDoneOn && f.blDoneOn > isAdd(s, b - 1) ? isAdd(f.blDoneOn, 1) : isAdd(s, b); return { k: 'wait', d: Math.max(0, isDayNo(since, today) - 1), since: since }; }   // from the day after the baseline was finished
   return null;
 }
 
@@ -123,7 +123,7 @@ async function isCommitDialog(code) {
     { key: 'ref', label: 'Letter / order number (optional)', value: '' }];
   if (others.length) fields.push({ key: 'more', label: 'Also for these waiting facilities of ' + (f.district || 'this district'), type: 'checklist', options: others.map(function (c) { return { value: c, label: (F[c].name || c) + ' · ' + c }; }), value: others });
   var v = await scDialog({ title: 'Start implementation without payment', icon: '🏛️', okLabel: 'Record commitment',
-    message: (f.name || code) + '\nFor a District, Block, State or partner that has committed to pay. The facility chooses its Day ' + (isBase(f) + 1) + ' straight away. If nothing is paid by the date, it shows in Business → Collect; its cards stay open.', fields: fields });
+    message: (f.name || code) + '\nFor a District, Block, State or partner that has committed to pay. ' + (f.startDate ? 'The facility chooses its Day ' + (isBase(f) + 1) + ' straight away.' : 'The facility can choose its Day 1 now, without paying the baseline fee first.') + ' If nothing is paid by the date, it shows in Business → Collect; its cards stay open.', fields: fields });
   if (!v) return;
   var codes = [code].concat(Array.isArray(v.more) ? v.more : []);
   try { var r = await nfCall('commitProgramme', { codes: codes, kind: v.kind, org: v.org, payBy: v.payBy, ref: v.ref });
