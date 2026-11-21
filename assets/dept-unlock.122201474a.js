@@ -29,15 +29,15 @@ async function nduAfter() { try { await ndReload(); } catch (e) {} _ndu.price = 
 function nduHead() {
   var b = nduBase(), n = (_nd.cfg && _nd.cfg.days) || 90;
   return '<div class="ndu-hd"><div class="ndu-lk">🔒</div><b>' + nduE(nduT('Your no-cost baseline assessment is complete', 'आपका निःशुल्क बेसलाइन आकलन पूरा हो गया है')) + '</b><small>'
-    + nduE(nduT(b + ' baseline days done for ' + (_nd.fac.name || _nd.code) + '. Unlock the full ' + n + '-day programme to continue from Day ' + (b + 1) + ' — your baseline scores are saved.',
-      (_nd.fac.name || _nd.code) + ' के ' + b + ' बेसलाइन दिन पूरे हुए। दिन ' + (b + 1) + ' से आगे बढ़ने के लिए पूरा ' + n + ' दिन का कार्यक्रम अनलॉक करें — आपके बेसलाइन स्कोर सुरक्षित हैं।')) + '</small></div>';
+    + nduE(nduT(b + ' baseline days done for ' + (_nd.fac.name || _nd.code) + '. Implementation starts from Day ' + (b + 1) + ' when payment or a District / partner commitment is confirmed. Your clock is paused, so no days are lost. District or partner paying? Ask them to tell HealSol Academy.',
+      (_nd.fac.name || _nd.code) + ' के ' + b + ' बेसलाइन दिन पूरे हुए। भुगतान या ज़िले / सहयोगी की पुष्टि होने पर कार्यान्वयन दिन ' + (b + 1) + ' से शुरू होगा। आपकी घड़ी रुकी है, कोई दिन नहीं छूटेगा। ज़िला या सहयोगी भुगतान कर रहा है? उनसे HealSol Academy को बताने को कहें।')) + '</small></div>';
 }
 function nduCardShell() { return '<div class="upgrade-card ndu-card" id="ndu-card">' + nduHead() + '<div class="upgrade-body ndu-body" id="ndu-body"><div class="ndu-wait">' + nduE(nduT('Loading your package…', 'आपका पैकेज लोड हो रहा है…')) + '</div></div></div>'; }
 async function nduFill() {
   var body = document.getElementById('ndu-body'); if (!body) return;
   if (!nduInCharge()) {
     var nm = nduInChargeName(), lab = (_nd.cfg && (_nd.cfg.inChargeLabel || _nd.cfg.inCharge)) || 'in-charge';
-    body.innerHTML = '<div class="ndu-staff">👤 <b>' + nduE(nduT('Ask ' + (nm ? nm + ' (' + lab + ')' : 'your ' + lab), (nm ? nm + ' (' + lab + ')' : 'अपने ' + lab) + ' से कहें')) + '</b> ' + nduE(nduT('to unlock the programme. As soon as it is unlocked, your cards open again here — nothing you did is lost.', 'कि वे कार्यक्रम अनलॉक करें। अनलॉक होते ही आपके कार्ड यहाँ फिर खुल जाएँगे — आपका किया कुछ भी नहीं खोएगा।')) + '</div>';
+    body.innerHTML = '<div class="ndu-staff">👤 <b>' + nduE(nduT('Ask ' + (nm ? nm + ' (' + lab + ')' : 'your ' + lab), (nm ? nm + ' (' + lab + ')' : 'अपने ' + lab) + ' से कहें')) + '</b> ' + nduE(nduT('to confirm the programme. Your cards start again from Day ' + (nduBase() + 1) + ' — your baseline work is saved, and no days are lost while you wait.', 'कि वे कार्यक्रम अनलॉक करें। अनलॉक होते ही आपके कार्ड यहाँ फिर खुल जाएँगे — आपका किया कुछ भी नहीं खोएगा।')) + '</div>';
     return;
   }
   var p = await nduPrice(); if (!document.getElementById('ndu-body')) return; body = document.getElementById('ndu-body');
@@ -89,7 +89,7 @@ function nduApply() {
     var html = '';
     var play = typeof nfIsPlay === 'function' && nfIsPlay();   // Google Play app: no unlock call-to-action (Payments policy)
     if (nduLocked(day) && play) html = '<div class="ndu-ban" id="ndu-ban"><span class="ndu-bi">🔒</span><span><b>' + nduE(nduT('Baseline complete', 'बेसलाइन पूरी')) + '</b><small>' + nduE(nduT('The next days open when your facility\'s full programme is active.', 'केंद्र का पूरा कार्यक्रम सक्रिय होने पर आगे के दिन खुलेंगे।')) + '</small></span></div>';
-    else if (nduLocked(day)) html = '<div class="ndu-ban" id="ndu-ban"><span class="ndu-bi">🔒</span><span><b>' + nduE(nduT('Baseline complete — unlock to continue', 'बेसलाइन पूरी — आगे बढ़ने के लिए अनलॉक करें')) + '</b><small>' + nduE(nduT('Your team’s Day ' + day + ' cards open after the programme is unlocked.', 'कार्यक्रम अनलॉक होने के बाद आपकी टीम के दिन ' + day + ' के कार्ड खुलेंगे।')) + '</small></span><button type="button" onclick="nduGoUnlock()">' + nduE(nduT('Unlock', 'अनलॉक')) + '</button></div>';
+    else if (nduLocked(day)) html = '<div class="ndu-ban" id="ndu-ban"><span class="ndu-bi">🔒</span><span><b>' + nduE(nduT('Baseline complete — implementation paused', 'बेसलाइन पूरी — कार्यान्वयन रुका है')) + '</b><small>' + nduE(nduT('Day ' + (b + 1) + ' starts when payment or a District / partner commitment is confirmed. No days are lost.', 'भुगतान या ज़िले / सहयोगी की पुष्टि होने पर दिन ' + (b + 1) + ' शुरू होगा। कोई दिन नहीं छूटेगा।')) + '</small></span><button type="button" onclick="nduGoUnlock()">' + nduE(nduT('Start', 'शुरू करें')) + '</button></div>';
     else if (!nduOpen() && day >= 1 && day <= b && nduInCharge() && play) html = '<div class="ndu-soft" id="ndu-ban"><span>🎁 <b>' + nduE(nduT('No-cost baseline · Day ' + day + ' of ' + b, 'निःशुल्क बेसलाइन · दिन ' + day + ' / ' + b)) + '</b></span></div>';
     else if (!nduOpen() && day >= 1 && day <= b && nduInCharge()) html = '<div class="ndu-soft" id="ndu-ban"><span>🎁 <b>' + nduE(nduT('No-cost baseline · Day ' + day + ' of ' + b, 'निःशुल्क बेसलाइन · दिन ' + day + ' / ' + b)) + '</b><small>' + nduE(nduT('Unlock the full programme any time — before Day ' + (b + 1) + ' keeps it running without a break.', 'पूरा कार्यक्रम कभी भी अनलॉक करें — दिन ' + (b + 1) + ' से पहले करने पर बिना रुकावट चलता रहेगा।')) + '</small></span><button type="button" onclick="nduGoUnlock()">' + nduE(nduT('Unlock', 'अनलॉक')) + '</button></div>';
     if (html && top) top.insertAdjacentHTML('afterbegin', html);
